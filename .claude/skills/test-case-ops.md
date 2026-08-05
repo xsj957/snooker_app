@@ -18,17 +18,6 @@ triggers:
 
 当用户要求对测试用例 Excel 进行**新增、删除、修改**操作时，加载本 skill 获取 Python 代码模板。
 
-## 代码文件
-
-**完整测试脚本**: `test_openpyxl_comprehensive.py`（项目根目录）
-
-该文件包含：
-- 完整的样式定义常量
-- `fixed_insert_rows()` — 修复版新增用例函数
-- `fixed_delete_rows()` — 修复版删除用例函数
-- `print_excel_content()` — 验证打印函数
-- 完整的测试流程（创建→新增→删除→修改→验证）
-
 ## 核心代码模板
 
 ### 样式常量（所有操作复用）
