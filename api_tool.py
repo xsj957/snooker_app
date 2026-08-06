@@ -26,6 +26,10 @@ from collections import OrderedDict
 
 # ============== 配置 ==============
 
+# 禁用代理（避免公司网络代理导致连接失败）
+os.environ['NO_PROXY'] = '*'
+os.environ['no_proxy'] = '*'
+
 BASE_URL = "https://test.supervisions.cn"
 
 HEADERS = {
@@ -37,7 +41,52 @@ HEADERS = {
 
 USER_ID = "57d703dc-659a-4474-898e-b75efa1f2e0a"
 
-ADB_DEVICE = "10AECL22YX0023T"
+
+def get_adb_device():
+    """动态获取已连接的 ADB 设备序列号，无设备则返回 None"""
+    try:
+        result = subprocess.run(["adb", "devices"], capture_output=True, text=True, timeout=5)
+        lines = result.stdout.strip().splitlines()
+        for line in lines[1:]:  # 跳过 "List of devices attached" 行
+            parts = line.split()
+            if len(parts) >= 2 and parts[1] == "device":
+                return parts[0]
+        return None
+    except Exception:
+        return None
+
+
+ADB_DEVICE = get_adb_device()
+
+# 所有已知的内置接口 URL（auto 模式初始化 seen_uris 用）
+KNOWN_API_URLS = {
+    f"{BASE_URL}/mp/user/info",
+    f"{BASE_URL}/mp/user/myClubs",
+    f"{BASE_URL}/mp/user/saveDefaultClub",
+    f"{BASE_URL}/mp/oauth/wechatLogin",
+    f"{BASE_URL}/mobile/getUserBoxStatus",
+    f"{BASE_URL}/mp/record/deviceOnlineInfo",
+    f"{BASE_URL}/mobile/loginBoxAfterScanningQrCode",
+    f"{BASE_URL}/mp/app/version/check",
+    f"{BASE_URL}/mp/coupon/checkEligibility",
+    f"{BASE_URL}/mp/coupon/trialList",
+    f"{BASE_URL}/video/videoClient/myVideos/readyV2",
+    f"{BASE_URL}/video/videoClient/myVideos/failedV2",
+    f"{BASE_URL}/mp/record/opponentListWithVideos",
+    f"{BASE_URL}/mp/record/opponentStatistics",
+    f"{BASE_URL}/mp/record/competitionListWithVideos",
+    f"{BASE_URL}/mp/record/inningList",
+    f"{BASE_URL}/mp/record/inningStatistics",
+    f"{BASE_URL}/video/videoinfo/competitionVideos",
+    f"{BASE_URL}/mp/rank/clubList",
+    f"{BASE_URL}/mp/rank/userBreakRank",
+    f"{BASE_URL}/mp/rank/ratingList",
+    f"{BASE_URL}/mp/rank/breakList",
+    f"{BASE_URL}/mp/rank/winRateList",
+    f"{BASE_URL}/mp/record/barchart",
+    f"{BASE_URL}/mp/record/statics",
+    f"{BASE_URL}/mp/event/track",
+}
 
 # ============== API 记忆库 ==============
 
@@ -108,6 +157,9 @@ def cprint(text, color=None, bold=False):
 
 def cmd_log(args):
     """实时查看 App 网络日志"""
+    if not ADB_DEVICE:
+        cprint("未检测到 ADB 设备，请检查连接", Colors.RED)
+        return
     pattern = args.pattern or "DIO"
     adb_cmd = ["adb", "-s", ADB_DEVICE, "logcat"]
 
@@ -119,11 +171,11 @@ def cmd_log(args):
             adb_cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            bufsize=1
+            bufsize=0  # 二进制无缓冲，配合 TextIOWrapper.line_buffering 使用
         )
 
         import io
-        stdout_reader = io.TextIOWrapper(proc.stdout, encoding='utf-8', errors='replace')
+        stdout_reader = io.TextIOWrapper(proc.stdout, encoding='utf-8', errors='replace', line_buffering=True)
 
         for line in stdout_reader:
             if pattern.lower() in line.lower():
@@ -271,26 +323,60 @@ def cmd_extract(args):
 def cmd_call(args):
     """调用指定接口并显示完整响应"""
 
-    # 预定义的快捷接口
+    # 预定义的快捷接口（26 个，全部从记忆库同步）
     presets = {
+        # ---- 用户 ----
         "user": {
             "name": "获取用户信息",
             "method": "POST",
             "url": f"{BASE_URL}/mp/user/info",
             "data": {"userId": USER_ID}
         },
+        "myClubs": {
+            "name": "我的俱乐部",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/user/myClubs",
+            "data": {"userId": USER_ID}
+        },
+        "saveDefaultClub": {
+            "name": "保存默认俱乐部",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/user/saveDefaultClub",
+            "data": {"clubId": 45376, "userId": USER_ID}
+        },
+        "wechatLogin": {
+            "name": "微信登录",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/oauth/wechatLogin",
+            "data": None
+        },
+        # ---- 设备 ----
         "box": {
             "name": "获取盒子状态",
             "method": "POST",
             "url": f"{BASE_URL}/mobile/getUserBoxStatus",
             "data": {"userId": USER_ID}
         },
+        "deviceOnline": {
+            "name": "设备在线状态",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/record/deviceOnlineInfo",
+            "data": {"competitionId": "bf0442cd43214739a799233bc4852738", "userId": USER_ID}
+        },
+        "loginBox": {
+            "name": "扫码绑定盒子",
+            "method": "POST",
+            "url": f"{BASE_URL}/mobile/loginBoxAfterScanningQrCode",
+            "data": {"encryptedString": "http://weixin.qq.com/q/02AYDNBsWOf9E1JX0n1GcW", "userId": USER_ID}
+        },
+        # ---- 版本 ----
         "version": {
             "name": "检查版本",
             "method": "POST",
             "url": f"{BASE_URL}/mp/app/version/check",
             "data": {"platform": 2, "currentVersion": "1.0.0", "userId": USER_ID}
         },
+        # ---- 视频券 ----
         "coupon": {
             "name": "检查视频券",
             "method": "POST",
@@ -303,24 +389,107 @@ def cmd_call(args):
             "url": f"{BASE_URL}/mp/coupon/trialList",
             "data": {"pageNo": 1, "pageSize": 100, "status": 0, "userId": USER_ID}
         },
+        # ---- 视频 ----
+        "readyV2": {
+            "name": "待制作视频",
+            "method": "POST",
+            "url": f"{BASE_URL}/video/videoClient/myVideos/readyV2",
+            "data": {"pageNo": 1, "pageSize": 10, "clientId": "BP2A.250605.031.A3_V000L1", "userId": USER_ID}
+        },
+        "failedV2": {
+            "name": "制作失败视频",
+            "method": "POST",
+            "url": f"{BASE_URL}/video/videoClient/myVideos/failedV2",
+            "data": {"pageNo": 1, "pageSize": 10, "clientId": "BP2A.250605.031.A3_V000L1", "userId": USER_ID}
+        },
+        # ---- 交手记录 ----
         "matches": {
             "name": "对手列表和视频",
             "method": "POST",
             "url": f"{BASE_URL}/mp/record/opponentListWithVideos",
-            "data": {"startTime": "2020-01-01 00:00:00", "endTime": "2030-12-31 23:59:59", "page": 1, "pageSize": 100, "userId": USER_ID}
+            "data": {"userId": USER_ID}
         },
         "stats": {
             "name": "对手统计数据",
             "method": "POST",
             "url": f"{BASE_URL}/mp/record/opponentStatistics",
-            "data": {"startTime": "2020-01-01 00:00:00", "endTime": "2030-12-31 23:59:59", "userId": USER_ID}
+            "data": {"userId": USER_ID, "startTime": "2026-08-03 00:00:00", "endTime": "2026-08-09 23:59:59"}
         },
+        "competitionList": {
+            "name": "比赛列表和视频",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/record/competitionListWithVideos",
+            "data": {"userA": USER_ID, "userB": "aff7eae4-3680-4b89-9f01-819e02c3b6b5", "startTime": "2026-08-03 00:00:00", "endTime": "2026-08-09 23:59:59", "page": 1, "pageSize": 10, "userId": USER_ID}
+        },
+        "inningList": {
+            "name": "局列表",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/record/inningList",
+            "data": {"competitionId": "fecd7c799ea5495ca23caceafaaca04b", "userId": USER_ID}
+        },
+        "inningStatistics": {
+            "name": "局统计",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/record/inningStatistics",
+            "data": {"competitionId": "bf0442cd43214739a799233bc4852738", "userId": USER_ID}
+        },
+        "competitionVideos": {
+            "name": "场比赛视频",
+            "method": "POST",
+            "url": f"{BASE_URL}/video/videoinfo/competitionVideos",
+            "data": {"competitionId": "fecd7c799ea5495ca23caceafaaca04b", "userId": USER_ID}
+        },
+        # ---- 排行榜 ----
+        "clubList": {
+            "name": "俱乐部排行榜",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/rank/clubList",
+            "data": {"userId": USER_ID}
+        },
+        "userBreakRank": {
+            "name": "用户破分榜",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/rank/userBreakRank",
+            "data": {"rankRange": None, "timeRange": None, "merchantAddressId": None, "userId": USER_ID}
+        },
+        "ratingList": {
+            "name": "评级榜",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/rank/ratingList",
+            "data": {"type": 3, "merchantAddressId": 45376, "areaId": None, "userId": USER_ID}
+        },
+        "breakList": {
+            "name": "破分榜",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/rank/breakList",
+            "data": {"type": 0, "merchantAddressId": 45376, "areaId": None, "rankRange": 0, "timeRange": 0, "userId": USER_ID}
+        },
+        "winRateList": {
+            "name": "胜率榜",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/rank/winRateList",
+            "data": {"type": 2, "merchantAddressId": 45376, "areaId": None, "rankRange": 0, "timeRange": 0, "userId": USER_ID}
+        },
+        # ---- 数据统计 ----
+        "barchart": {
+            "name": "柱状图统计",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/record/barchart",
+            "data": {"userId": USER_ID, "startTime": "2026-08-03 00:00:00", "endTime": "2026-08-09 23:59:59"}
+        },
+        "statics": {
+            "name": "综合统计",
+            "method": "POST",
+            "url": f"{BASE_URL}/mp/record/statics",
+            "data": {"userId": USER_ID, "startTime": "2026-08-03 00:00:00", "endTime": "2026-08-09 23:59:59"}
+        },
+        # ---- 埋点 ----
         "track": {
             "name": "埋点上报",
             "method": "POST",
             "url": f"{BASE_URL}/mp/event/track",
-            "data": {"modelType": 1, "eventType": 1, "attrName": "launch_source", "attrValue": "cold", "clientType": 1, "userId": USER_ID}
-        }
+            "data": {"modelType": 1, "eventType": 5, "attrName": "me", "attrValue": None, "clientType": 1, "userId": USER_ID}
+        },
     }
 
     if args.name in presets:
@@ -357,7 +526,8 @@ def cmd_call(args):
             api["url"],
             json=api["data"],
             headers=HEADERS,
-            timeout=10
+            timeout=10,
+            proxies={"http": None, "https": None}  # 禁用代理
         )
         elapsed = time.time() - start
 
@@ -404,12 +574,30 @@ def cmd_list(args):
     """列出所有已知接口"""
     presets = {
         "user": "POST /mp/user/info - 获取用户信息",
+        "myClubs": "POST /mp/user/myClubs - 我的俱乐部",
+        "saveDefaultClub": "POST /mp/user/saveDefaultClub - 保存默认俱乐部",
+        "wechatLogin": "POST /mp/oauth/wechatLogin - 微信登录",
         "box": "POST /mobile/getUserBoxStatus - 获取盒子状态",
+        "deviceOnline": "POST /mp/record/deviceOnlineInfo - 设备在线状态",
+        "loginBox": "POST /mobile/loginBoxAfterScanningQrCode - 扫码绑定盒子",
         "version": "POST /mp/app/version/check - 检查版本",
         "coupon": "POST /mp/coupon/checkEligibility - 检查视频券",
         "trial": "POST /mp/coupon/trialList - 试用券列表",
+        "readyV2": "POST /video/videoClient/myVideos/readyV2 - 待制作视频",
+        "failedV2": "POST /video/videoClient/myVideos/failedV2 - 制作失败视频",
         "matches": "POST /mp/record/opponentListWithVideos - 对手列表和视频",
         "stats": "POST /mp/record/opponentStatistics - 对手统计",
+        "competitionList": "POST /mp/record/competitionListWithVideos - 比赛列表和视频",
+        "inningList": "POST /mp/record/inningList - 局列表",
+        "inningStatistics": "POST /mp/record/inningStatistics - 局统计",
+        "competitionVideos": "POST /video/videoinfo/competitionVideos - 场比赛视频",
+        "clubList": "POST /mp/rank/clubList - 俱乐部排行榜",
+        "userBreakRank": "POST /mp/rank/userBreakRank - 用户破分榜",
+        "ratingList": "POST /mp/rank/ratingList - 评级榜",
+        "breakList": "POST /mp/rank/breakList - 破分榜",
+        "winRateList": "POST /mp/rank/winRateList - 胜率榜",
+        "barchart": "POST /mp/record/barchart - 柱状图统计",
+        "statics": "POST /mp/record/statics - 综合统计",
         "track": "POST /mp/event/track - 埋点上报"
     }
 
@@ -495,6 +683,9 @@ def _display_request_response(uri, method, data_lines, response_lines, seen_uris
 
 def cmd_auto(args):
     """实时监控 + 自动发现新接口"""
+    if not ADB_DEVICE:
+        cprint("未检测到 ADB 设备，请检查连接", Colors.RED)
+        return
     cprint("自动监控模式 | 实时发现新接口并获取完整响应", Colors.CYAN, bold=True)
     hide_list = getattr(args, 'hide', []) or []
     if hide_list:
@@ -502,7 +693,13 @@ def cmd_auto(args):
     cprint("Ctrl+C 停止", Colors.DIM)
     cprint("=" * 60)
 
-    seen_uris = set()
+    # 初始化 known_uris：内置接口 + 记忆库接口，这些不会标记为 [NEW]
+    known_uris = set(KNOWN_API_URLS)
+    memory = load_memory()
+    for api in memory.values():
+        known_uris.add(api["url"])
+
+    seen_uris = set(known_uris)
     discovered_apis = []  # 记录所有发现的接口
 
     adb_cmd = ["adb", "-s", ADB_DEVICE, "logcat"]
@@ -512,11 +709,11 @@ def cmd_auto(args):
             adb_cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            bufsize=1
+            bufsize=0  # 二进制无缓冲，配合 TextIOWrapper.line_buffering 使用
         )
 
         import io
-        stdout_reader = io.TextIOWrapper(proc.stdout, encoding='utf-8', errors='replace')
+        stdout_reader = io.TextIOWrapper(proc.stdout, encoding='utf-8', errors='replace', line_buffering=True)
 
         # 当前请求缓冲区
         current_uri = None
@@ -533,8 +730,8 @@ def cmd_auto(args):
             content = line.strip()
 
             if "*** Request ***" in content:
-                # 显示上一个请求的响应（如果有）
-                if current_uri:
+                # 显示上一个请求的响应（仅当有实际响应时才显示）
+                if current_uri and current_response_lines:
                     path = current_uri.replace(BASE_URL, "")
                     should_hide = any(h in path for h in hide_list)
                     if not should_hide:
@@ -562,6 +759,9 @@ def cmd_auto(args):
                             })
                             add_to_memory(current_uri, current_method, " ".join(current_data_lines))
                     request_count += 1
+                elif current_uri:
+                    # 上一个请求没有响应，静默丢弃（可能是超时重试）
+                    pass
 
                 # 重置
                 current_uri = None
@@ -578,8 +778,8 @@ def cmd_auto(args):
                 current_response_lines = []
 
             elif "*** DioException ***" in content:
-                # 异常也结束响应收集
-                if current_uri:
+                # 异常也结束响应收集（仅当有实际内容时才显示）
+                if current_uri and current_response_lines:
                     path = current_uri.replace(BASE_URL, "")
                     should_hide = any(h in path for h in hide_list)
                     if not should_hide:
@@ -589,6 +789,9 @@ def cmd_auto(args):
                             is_error=True
                         )
                     request_count += 1
+                elif current_uri:
+                    # 没有实际错误信息，丢弃
+                    pass
                 current_uri = None
                 in_response = False
 
@@ -735,7 +938,7 @@ def _handle_new_api(uri, method, data_lines):
 
     # 自动调用获取完整响应
     try:
-        resp = requests.post(uri, json=data, headers=HEADERS, timeout=10)
+        resp = requests.post(uri, json=data, headers=HEADERS, timeout=10, proxies={"http": None, "https": None})
         cprint(f"Status: {resp.status_code}", Colors.GREEN if resp.status_code == 200 else Colors.RED)
 
         try:

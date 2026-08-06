@@ -1,0 +1,372 @@
+{
+  "POST /mp/user/info": {
+    "url": "https://test.supervisions.cn/mp/user/info",
+    "method": "POST",
+    "path": "/mp/user/info",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:20"
+  },
+  "POST /mp/event/track": {
+    "url": "https://test.supervisions.cn/mp/event/track",
+    "method": "POST",
+    "path": "/mp/event/track",
+    "data": {
+      "modelType": 1,
+      "eventType": 5,
+      "attrName": "me",
+      "attrValue": null,
+      "clientType": 1,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:20"
+  },
+  "POST /mp/rank/clubList": {
+    "url": "https://test.supervisions.cn/mp/rank/clubList",
+    "method": "POST",
+    "path": "/mp/rank/clubList",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:20"
+  },
+  "POST /mp/rank/userBreakRank": {
+    "url": "https://test.supervisions.cn/mp/rank/userBreakRank",
+    "method": "POST",
+    "path": "/mp/rank/userBreakRank",
+    "data": {
+      "rankRange": null,
+      "timeRange": null,
+      "merchantAddressId": null,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:20"
+  },
+  "POST /mobile/getUserBoxStatus": {
+    "url": "https://test.supervisions.cn/mobile/getUserBoxStatus",
+    "method": "POST",
+    "path": "/mobile/getUserBoxStatus",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:20"
+  },
+  "POST /mp/coupon/trialList": {
+    "url": "https://test.supervisions.cn/mp/coupon/trialList",
+    "method": "POST",
+    "path": "/mp/coupon/trialList",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 10,
+      "status": 2,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:20"
+  },
+  "POST /mp/rank/ratingList": {
+    "url": "https://test.supervisions.cn/mp/rank/ratingList",
+    "method": "POST",
+    "path": "/mp/rank/ratingList",
+    "data": {
+      "type": 3,
+      "merchantAddressId": 45376,
+      "areaId": null,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:20"
+  },
+  "POST /mp/rank/breakList": {
+    "url": "https://test.supervisions.cn/mp/rank/breakList",
+    "method": "POST",
+    "path": "/mp/rank/breakList",
+    "data": {
+      "type": 0,
+      "merchantAddressId": 45376,
+      "areaId": null,
+      "rankRange": 0,
+      "timeRange": 0,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:20"
+  },
+  "POST /mp/rank/winRateList": {
+    "url": "https://test.supervisions.cn/mp/rank/winRateList",
+    "method": "POST",
+    "path": "/mp/rank/winRateList",
+    "data": {
+      "type": 2,
+      "merchantAddressId": 45376,
+      "areaId": null,
+      "rankRange": 0,
+      "timeRange": 0,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:20"
+  },
+  "POST /mp/record/opponentListWithVideos": {
+    "url": "https://test.supervisions.cn/mp/record/opponentListWithVideos",
+    "method": "POST",
+    "path": "/mp/record/opponentListWithVideos",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:20"
+  },
+  "POST /mp/record/opponentStatistics": {
+    "url": "https://test.supervisions.cn/mp/record/opponentStatistics",
+    "method": "POST",
+    "path": "/mp/record/opponentStatistics",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "startTime": "2026-08-03 00:00:00",
+      "endTime": "2026-08-09 23:59:59"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:20"
+  },
+  "POST /video/videoClient/myVideos/readyV2": {
+    "url": "https://test.supervisions.cn/video/videoClient/myVideos/readyV2",
+    "method": "POST",
+    "path": "/video/videoClient/myVideos/readyV2",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 10,
+      "clientId": "BP2A.250605.031.A3_V000L1",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:24"
+  },
+  "POST /mp/coupon/checkEligibility": {
+    "url": "https://test.supervisions.cn/mp/coupon/checkEligibility",
+    "method": "POST",
+    "path": "/mp/coupon/checkEligibility",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:24"
+  },
+  "POST /mp/record/competitionListWithVideos": {
+    "url": "https://test.supervisions.cn/mp/record/competitionListWithVideos",
+    "method": "POST",
+    "path": "/mp/record/competitionListWithVideos",
+    "data": {
+      "userA": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "userB": "aff7eae4-3680-4b89-9f01-819e02c3b6b5",
+      "startTime": "2026-08-03 00:00:00",
+      "endTime": "2026-08-09 23:59:59",
+      "page": 1,
+      "pageSize": 10,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:24"
+  },
+  "POST /mobile/loginBoxAfterScanningQrCode": {
+    "url": "https://test.supervisions.cn/mobile/loginBoxAfterScanningQrCode",
+    "method": "POST",
+    "path": "/mobile/loginBoxAfterScanningQrCode",
+    "data": {
+      "encryptedString": "http://weixin.qq.com/q/02AYDNBsWOf9E1JX0n1GcW",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:29:25"
+  },
+  "POST /mp/record/deviceOnlineInfo": {
+    "url": "https://test.supervisions.cn/mp/record/deviceOnlineInfo",
+    "method": "POST",
+    "path": "/mp/record/deviceOnlineInfo",
+    "data": {
+      "competitionId": "fecd7c799ea5495ca23caceafaaca04b",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:36:41"
+  },
+  "POST /mp/record/inningList": {
+    "url": "https://test.supervisions.cn/mp/record/inningList",
+    "method": "POST",
+    "path": "/mp/record/inningList",
+    "data": {
+      "competitionId": "fecd7c799ea5495ca23caceafaaca04b",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:36:41"
+  },
+  "POST /video/videoinfo/competitionVideos": {
+    "url": "https://test.supervisions.cn/video/videoinfo/competitionVideos",
+    "method": "POST",
+    "path": "/video/videoinfo/competitionVideos",
+    "data": {
+      "competitionId": "fecd7c799ea5495ca23caceafaaca04b",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:36:41"
+  },
+  "POST /mp/record/barchart": {
+    "url": "https://test.supervisions.cn/mp/record/barchart",
+    "method": "POST",
+    "path": "/mp/record/barchart",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "startTime": "2026-08-03 00:00:00",
+      "endTime": "2026-08-09 23:59:59"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:37:27"
+  },
+  "POST /mp/record/statics": {
+    "url": "https://test.supervisions.cn/mp/record/statics",
+    "method": "POST",
+    "path": "/mp/record/statics",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "startTime": "2026-08-03 00:00:00",
+      "endTime": "2026-08-09 23:59:59"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:37:27"
+  },
+  "POST /mp/record/inningStatistics": {
+    "url": "https://test.supervisions.cn/mp/record/inningStatistics",
+    "method": "POST",
+    "path": "/mp/record/inningStatistics",
+    "data": {
+      "competitionId": "bf0442cd43214739a799233bc4852738",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 10:56:30"
+  },
+  "POST /video/videoClient/myVideos/failedV2": {
+    "url": "https://test.supervisions.cn/video/videoClient/myVideos/failedV2",
+    "method": "POST",
+    "path": "/video/videoClient/myVideos/failedV2",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 10,
+      "clientId": "BP2A.250605.031.A3_V000L1",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 11:25:51"
+  },
+  "POST /mp/user/myClubs": {
+    "url": "https://test.supervisions.cn/mp/user/myClubs",
+    "method": "POST",
+    "path": "/mp/user/myClubs",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 11:35:58"
+  },
+  "POST /mp/app/version/check": {
+    "url": "https://test.supervisions.cn/mp/app/version/check",
+    "method": "POST",
+    "path": "/mp/app/version/check",
+    "data": {
+      "platform": 2,
+      "currentVersion": "1.0.0",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 11:36:13"
+  },
+  "POST /mp/user/saveDefaultClub": {
+    "url": "https://test.supervisions.cn/mp/user/saveDefaultClub",
+    "method": "POST",
+    "path": "/mp/user/saveDefaultClub",
+    "data": {
+      "clubId": 45376,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 11:36:18"
+  },
+  "POST /mp/oauth/wechatLogin": {
+    "url": "https://test.supervisions.cn/mp/oauth/wechatLogin",
+    "method": "POST",
+    "path": "/mp/oauth/wechatLogin",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-06 11:37:09"
+  },
+  "POST /mp/record/competitionStatistics": {
+    "url": "https://test.supervisions.cn/mp/record/competitionStatistics",
+    "method": "POST",
+    "path": "/mp/record/competitionStatistics",
+    "data": {
+      "userA": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "userB": "902b8978-03dc-4797-a529-3ba7572b6096",
+      "startTime": "2026-08-01 00:00:00",
+      "endTime": "2026-08-31 23:59:59",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 14:28:56"
+  },
+  "POST /mp/user/breakScoreList": {
+    "url": "https://test.supervisions.cn/mp/user/breakScoreList",
+    "method": "POST",
+    "path": "/mp/user/breakScoreList",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 30,
+      "sortingFields": "[Instance of 'SortingFieldsModel']",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 14:43:54"
+  },
+  "POST /video/videoClient/getVideoStatistics": {
+    "url": "https://test.supervisions.cn/video/videoClient/getVideoStatistics",
+    "method": "POST",
+    "path": "/video/videoClient/getVideoStatistics",
+    "data": {
+      "clientId": "BP2A.250605.031.A3",
+      "userId": "aff7eae4-3680-4b89-9f01-819e02c3b6b5"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 15:31:07"
+  },
+  "POST /video/videoClient/myVideos/processingV2": {
+    "url": "https://test.supervisions.cn/video/videoClient/myVideos/processingV2",
+    "method": "POST",
+    "path": "/video/videoClient/myVideos/processingV2",
+    "data": {
+      "pageNo": 1000,
+      "pageSize": 1,
+      "clientId": "BP2A.250605.031.A3",
+      "userId": "aff7eae4-3680-4b89-9f01-819e02c3b6b5"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 16:24:49"
+  },
+  "POST /mp/record/markVideoViewed": {
+    "url": "https://test.supervisions.cn/mp/record/markVideoViewed",
+    "method": "POST",
+    "path": "/mp/record/markVideoViewed",
+    "data": {
+      "videoOrderId": 2004,
+      "userId": "aff7eae4-3680-4b89-9f01-819e02c3b6b5"
+    },
+    "description": "",
+    "discovered_at": "2026-08-06 16:30:35"
+  }
+}
