@@ -368,5 +368,44 @@
     },
     "description": "",
     "discovered_at": "2026-08-06 16:30:35"
+  },
+  "POST /mp/user/rating": {
+    "url": "https://test.supervisions.cn/mp/user/rating",
+    "method": "POST",
+    "path": "/mp/user/rating",
+    "data": {
+      "userId": "4ac883d7-0eaa-4086-b609-0b384955c0d8",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-08-19 15:34:55"
+  },
+  "POST /mp/coupon/queryCouponList": {
+    "url": "https://test.supervisions.cn/mp/coupon/queryCouponList",
+    "method": "POST",
+    "path": "/mp/coupon/queryCouponList",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 10,
+      "status": 0,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-08-19 15:58:30"
+  },
+  "POST /video/videoinfo/buyitUseComboV3": {
+    "url": "https://test.supervisions.cn/video/videoinfo/buyitUseComboV3",
+    "method": "POST",
+    "path": "/video/videoinfo/buyitUseComboV3",
+    "data": {
+      "videoId": 12246,
+      "payChannel": 2,
+      "clientId": "ea6580d7-339d-4a88-83d9-1fbbd9df300b",
+      "userId": "4ac883d7-0eaa-4086-b609-0b384955c0d8",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-08-19 17:27:02"
   }
 }

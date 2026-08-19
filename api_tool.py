@@ -11,6 +11,11 @@
   call    - 调用指定接口并显示完整响应
   auto    - 实时监控 + 自动发现新接口 + 自动获取完整响应
   list    - 列出所有已发现的接口
+
+全局参数：
+  -s, --device  指定 ADB 设备 ID（多设备时必须指定）
+                设备 ID 可通过 adb devices 查看
+                示例：python api_tool.py auto -s 设备ID
 """
 
 import argparse
@@ -157,11 +162,12 @@ def cprint(text, color=None, bold=False):
 
 def cmd_log(args):
     """实时查看 App 网络日志"""
-    if not ADB_DEVICE:
+    device = getattr(args, '_device', None)
+    if not device:
         cprint("未检测到 ADB 设备，请检查连接", Colors.RED)
         return
     pattern = args.pattern or "DIO"
-    adb_cmd = ["adb", "-s", ADB_DEVICE, "logcat"]
+    adb_cmd = ["adb", "-s", device, "logcat"]
 
     cprint(f"实时日志流 | 过滤: {pattern} | Ctrl+C 停止", Colors.CYAN, bold=True)
     cprint("=" * 60)
@@ -683,7 +689,8 @@ def _display_request_response(uri, method, data_lines, response_lines, seen_uris
 
 def cmd_auto(args):
     """实时监控 + 自动发现新接口"""
-    if not ADB_DEVICE:
+    device = getattr(args, '_device', None)
+    if not device:
         cprint("未检测到 ADB 设备，请检查连接", Colors.RED)
         return
     cprint("自动监控模式 | 实时发现新接口并获取完整响应", Colors.CYAN, bold=True)
@@ -702,8 +709,7 @@ def cmd_auto(args):
     seen_uris = set(known_uris)
     discovered_apis = []  # 记录所有发现的接口
 
-    adb_cmd = ["adb", "-s", ADB_DEVICE, "logcat"]
-
+    adb_cmd = ["adb", "-s", device, "logcat"]
     try:
         proc = subprocess.Popen(
             adb_cmd,
@@ -711,10 +717,10 @@ def cmd_auto(args):
             stderr=subprocess.PIPE,
             bufsize=0  # 二进制无缓冲，配合 TextIOWrapper.line_buffering 使用
         )
-
+    
         import io
         stdout_reader = io.TextIOWrapper(proc.stdout, encoding='utf-8', errors='replace', line_buffering=True)
-
+    
         # 当前请求缓冲区
         current_uri = None
         current_method = None
@@ -725,10 +731,10 @@ def cmd_auto(args):
         in_data = False
         in_response = False
         request_count = 0
-
+    
         for line in stdout_reader:
             content = line.strip()
-
+    
             if "*** Request ***" in content:
                 # 显示上一个请求的响应（仅当有实际响应时才显示）
                 if current_uri and current_response_lines:
@@ -762,7 +768,7 @@ def cmd_auto(args):
                 elif current_uri:
                     # 上一个请求没有响应，静默丢弃（可能是超时重试）
                     pass
-
+    
                 # 重置
                 current_uri = None
                 current_method = None
@@ -772,11 +778,11 @@ def cmd_auto(args):
                 current_response_lines = []
                 in_data = False
                 in_response = False
-
+    
             elif "*** Response ***" in content:
                 in_response = "headers"  # 先跳过 headers
                 current_response_lines = []
-
+    
             elif "*** DioException ***" in content:
                 # 异常也结束响应收集（仅当有实际内容时才显示）
                 if current_uri and current_response_lines:
@@ -794,7 +800,7 @@ def cmd_auto(args):
                     pass
                 current_uri = None
                 in_response = False
-
+    
             elif in_response == "headers" and "Response Text:" in content:
                 in_response = "body"  # 开始收集响应正文
                 # Response Text: 和响应 JSON 可能在同一行
@@ -809,34 +815,34 @@ def cmd_auto(args):
                         current_response_lines.append(after_dio)
                 else:
                     in_response = False  # 非 DIO 行，结束收集
-
+    
             elif "uri:" in content and "https://" in content:
                 m = re.search(r'uri:\s*(https?://\S+)', content)
                 if m:
                     current_uri = m.group(1).strip()
-
+    
             elif "method:" in content:
                 m = re.search(r'method:\s*(\w+)', content)
                 if m:
                     current_method = m.group(1).strip()
-
+    
             elif "Authorization:" in content:
                 m = re.search(r'Authorization:\s*(\S+)', content)
                 if m:
                     current_auth = m.group(1).strip()
-
+    
             elif "refresh_token:" in content:
                 m = re.search(r'refresh_token:\s*(\S+)', content)
                 if m:
                     current_refresh = m.group(1).strip()
-
+    
             elif "data:" in content:
                 in_data = True
                 current_data_lines = []
                 after_dio = content.split("[DIO]")[-1].strip() if "[DIO]" in content else content.strip()
                 if "{" in after_dio and after_dio != "data:":
                     current_data_lines.append(after_dio.replace("data:", "").strip())
-
+    
             elif in_data:
                 after_dio = content.split("[DIO]")[-1].strip() if "[DIO]" in content else content.strip()
                 if "*** " in after_dio or after_dio == "":
@@ -977,6 +983,7 @@ def main():
 
     # log
     log_parser = subparsers.add_parser("log", help="实时查看 App 网络日志")
+    log_parser.add_argument("-s", "--device", help="指定 ADB 设备 ID（多设备时必须指定）")
     log_parser.add_argument("-p", "--pattern", help="过滤关键词 (默认: DIO)")
 
     # extract
@@ -992,6 +999,7 @@ def main():
 
     # auto
     auto_parser = subparsers.add_parser("auto", help="实时监控 + 自动发现接口")
+    auto_parser.add_argument("-s", "--device", help="指定 ADB 设备 ID（多设备时必须指定）")
     auto_parser.add_argument("--hide", nargs="+", default=[
         "/mobile/getUserBoxStatus",
         "/mp/user/info",
@@ -1002,13 +1010,23 @@ def main():
 
     args = parser.parse_args()
 
+    # 处理 -s 设备参数：优先使用命令行指定，否则自动检测
+    device = None
+    if hasattr(args, 'device') and args.device:
+        device = args.device
+        cprint(f"指定设备: {device}", Colors.CYAN)
+    else:
+        device = ADB_DEVICE
+
     if args.command == "log":
+        args._device = device
         cmd_log(args)
     elif args.command == "extract":
         cmd_extract(args)
     elif args.command == "call":
         cmd_call(args)
     elif args.command == "auto":
+        args._device = device
         cmd_auto(args)
     elif args.command == "list":
         cmd_list(args)
