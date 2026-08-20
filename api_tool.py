@@ -16,6 +16,11 @@
   -s, --device  指定 ADB 设备 ID（多设备时必须指定）
                 设备 ID 可通过 adb devices 查看
                 示例：python api_tool.py auto -s 设备ID
+
+auto 专用参数：
+  --full        自动用 Python requests 调用每个请求获取完整响应
+                （绕过 logcat 单行截断限制，大响应也能完整显示）
+                示例：python api_tool.py auto --full
 """
 
 import argparse
@@ -25,6 +30,8 @@ import json
 import sys
 import os
 import time
+import threading
+import queue
 import requests
 from datetime import datetime
 from collections import OrderedDict
@@ -629,8 +636,31 @@ def cmd_list(args):
 
 # ============== 自动模式 ==============
 
-def _display_request_response(uri, method, data_lines, response_lines, seen_uris, discovered_apis, is_error=False):
-    """显示一个完整的请求+响应"""
+def _fetch_full_response(uri, method, data_str):
+    """用 Python requests 获取完整响应（绕过 logcat 截断）"""
+    data = None
+    try:
+        data = json.loads(data_str)
+    except:
+        data = _dart_to_json(data_str)
+    if data is None:
+        data = {"raw": data_str[:200]}
+
+    try:
+        resp = requests.post(uri, json=data, headers=HEADERS, timeout=10, proxies={"http": None, "https": None})
+        if resp.status_code == 200:
+            try:
+                return resp.json()
+            except:
+                return {"raw": resp.text[:500]}
+        else:
+            return {"_error": f"HTTP {resp.status_code}"}
+    except Exception as e:
+        return {"_error": str(e)}
+
+
+def _display_request_response(uri, method, data_lines, response_lines, seen_uris, discovered_apis, is_error=False, full_data=None, device_tag=""):
+    """显示一个完整的请求+响应（full_data 为 Python requests 拿到的完整响应）"""
     # 解析 data
     data_str = " ".join(data_lines)
     data = None
@@ -641,13 +671,15 @@ def _display_request_response(uri, method, data_lines, response_lines, seen_uris
     if data is None:
         data = {"raw": data_str[:200]}
 
-    # 解析响应
-    response_text = " ".join(response_lines).strip()
-    response_data = None
-    try:
-        response_data = json.loads(response_text)
-    except:
-        response_data = None
+    # 优先使用 Python requests 的完整响应，否则用 logcat 的截断响应
+    response_data = full_data
+    response_text = ""
+    if response_data is None:
+        response_text = " ".join(response_lines).strip()
+        try:
+            response_data = json.loads(response_text)
+        except:
+            response_data = None
 
     # 实时更新 Token
     # 显示
@@ -658,43 +690,89 @@ def _display_request_response(uri, method, data_lines, response_lines, seen_uris
 
     path = uri.replace(BASE_URL, "")
     marker = " [NEW]" if is_new else ""
+    prefix = f"[{device_tag}] " if device_tag else ""
 
     print()  # 空行分隔
     if is_error:
-        cprint(f"!! {method} {path}{marker}", Colors.RED, bold=True)
+        cprint(f"{prefix}!! {method} {path}{marker}", Colors.RED, bold=True)
     elif is_new:
-        cprint(f">> {method} {path}{marker}", Colors.GREEN, bold=True)
+        cprint(f"{prefix}>> {method} {path}{marker}", Colors.GREEN, bold=True)
     else:
-        cprint(f">> {method} {path}", Colors.BLUE)
+        cprint(f"{prefix}>> {method} {path}", Colors.BLUE)
 
     # 请求参数
     if data and data != {"raw": ""}:
         data_display = json.dumps(data, ensure_ascii=False, indent=2) if isinstance(data, dict) else str(data)
-        cprint(f"   请求: {data_display}", Colors.DIM)
+        cprint(f"{prefix}   请求: {data_display}", Colors.DIM)
 
     # 响应体
     if response_data:
-        resp_display = json.dumps(response_data, ensure_ascii=False, indent=2)
-        # 截断过长响应
-        if len(resp_display) > 1500:
-            resp_display = resp_display[:1500] + "\n   ... (已截断)"
-        cprint(f"   响应:\n{resp_display}", Colors.WHITE)
+        if "_error" in response_data:
+            cprint(f"{prefix}   响应: (requests调用失败: {response_data['_error']})", Colors.RED)
+        else:
+            source_tag = " [requests]" if full_data else " [logcat]"
+            resp_display = json.dumps(response_data, ensure_ascii=False, indent=2)
+            cprint(f"{prefix}   响应{source_tag}:\n{resp_display}", Colors.WHITE)
     elif response_text:
-        cprint(f"   响应: {response_text[:500]}", Colors.WHITE)
+        cprint(f"{prefix}   响应: {response_text[:500]}", Colors.WHITE)
     elif is_error:
-        cprint(f"   响应: (异常/无响应)", Colors.RED)
+        cprint(f"{prefix}   响应: (异常/无响应)", Colors.RED)
     else:
-        cprint(f"   响应: (等待中...)", Colors.DIM)
+        cprint(f"{prefix}   响应: (等待中...)", Colors.DIM)
+
+
+# 全局打印锁，防止多线程输出交错
+_print_lock = threading.Lock()
+
+def _threaded_display_request_response(uri, method, data_lines, response_lines,
+                                        seen_uris, discovered_apis, is_error=False,
+                                        full_data=None, hide_list=None, device_tag=""):
+    """线程安全的显示函数，带打印锁"""
+    if hide_list is None:
+        hide_list = []
+    path = uri.replace(BASE_URL, "")
+    if any(h in path for h in hide_list):
+        return
+
+    with _print_lock:
+        _display_request_response(
+            uri, method, data_lines, response_lines,
+            seen_uris, discovered_apis, is_error, full_data, device_tag
+        )
+
+
+def _short_device_id(device):
+    """缩短设备ID用于显示标签"""
+    if device.startswith("adb-"):
+        # WiFi设备: adb-IVXGSGRKEATKXO4D-xxx -> IVXGSGRK
+        parts = device.split("-")
+        return parts[1][:8] if len(parts) >= 2 else device[:10]
+    return device[:8]  # USB设备取前8位
 
 
 def cmd_auto(args):
-    """实时监控 + 自动发现新接口"""
-    device = getattr(args, '_device', None)
-    if not device:
+    """实时监控 + 自动发现新接口（支持多设备并行）"""
+    devices = getattr(args, '_devices', None)
+    if not devices:
         cprint("未检测到 ADB 设备，请检查连接", Colors.RED)
         return
-    cprint("自动监控模式 | 实时发现新接口并获取完整响应", Colors.CYAN, bold=True)
+
+    full_mode = getattr(args, 'full', False)
     hide_list = getattr(args, 'hide', []) or []
+
+    if len(devices) > 1:
+        cprint(f"自动监控模式 | {len(devices)} 台设备并行监控", Colors.CYAN, bold=True)
+        for d in devices:
+            tag = f"[{_short_device_id(d)}]"
+            cprint(f"  {tag} {d}", Colors.DIM)
+    else:
+        cprint(f"自动监控模式 | 设备: {devices[0]}", Colors.CYAN, bold=True)
+
+    if full_mode:
+        cprint("模式: logcat 监听 + Python requests 获取完整响应（并行）", Colors.CYAN)
+    else:
+        cprint("模式: logcat 监听（大响应可能被截断）", Colors.CYAN)
+
     if hide_list:
         cprint(f"已隐藏接口: {', '.join(hide_list)}", Colors.DIM)
     cprint("Ctrl+C 停止", Colors.DIM)
@@ -706,169 +784,223 @@ def cmd_auto(args):
     for api in memory.values():
         known_uris.add(api["url"])
 
+    # 共享状态用锁保护
+    state_lock = threading.Lock()
     seen_uris = set(known_uris)
-    discovered_apis = []  # 记录所有发现的接口
+    discovered_apis = []
+    request_count = [0]
 
-    adb_cmd = ["adb", "-s", device, "logcat"]
-    try:
-        proc = subprocess.Popen(
-            adb_cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            bufsize=0  # 二进制无缓冲，配合 TextIOWrapper.line_buffering 使用
-        )
-    
-        import io
-        stdout_reader = io.TextIOWrapper(proc.stdout, encoding='utf-8', errors='replace', line_buffering=True)
-    
-        # 当前请求缓冲区
-        current_uri = None
-        current_method = None
-        current_data_lines = []
-        current_auth = None
-        current_refresh = None
-        current_response_lines = []
-        in_data = False
-        in_response = False
-        request_count = 0
-    
-        for line in stdout_reader:
-            content = line.strip()
-    
-            if "*** Request ***" in content:
-                # 显示上一个请求的响应（仅当有实际响应时才显示）
-                if current_uri and current_response_lines:
-                    path = current_uri.replace(BASE_URL, "")
-                    should_hide = any(h in path for h in hide_list)
-                    if not should_hide:
-                        is_new = current_uri not in seen_uris
-                        _display_request_response(
-                            current_uri, current_method, current_data_lines,
-                            current_response_lines, seen_uris, discovered_apis
-                        )
-                        # 自动存入记忆库
-                        if is_new:
-                            added = add_to_memory(
-                                current_uri, current_method,
-                                " ".join(current_data_lines)
-                            )
-                            if added:
-                                cprint(f"  💾 已存入记忆库: {current_method} {current_uri.replace(BASE_URL, '')}", Colors.DIM)
-                    else:
-                        # 隐藏但仍记录为新接口
-                        if current_uri not in seen_uris:
-                            seen_uris.add(current_uri)
-                            discovered_apis.append({
-                                "uri": current_uri,
-                                "method": current_method,
-                                "data": " ".join(current_data_lines)
-                            })
-                            add_to_memory(current_uri, current_method, " ".join(current_data_lines))
-                    request_count += 1
-                elif current_uri:
-                    # 上一个请求没有响应，静默丢弃（可能是超时重试）
-                    pass
-    
-                # 重置
-                current_uri = None
-                current_method = None
-                current_data_lines = []
-                current_auth = None
-                current_refresh = None
-                current_response_lines = []
-                in_data = False
-                in_response = False
-    
-            elif "*** Response ***" in content:
-                in_response = "headers"  # 先跳过 headers
-                current_response_lines = []
-    
-            elif "*** DioException ***" in content:
-                # 异常也结束响应收集（仅当有实际内容时才显示）
-                if current_uri and current_response_lines:
-                    path = current_uri.replace(BASE_URL, "")
-                    should_hide = any(h in path for h in hide_list)
-                    if not should_hide:
-                        _display_request_response(
-                            current_uri, current_method, current_data_lines,
-                            current_response_lines, seen_uris, discovered_apis,
-                            is_error=True
-                        )
-                    request_count += 1
-                elif current_uri:
-                    # 没有实际错误信息，丢弃
-                    pass
-                current_uri = None
-                in_response = False
-    
-            elif in_response == "headers" and "Response Text:" in content:
-                in_response = "body"  # 开始收集响应正文
-                # Response Text: 和响应 JSON 可能在同一行
-                after_marker = content.split("Response Text:")[-1].strip()
-                if after_marker and "[DIO]" not in after_marker:
-                    current_response_lines.append(after_marker)
-            elif in_response == "body" and content:
-                # 只收集 [DIO] 开头的行，遇到非 DIO 行就停止
-                if "[DIO]" in content:
-                    after_dio = content.split("[DIO]")[-1].strip()
-                    if after_dio and not after_dio.startswith("***"):
-                        current_response_lines.append(after_dio)
-                else:
-                    in_response = False  # 非 DIO 行，结束收集
-    
-            elif "uri:" in content and "https://" in content:
-                m = re.search(r'uri:\s*(https?://\S+)', content)
-                if m:
-                    current_uri = m.group(1).strip()
-    
-            elif "method:" in content:
-                m = re.search(r'method:\s*(\w+)', content)
-                if m:
-                    current_method = m.group(1).strip()
-    
-            elif "Authorization:" in content:
-                m = re.search(r'Authorization:\s*(\S+)', content)
-                if m:
-                    current_auth = m.group(1).strip()
-    
-            elif "refresh_token:" in content:
-                m = re.search(r'refresh_token:\s*(\S+)', content)
-                if m:
-                    current_refresh = m.group(1).strip()
-    
-            elif "data:" in content:
-                in_data = True
-                current_data_lines = []
-                after_dio = content.split("[DIO]")[-1].strip() if "[DIO]" in content else content.strip()
-                if "{" in after_dio and after_dio != "data:":
-                    current_data_lines.append(after_dio.replace("data:", "").strip())
-    
-            elif in_data:
-                after_dio = content.split("[DIO]")[-1].strip() if "[DIO]" in content else content.strip()
-                if "*** " in after_dio or after_dio == "":
-                    in_data = False
-                elif after_dio and ("{" in after_dio or after_dio.startswith('"') or ":" in after_dio):
-                    current_data_lines.append(after_dio)
+    # 每个设备独立的请求队列
+    stop_event = threading.Event()
+    worker_threads = []
 
-    except KeyboardInterrupt:
-        # 显示最后一个请求
-        if current_uri:
-            path = current_uri.replace(BASE_URL, "")
-            should_hide = any(h in path for h in hide_list)
-            if not should_hide:
-                _display_request_response(
-                    current_uri, current_method, current_data_lines,
-                    current_response_lines, seen_uris, discovered_apis
+    def make_worker(device_id, request_q):
+        """为每个设备创建一个工作线程（--full模式下调用Python requests）"""
+        def worker():
+            while not stop_event.is_set():
+                try:
+                    item = request_q.get(timeout=0.5)
+                except queue.Empty:
+                    continue
+
+                uri, method, data_lines, response_lines = item
+
+                full_data = None
+                if full_mode and data_lines:
+                    full_data = _fetch_full_response(uri, method, " ".join(data_lines))
+                    if full_data and "_error" in full_data:
+                        with _print_lock:
+                            cprint(f"  [{_short_device_id(device_id)}] requests调用失败: {full_data['_error']}", Colors.DIM)
+
+                _threaded_display_request_response(
+                    uri, method, data_lines, response_lines,
+                    seen_uris, discovered_apis,
+                    full_data=full_data, hide_list=hide_list,
+                    device_tag=_short_device_id(device_id),
                 )
-            request_count += 1
-        cprint(f"\n已停止，共捕获 {request_count} 个请求，发现 {len(seen_uris)} 个新接口", Colors.DIM)
+
+                # 自动存入记忆库
+                with state_lock:
+                    if uri not in known_uris:
+                        added = add_to_memory(uri, method, " ".join(data_lines))
+                        if added:
+                            with _print_lock:
+                                cprint(f"  [{_short_device_id(device_id)}] 💾 已存入记忆库: {method} {uri.replace(BASE_URL, '')}", Colors.DIM)
+                        seen_uris.add(uri)
+                        discovered_apis.append({"uri": uri, "method": method, "data": " ".join(data_lines)})
+                    request_count[0] += 1
+
+                request_q.task_done()
+        return worker
+
+    # 为每个设备创建请求队列和工作线程
+    device_queues = {}
+    for device_id in devices:
+        q = queue.Queue()
+        device_queues[device_id] = q
+
+        if full_mode:
+            wt = threading.Thread(target=make_worker(device_id, q), daemon=True)
+            wt.start()
+            worker_threads.append(wt)
+
+    def process_line(device_id, content, request_q, buf):
+        """处理一行 logcat 输出，解析DIO请求/响应"""
+        if "*** Request ***" in content:
+            if buf["uri"]:
+                request_q.put((
+                    buf["uri"], buf["method"],
+                    buf["data_lines"][:], buf["response_lines"][:]
+                ))
+            buf["uri"] = None
+            buf["method"] = None
+            buf["data_lines"] = []
+            buf["auth"] = None
+            buf["refresh"] = None
+            buf["response_lines"] = []
+            buf["in_data"] = False
+            buf["in_response"] = False
+
+        elif "*** Response ***" in content:
+            buf["in_response"] = "headers"
+            buf["response_lines"] = []
+
+        elif "*** DioException ***" in content:
+            if buf["uri"]:
+                request_q.put((
+                    buf["uri"], buf["method"],
+                    buf["data_lines"][:], buf["response_lines"][:]
+                ))
+            buf["uri"] = None
+            buf["in_response"] = False
+
+        elif buf["in_response"] == "headers" and "Response Text:" in content:
+            buf["in_response"] = "body"
+            after_marker = content.split("Response Text:")[-1].strip()
+            if after_marker and "[DIO]" not in after_marker:
+                buf["response_lines"].append(after_marker)
+        elif buf["in_response"] == "body" and content:
+            if "[DIO]" in content:
+                after_dio = content.split("[DIO]")[-1].strip()
+                if after_dio and not after_dio.startswith("***"):
+                    buf["response_lines"].append(after_dio)
+            else:
+                buf["in_response"] = False
+
+        elif "uri:" in content and "https://" in content:
+            m = re.search(r'uri:\s*(https?://\S+)', content)
+            if m:
+                buf["uri"] = m.group(1).strip()
+
+        elif "method:" in content:
+            m = re.search(r'method:\s*(\w+)', content)
+            if m:
+                buf["method"] = m.group(1).strip()
+
+        elif "Authorization:" in content:
+            m = re.search(r'Authorization:\s*(\S+)', content)
+            if m:
+                buf["auth"] = m.group(1).strip()
+
+        elif "refresh_token:" in content:
+            m = re.search(r'refresh_token:\s*(\S+)', content)
+            if m:
+                buf["refresh"] = m.group(1).strip()
+
+        elif "data:" in content:
+            buf["in_data"] = True
+            buf["data_lines"] = []
+            after_dio = content.split("[DIO]")[-1].strip() if "[DIO]" in content else content.strip()
+            if "{" in after_dio and after_dio != "data:":
+                buf["data_lines"].append(after_dio.replace("data:", "").strip())
+
+        elif buf["in_data"]:
+            after_dio = content.split("[DIO]")[-1].strip() if "[DIO]" in content else content.strip()
+            if "*** " in after_dio or after_dio == "":
+                buf["in_data"] = False
+            elif after_dio and ("{" in after_dio or after_dio.startswith('"') or ":" in after_dio):
+                buf["data_lines"].append(after_dio)
+
+    def logcat_reader(device_id):
+        """为单个设备启动 logcat 流，实时解析DIO日志"""
+        adb_cmd = ["adb", "-s", device_id, "logcat"]
+        tag = _short_device_id(device_id)
+        proc = None
+        buf = {
+            "uri": None, "method": None,
+            "data_lines": [], "auth": None, "refresh": None,
+            "response_lines": [], "in_data": False, "in_response": False,
+        }
+
+        try:
+            proc = subprocess.Popen(
+                adb_cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                bufsize=0
+            )
+
+            import io
+            stdout_reader = io.TextIOWrapper(proc.stdout, encoding='utf-8', errors='replace', line_buffering=True)
+
+            for line in stdout_reader:
+                if stop_event.is_set():
+                    break
+                content = line.strip()
+                request_q = device_queues.get(device_id)
+                if request_q:
+                    process_line(device_id, content, request_q, buf)
+
+        except Exception as e:
+            with _print_lock:
+                cprint(f"  [{tag}] logcat错误: {e}", Colors.RED)
+        finally:
+            # 最后一个请求丢入队列
+            if buf["uri"]:
+                request_q = device_queues.get(device_id)
+                if request_q:
+                    request_q.put((
+                        buf["uri"], buf["method"],
+                        buf["data_lines"][:], buf["response_lines"][:]
+                    ))
+            if proc:
+                proc.terminate()
+
+    # 为每个设备启动 logcat 读取线程
+    logcat_threads = []
+    for device_id in devices:
+        t = threading.Thread(target=logcat_reader, args=(device_id,), daemon=True)
+        t.start()
+        logcat_threads.append(t)
+
+    try:
+        # 主线程等待，直到 Ctrl+C
+        while True:
+            time.sleep(1)
+            alive = any(t.is_alive() for t in logcat_threads)
+            if not alive:
+                cprint("\n所有设备 logcat 流已断开", Colors.DIM)
+                break
+    except KeyboardInterrupt:
+        pass
+    finally:
+        stop_event.set()
+
+        # 等待工作线程处理完
+        for q in device_queues.values():
+            try:
+                q.join(timeout=3)
+            except:
+                pass
+        for wt in worker_threads:
+            wt.join(timeout=5)
+
+        cprint(f"\n已停止，共捕获 {request_count[0]} 个请求，发现 {len(seen_uris) - len(known_uris)} 个新接口", Colors.DIM)
         if discovered_apis:
             cprint("\n发现的接口列表:", Colors.YELLOW, bold=True)
             for api in discovered_apis:
                 cprint(f"  {api['method']} {api['uri'].replace(BASE_URL, '')}", Colors.WHITE)
             cprint(f"\n提示: 将新接口添加到 api_tool.py 的 presets 中即可用 call 命令调用", Colors.DIM)
-    finally:
-        proc.terminate()
 
 
 def _dart_to_json(dart_str):
@@ -975,6 +1107,8 @@ def main():
   python api_tool.py call matches           # 调用对手列表接口
   python api_tool.py call -u https://...    # 调用自定义 URL
   python api_tool.py auto                   # 实时监控 + 自动发现
+  python api_tool.py auto --full            # 自动发现 + Python requests 拿完整响应
+  python api_tool.py auto -s 设备ID --full  # 指定设备 + 完整响应
   python api_tool.py list                   # 列出所有已知接口
         """
     )
@@ -999,24 +1133,53 @@ def main():
 
     # auto
     auto_parser = subparsers.add_parser("auto", help="实时监控 + 自动发现接口")
-    auto_parser.add_argument("-s", "--device", help="指定 ADB 设备 ID（多设备时必须指定）")
+    auto_parser.add_argument("-s", "--device", nargs="+", default=None,
+        help="指定 ADB 设备 ID（支持多个设备，空格分隔）")
     auto_parser.add_argument("--hide", nargs="+", default=[
         "/mobile/getUserBoxStatus",
         "/mp/user/info",
     ], help="隐藏高频轮询接口路径 (默认隐藏 getUserBoxStatus 和 user/info)")
+    auto_parser.add_argument("--full", action="store_true",
+        help="自动用 Python requests 调用每个请求获取完整响应（绕过 logcat 截断限制）")
 
     # list
     list_parser = subparsers.add_parser("list", help="列出所有已知接口")
 
     args = parser.parse_args()
 
-    # 处理 -s 设备参数：优先使用命令行指定，否则自动检测
-    device = None
-    if hasattr(args, 'device') and args.device:
-        device = args.device
-        cprint(f"指定设备: {device}", Colors.CYAN)
+    # 处理 -s 设备参数
+    device = None  # 用于 log/call 等单设备命令
+    devices = None  # 用于 auto 多设备命令
+
+    if args.command == "auto":
+        if args.device:
+            devices = args.device  # nargs="+" 返回 list
+            for d in devices:
+                cprint(f"指定设备: {d}", Colors.CYAN)
+        else:
+            # 未指定设备时，自动获取所有已连接设备
+            all_devices = []
+            try:
+                result = subprocess.run(["adb", "devices"], capture_output=True, text=True, timeout=5)
+                for line in result.stdout.strip().splitlines()[1:]:
+                    parts = line.split()
+                    if len(parts) >= 2 and parts[1] == "device":
+                        all_devices.append(parts[0])
+            except:
+                pass
+            if all_devices:
+                devices = all_devices
+            else:
+                devices = [ADB_DEVICE] if ADB_DEVICE else None
+
+        args._devices = devices
     else:
-        device = ADB_DEVICE
+        # 其他命令：单设备逻辑
+        if hasattr(args, 'device') and args.device:
+            device = args.device
+            cprint(f"指定设备: {device}", Colors.CYAN)
+        else:
+            device = ADB_DEVICE
 
     if args.command == "log":
         args._device = device
@@ -1026,7 +1189,9 @@ def main():
     elif args.command == "call":
         cmd_call(args)
     elif args.command == "auto":
-        args._device = device
+        if not args._devices:
+            cprint("未检测到 ADB 设备，请检查连接", Colors.RED)
+            sys.exit(1)
         cmd_auto(args)
     elif args.command == "list":
         cmd_list(args)
