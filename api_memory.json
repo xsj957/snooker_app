@@ -519,5 +519,51 @@
     "data": null,
     "description": "",
     "discovered_at": "2026-08-20 17:11:08"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c4028a05001834816819108372/f55r6NCOHdMA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c4028a05001834816819108372/f55r6NCOHdMA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c4028a05001834816819108372/f55r6NCOHdMA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-20 21:52:31"
+  },
+  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c4028a05001834816819108372/f55r6NCOHdMA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c4028a05001834816819108372/f55r6NCOHdMA.mp4",
+    "method": "POST",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c4028a05001834816819108372/f55r6NCOHdMA.mp4",
+    "data": {
+      "clientId": "2149f99f-3c66-42d7-b640-e7a48a34ebb8",
+      "status": 3,
+      "videoId": 12326,
+      "videoOrderId": 2107,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-08-20 21:52:32"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9f5c57355001834816820602262/lLC82JEQz4EA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9f5c57355001834816820602262/lLC82JEQz4EA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9f5c57355001834816820602262/lLC82JEQz4EA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-20 21:53:44"
+  },
+  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9f5c57355001834816820602262/lLC82JEQz4EA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9f5c57355001834816820602262/lLC82JEQz4EA.mp4",
+    "method": "POST",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9f5c57355001834816820602262/lLC82JEQz4EA.mp4",
+    "data": {
+      "clientId": "2149f99f-3c66-42d7-b640-e7a48a34ebb8",
+      "status": 3,
+      "videoId": 12325,
+      "videoOrderId": 2108,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-08-20 21:53:45"
   }
 }

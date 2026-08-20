@@ -32,9 +32,11 @@ import os
 import time
 import threading
 import queue
+import io
 import requests
 from datetime import datetime
 from collections import OrderedDict
+from concurrent.futures import ThreadPoolExecutor
 
 # ============== 配置 ==============
 
@@ -64,85 +66,119 @@ def get_adb_device():
             if len(parts) >= 2 and parts[1] == "device":
                 return parts[0]
         return None
-    except Exception:
+    except (FileNotFoundError, subprocess.TimeoutExpired):
         return None
 
 
 ADB_DEVICE = get_adb_device()
 
-# 所有已知的内置接口 URL（auto 模式初始化 seen_uris 用）
-KNOWN_API_URLS = {
-    f"{BASE_URL}/mp/user/info",
-    f"{BASE_URL}/mp/user/myClubs",
-    f"{BASE_URL}/mp/user/saveDefaultClub",
-    f"{BASE_URL}/mp/oauth/wechatLogin",
-    f"{BASE_URL}/mobile/getUserBoxStatus",
-    f"{BASE_URL}/mp/record/deviceOnlineInfo",
-    f"{BASE_URL}/mobile/loginBoxAfterScanningQrCode",
-    f"{BASE_URL}/mp/app/version/check",
-    f"{BASE_URL}/mp/coupon/checkEligibility",
-    f"{BASE_URL}/mp/coupon/trialList",
-    f"{BASE_URL}/video/videoClient/myVideos/readyV2",
-    f"{BASE_URL}/video/videoClient/myVideos/failedV2",
-    f"{BASE_URL}/mp/record/opponentListWithVideos",
-    f"{BASE_URL}/mp/record/opponentStatistics",
-    f"{BASE_URL}/mp/record/competitionListWithVideos",
-    f"{BASE_URL}/mp/record/inningList",
-    f"{BASE_URL}/mp/record/inningStatistics",
-    f"{BASE_URL}/video/videoinfo/competitionVideos",
-    f"{BASE_URL}/mp/rank/clubList",
-    f"{BASE_URL}/mp/rank/userBreakRank",
-    f"{BASE_URL}/mp/rank/ratingList",
-    f"{BASE_URL}/mp/rank/breakList",
-    f"{BASE_URL}/mp/rank/winRateList",
-    f"{BASE_URL}/mp/record/barchart",
-    f"{BASE_URL}/mp/record/statics",
-    f"{BASE_URL}/mp/event/track",
-}
 
-# ============== API 记忆库 ==============
+# ============== API 记忆库（线程安全 + 缓存） ==============
 
 MEMORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "api_memory.json")
 
-def load_memory():
-    """加载 API 记忆库"""
-    if os.path.exists(MEMORY_FILE):
-        with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
 
-def save_memory(memory):
-    """保存 API 记忆库"""
-    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(memory, f, ensure_ascii=False, indent=2)
+class MemoryManager:
+    """线程安全的 API 记忆库管理器，内存缓存 + 定期批量写入"""
 
-def get_memory_key(uri, method):
-    """生成接口的记忆库 key"""
-    path = uri.replace(BASE_URL, "")
-    return f"{method} {path}"
+    def __init__(self, filepath):
+        self._filepath = filepath
+        self._lock = threading.Lock()
+        self._cache = self._load()
+        self._dirty = False
+        # 后台定期保存线程（daemon 模式，主线程退出时自动终止）
+        self._save_timer = threading.Timer(30.0, self._periodic_save)
+        self._save_timer.daemon = True
+        self._save_timer.start()
 
-def add_to_memory(uri, method, data_str, description=""):
-    """添加新接口到记忆库"""
-    memory = load_memory()
-    key = get_memory_key(uri, method)
-    if key not in memory:
-        # 解析 data
-        data = None
+    def _load(self):
+        if os.path.exists(self._filepath):
+            try:
+                with open(self._filepath, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, OSError):
+                return {}
+        return {}
+
+    def _save_unlocked(self):
+        """内部保存方法，调用者必须已持有 self._lock"""
         try:
-            data = json.loads(data_str)
-        except:
-            data = _dart_to_json(data_str)
-        memory[key] = {
-            "url": uri,
-            "method": method,
-            "path": uri.replace(BASE_URL, ""),
-            "data": data,
-            "description": description,
-            "discovered_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
-        save_memory(memory)
-        return True  # 新增
-    return False  # 已存在
+            with open(self._filepath, "w", encoding="utf-8") as f:
+                json.dump(self._cache, f, ensure_ascii=False, indent=2)
+            self._dirty = False
+        except OSError:
+            pass
+
+    def _periodic_save(self):
+        """定期保存（后台线程）"""
+        try:
+            with self._lock:
+                if self._dirty:
+                    self._save_unlocked()
+        except Exception:
+            pass
+        # 重新启动定时器
+        try:
+            self._save_timer = threading.Timer(30.0, self._periodic_save)
+            self._save_timer.daemon = True
+            self._save_timer.start()
+        except RuntimeError:
+            pass  # Python 解释器正在关闭
+
+    def flush(self):
+        """强制保存所有未写入的数据"""
+        with self._lock:
+            if self._dirty:
+                self._save_unlocked()
+
+    def shutdown(self):
+        """关闭管理器，停止定时保存"""
+        try:
+            self._save_timer.cancel()
+        except Exception:
+            pass
+        self.flush()
+
+    def get(self):
+        with self._lock:
+            return dict(self._cache)
+
+    def get_key(self, uri, method):
+        path = uri.replace(BASE_URL, "")
+        return f"{method} {path}"
+
+    def add(self, uri, method, data_str, description=""):
+        """添加新接口到记忆库，线程安全，返回 True 表示新增"""
+        key = self.get_key(uri, method)
+        with self._lock:
+            if key in self._cache:
+                return False
+            data = None
+            try:
+                data = json.loads(data_str)
+            except (json.JSONDecodeError, ValueError):
+                data = _dart_to_json(data_str)
+            self._cache[key] = {
+                "url": uri,
+                "method": method,
+                "path": uri.replace(BASE_URL, ""),
+                "data": data,
+                "description": description,
+                "discovered_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            self._dirty = True
+            # 立即写入（auto 模式发现新接口时用户会立即看到反馈）
+            self._save_unlocked()
+            return True
+
+    def known_urls(self):
+        with self._lock:
+            return {api["url"] for api in self._cache.values()}
+
+
+# 全局记忆库实例
+_memory_mgr = MemoryManager(MEMORY_FILE)
+
 
 # ============== 颜色 ==============
 
@@ -157,6 +193,7 @@ class Colors:
     BOLD = "\033[1m"
     RESET = "\033[0m"
 
+
 def cprint(text, color=None, bold=False):
     prefix = ""
     if bold:
@@ -164,6 +201,115 @@ def cprint(text, color=None, bold=False):
     if color:
         prefix += color
     print(f"{prefix}{text}{Colors.RESET}")
+
+
+# 全局打印锁，防止多线程输出交错
+_print_lock = threading.Lock()
+
+
+def safe_print(text, color=None, bold=False):
+    """线程安全的打印：先在锁外格式化，再在锁内打印"""
+    prefix = ""
+    if bold:
+        prefix += Colors.BOLD
+    if color:
+        prefix += color
+    formatted = f"{prefix}{text}{Colors.RESET}"
+    with _print_lock:
+        print(formatted)
+
+
+# ============== 接口解析工具 ==============
+
+def _dart_to_json(dart_str):
+    """将 Dart 风格对象转为 JSON（{key: value} → {"key": "value"}）"""
+    if not dart_str or not dart_str.strip().startswith("{"):
+        return None
+    s = dart_str.strip()
+    # 去掉外层 {}
+    inner = s[1:-1].strip() if s.endswith("}") else s[1:].strip()
+    if not inner:
+        return {}
+
+    result = {}
+    # 按逗号分割，但要处理嵌套 {}
+    parts = []
+    depth = 0
+    current = ""
+    for ch in inner:
+        if ch == "{":
+            depth += 1
+            current += ch
+        elif ch == "}":
+            depth -= 1
+            current += ch
+        elif ch == "," and depth == 0:
+            parts.append(current.strip())
+            current = ""
+        else:
+            current += ch
+    if current.strip():
+        parts.append(current.strip())
+
+    for part in parts:
+        if ":" in part:
+            key, _, value = part.partition(":")
+            key = key.strip()
+            value = value.strip()
+            if value == "null":
+                result[key] = None
+            elif value == "true":
+                result[key] = True
+            elif value == "false":
+                result[key] = False
+            elif value.lstrip("-").isdigit():
+                result[key] = int(value)
+            elif "." in value:
+                try:
+                    result[key] = float(value)
+                except ValueError:
+                    result[key] = value
+            else:
+                result[key] = value
+    return result
+
+
+def _parse_request_data(data_lines):
+    """解析请求数据，先尝试标准 JSON，再尝试 Dart 格式"""
+    data_str = " ".join(data_lines).strip()
+    if not data_str:
+        return {}, data_str
+    try:
+        return json.loads(data_str), data_str
+    except (json.JSONDecodeError, ValueError):
+        parsed = _dart_to_json(data_str)
+        if parsed is not None:
+            return parsed, data_str
+        return {"raw": data_str[:200]}, data_str
+
+
+def _fetch_full_response(uri, method, data_str):
+    """用 Python requests 获取完整响应（绕过 logcat 截断）"""
+    data = None
+    try:
+        data = json.loads(data_str)
+    except (json.JSONDecodeError, ValueError):
+        data = _dart_to_json(data_str)
+    if data is None:
+        data = {"raw": data_str[:200]}
+
+    try:
+        resp = requests.post(uri, json=data, headers=HEADERS, timeout=10, proxies={"http": None, "https": None})
+        if resp.status_code == 200:
+            try:
+                return resp.json()
+            except (json.JSONDecodeError, ValueError):
+                return {"raw": resp.text[:500]}
+        else:
+            return {"_error": f"HTTP {resp.status_code}"}
+    except requests.exceptions.RequestException as e:
+        return {"_error": str(e)}
+
 
 # ============== 日志实时查看 ==============
 
@@ -184,10 +330,9 @@ def cmd_log(args):
             adb_cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            bufsize=0  # 二进制无缓冲，配合 TextIOWrapper.line_buffering 使用
+            bufsize=0
         )
 
-        import io
         stdout_reader = io.TextIOWrapper(proc.stdout, encoding='utf-8', errors='replace', line_buffering=True)
 
         for line in stdout_reader:
@@ -230,16 +375,7 @@ def cmd_extract(args):
     with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
         content = f.read()
 
-    # 提取所有请求块
-    request_pattern = re.compile(
-        r'\*\*\* Request \*\*\*.*?'
-        r'uri:\s*(https?://\S+).*?'
-        r'method:\s*(\w+).*?'
-        r'data:\s*\n.*?\{([^}]*(?:\{[^}]*\}[^}]*)*)\}',
-        re.DOTALL
-    )
-
-    # 逐行解析，更健壮
+    # 逐行解析
     apis = OrderedDict()
     lines = content.split("\n")
 
@@ -270,15 +406,10 @@ def cmd_extract(args):
 
                 # 收集 data 行
                 if "data:" in l and "{" in l:
-                    # data 和 JSON 在同一行
                     m = re.search(r'data:\s*(\{.*\})', l)
                     if m:
                         data_lines.append(m.group(1))
-                elif "data:" in l:
-                    # data 在下一行
-                    pass
                 elif data_lines is not None and "{" in l and uri and method:
-                    # 可能是 data JSON 行
                     stripped = l.split("flutter : [DIO]")[-1].strip() if "flutter" in l else l.strip()
                     if stripped.startswith("{") or stripped.startswith('"'):
                         data_lines.append(stripped)
@@ -293,12 +424,11 @@ def cmd_extract(args):
                 raw_data = " ".join(data_lines) if data_lines else ""
                 try:
                     parsed_data = json.loads(raw_data) if raw_data else {}
-                except:
-                    # 尝试去掉非 JSON 部分
+                except (json.JSONDecodeError, ValueError):
                     m = re.search(r'(\{.*\})', raw_data)
                     try:
                         parsed_data = json.loads(m.group(1)) if m else {}
-                    except:
+                    except (json.JSONDecodeError, ValueError):
                         parsed_data = {"raw": raw_data[:200]}
 
                 if key not in apis:
@@ -336,7 +466,7 @@ def cmd_extract(args):
 def cmd_call(args):
     """调用指定接口并显示完整响应"""
 
-    # 预定义的快捷接口（26 个，全部从记忆库同步）
+    # 预定义的快捷接口
     presets = {
         # ---- 用户 ----
         "user": {
@@ -516,7 +646,7 @@ def cmd_call(args):
         }
     else:
         # 尝试从记忆库查找
-        memory = load_memory()
+        memory = _memory_mgr.get()
         if args.name in memory:
             api = memory[args.name]
             api["name"] = args.name
@@ -540,7 +670,7 @@ def cmd_call(args):
             json=api["data"],
             headers=HEADERS,
             timeout=10,
-            proxies={"http": None, "https": None}  # 禁用代理
+            proxies={"http": None, "https": None}
         )
         elapsed = time.time() - start
 
@@ -551,7 +681,7 @@ def cmd_call(args):
             result = resp.json()
             formatted = json.dumps(result, ensure_ascii=False, indent=2)
             cprint(f"\n{formatted}", Colors.WHITE)
-        except:
+        except (json.JSONDecodeError, ValueError):
             cprint(f"\n{resp.text}", Colors.WHITE)
 
         # 简单分析
@@ -574,7 +704,7 @@ def cmd_call(args):
                     cprint(f"  列表长度: {len(data)}", Colors.DIM)
                     if data and isinstance(data[0], dict):
                         cprint(f"  首条记录 keys: {list(data[0].keys())}", Colors.DIM)
-            except:
+            except (json.JSONDecodeError, ValueError):
                 pass
 
     except requests.exceptions.RequestException as e:
@@ -614,7 +744,7 @@ def cmd_list(args):
         "track": "POST /mp/event/track - 埋点上报"
     }
 
-    memory = load_memory()
+    memory = _memory_mgr.get()
 
     cprint("  内置接口:", Colors.CYAN, bold=True)
     for key, desc in presets.items():
@@ -634,120 +764,14 @@ def cmd_list(args):
     cprint(f"           python api_tool.py call -u /mp/record/xxx  (调用记忆库中的接口)", Colors.DIM)
 
 
-# ============== 自动模式 ==============
-
-def _fetch_full_response(uri, method, data_str):
-    """用 Python requests 获取完整响应（绕过 logcat 截断）"""
-    data = None
-    try:
-        data = json.loads(data_str)
-    except:
-        data = _dart_to_json(data_str)
-    if data is None:
-        data = {"raw": data_str[:200]}
-
-    try:
-        resp = requests.post(uri, json=data, headers=HEADERS, timeout=10, proxies={"http": None, "https": None})
-        if resp.status_code == 200:
-            try:
-                return resp.json()
-            except:
-                return {"raw": resp.text[:500]}
-        else:
-            return {"_error": f"HTTP {resp.status_code}"}
-    except Exception as e:
-        return {"_error": str(e)}
-
-
-def _display_request_response(uri, method, data_lines, response_lines, seen_uris, discovered_apis, is_error=False, full_data=None, device_tag=""):
-    """显示一个完整的请求+响应（full_data 为 Python requests 拿到的完整响应）"""
-    # 解析 data
-    data_str = " ".join(data_lines)
-    data = None
-    try:
-        data = json.loads(data_str)
-    except:
-        data = _dart_to_json(data_str)
-    if data is None:
-        data = {"raw": data_str[:200]}
-
-    # 优先使用 Python requests 的完整响应，否则用 logcat 的截断响应
-    response_data = full_data
-    response_text = ""
-    if response_data is None:
-        response_text = " ".join(response_lines).strip()
-        try:
-            response_data = json.loads(response_text)
-        except:
-            response_data = None
-
-    # 实时更新 Token
-    # 显示
-    is_new = uri not in seen_uris
-    if is_new:
-        seen_uris.add(uri)
-        discovered_apis.append({"uri": uri, "method": method, "data": data_str})
-
-    path = uri.replace(BASE_URL, "")
-    marker = " [NEW]" if is_new else ""
-    prefix = f"[{device_tag}] " if device_tag else ""
-
-    print()  # 空行分隔
-    if is_error:
-        cprint(f"{prefix}!! {method} {path}{marker}", Colors.RED, bold=True)
-    elif is_new:
-        cprint(f"{prefix}>> {method} {path}{marker}", Colors.GREEN, bold=True)
-    else:
-        cprint(f"{prefix}>> {method} {path}", Colors.BLUE)
-
-    # 请求参数
-    if data and data != {"raw": ""}:
-        data_display = json.dumps(data, ensure_ascii=False, indent=2) if isinstance(data, dict) else str(data)
-        cprint(f"{prefix}   请求: {data_display}", Colors.DIM)
-
-    # 响应体
-    if response_data:
-        if "_error" in response_data:
-            cprint(f"{prefix}   响应: (requests调用失败: {response_data['_error']})", Colors.RED)
-        else:
-            source_tag = " [requests]" if full_data else " [logcat]"
-            resp_display = json.dumps(response_data, ensure_ascii=False, indent=2)
-            cprint(f"{prefix}   响应{source_tag}:\n{resp_display}", Colors.WHITE)
-    elif response_text:
-        cprint(f"{prefix}   响应: {response_text[:500]}", Colors.WHITE)
-    elif is_error:
-        cprint(f"{prefix}   响应: (异常/无响应)", Colors.RED)
-    else:
-        cprint(f"{prefix}   响应: (等待中...)", Colors.DIM)
-
-
-# 全局打印锁，防止多线程输出交错
-_print_lock = threading.Lock()
-
-def _threaded_display_request_response(uri, method, data_lines, response_lines,
-                                        seen_uris, discovered_apis, is_error=False,
-                                        full_data=None, hide_list=None, device_tag=""):
-    """线程安全的显示函数，带打印锁"""
-    if hide_list is None:
-        hide_list = []
-    path = uri.replace(BASE_URL, "")
-    if any(h in path for h in hide_list):
-        return
-
-    with _print_lock:
-        _display_request_response(
-            uri, method, data_lines, response_lines,
-            seen_uris, discovered_apis, is_error, full_data, device_tag
-        )
-
+# ============== 自动模式（重构版） ==============
 
 def _short_device_id(device):
     """缩短设备ID用于显示标签"""
     if device.startswith("adb-"):
-        # WiFi设备: adb-IVXGSGRKEATKXO4D-xxx -> IVXGSGRK
         parts = device.split("-")
         return parts[1][:8] if len(parts) >= 2 else device[:10]
-    return device[:8]  # USB设备取前8位
+    return device[:8]
 
 
 def cmd_auto(args):
@@ -760,6 +784,7 @@ def cmd_auto(args):
     full_mode = getattr(args, 'full', False)
     hide_list = getattr(args, 'hide', []) or []
 
+    # 显示模式信息
     if len(devices) > 1:
         cprint(f"自动监控模式 | {len(devices)} 台设备并行监控", Colors.CYAN, bold=True)
         for d in devices:
@@ -778,80 +803,145 @@ def cmd_auto(args):
     cprint("Ctrl+C 停止", Colors.DIM)
     cprint("=" * 60)
 
-    # 初始化 known_uris：内置接口 + 记忆库接口，这些不会标记为 [NEW]
-    known_uris = set(KNOWN_API_URLS)
-    memory = load_memory()
-    for api in memory.values():
-        known_uris.add(api["url"])
+    # 初始化 known_uris：内置接口 + 记忆库接口
+    known_urls = set()
+    # 内置接口路径（从 presets 提取）
+    builtin_paths = {
+        "/mp/user/info", "/mp/user/myClubs", "/mp/user/saveDefaultClub",
+        "/mp/oauth/wechatLogin", "/mobile/getUserBoxStatus",
+        "/mp/record/deviceOnlineInfo", "/mobile/loginBoxAfterScanningQrCode",
+        "/mp/app/version/check", "/mp/coupon/checkEligibility",
+        "/mp/coupon/trialList", "/video/videoClient/myVideos/readyV2",
+        "/video/videoClient/myVideos/failedV2", "/mp/record/opponentListWithVideos",
+        "/mp/record/opponentStatistics", "/mp/record/competitionListWithVideos",
+        "/mp/record/inningList", "/mp/record/inningStatistics",
+        "/video/videoinfo/competitionVideos", "/mp/rank/clubList",
+        "/mp/rank/userBreakRank", "/mp/rank/ratingList", "/mp/rank/breakList",
+        "/mp/rank/winRateList", "/mp/record/barchart", "/mp/record/statics",
+        "/mp/event/track",
+    }
+    known_urls = {f"{BASE_URL}{p}" for p in builtin_paths}
+    known_urls.update(_memory_mgr.known_urls())
 
-    # 共享状态用锁保护
+    # 共享状态
     state_lock = threading.Lock()
-    seen_uris = set(known_uris)
-    discovered_apis = []
-    request_count = [0]
+    seen_uris = set(known_urls)  # 已处理过的 URI（不标记 [NEW]）
+    discovered_apis = []         # 新发现的接口列表
+    request_count = [0]          # 总请求计数
 
-    # 每个设备独立的请求队列
+    # 请求队列（logcat → HTTP worker）
+    request_q = queue.Queue()
+    # 显示队列（HTTP worker → 显示线程）
+    display_q = queue.Queue()
+
     stop_event = threading.Event()
-    worker_threads = []
 
-    def make_worker(device_id, request_q):
-        """为每个设备创建一个工作线程（--full模式下调用Python requests）"""
-        def worker():
-            while not stop_event.is_set():
-                try:
-                    item = request_q.get(timeout=0.5)
-                except queue.Empty:
-                    continue
+    # ============ HTTP Worker（线程池，并行获取响应） ============
 
-                uri, method, data_lines, response_lines = item
+    def http_worker():
+        """从请求队列取请求，并行获取完整响应，结果放入显示队列"""
+        while not stop_event.is_set():
+            try:
+                item = request_q.get(timeout=0.5)
+            except queue.Empty:
+                continue
 
-                full_data = None
-                if full_mode and data_lines:
-                    full_data = _fetch_full_response(uri, method, " ".join(data_lines))
-                    if full_data and "_error" in full_data:
-                        with _print_lock:
-                            cprint(f"  [{_short_device_id(device_id)}] requests调用失败: {full_data['_error']}", Colors.DIM)
+            req_id, device_id, uri, method, data_str = item
+            tag = _short_device_id(device_id)
 
-                _threaded_display_request_response(
-                    uri, method, data_lines, response_lines,
-                    seen_uris, discovered_apis,
-                    full_data=full_data, hide_list=hide_list,
-                    device_tag=_short_device_id(device_id),
-                )
+            full_data = None
+            if full_mode and data_str:
+                full_data = _fetch_full_response(uri, method, data_str)
+                if full_data and "_error" in full_data:
+                    safe_print(f"  [{tag}] requests调用失败: {full_data['_error']}", Colors.DIM)
 
-                # 自动存入记忆库
-                with state_lock:
-                    if uri not in known_uris:
-                        added = add_to_memory(uri, method, " ".join(data_lines))
-                        if added:
-                            with _print_lock:
-                                cprint(f"  [{_short_device_id(device_id)}] 💾 已存入记忆库: {method} {uri.replace(BASE_URL, '')}", Colors.DIM)
-                        seen_uris.add(uri)
-                        discovered_apis.append({"uri": uri, "method": method, "data": " ".join(data_lines)})
-                    request_count[0] += 1
+            display_q.put((req_id, device_id, uri, method, data_str, full_data))
+            request_q.task_done()
 
-                request_q.task_done()
-        return worker
+    # ============ 显示 Worker（单线程，保证输出顺序） ============
 
-    # 为每个设备创建请求队列和工作线程
-    device_queues = {}
-    for device_id in devices:
-        q = queue.Queue()
-        device_queues[device_id] = q
+    def display_worker():
+        """从显示队列取结果，格式化输出到终端"""
+        while not stop_event.is_set():
+            try:
+                item = display_q.get(timeout=0.5)
+            except queue.Empty:
+                continue
 
-        if full_mode:
-            wt = threading.Thread(target=make_worker(device_id, q), daemon=True)
-            wt.start()
-            worker_threads.append(wt)
+            req_id, device_id, uri, method, data_str, full_data = item
+            tag = _short_device_id(device_id)
 
-    def process_line(device_id, content, request_q, buf):
-        """处理一行 logcat 输出，解析DIO请求/响应"""
+            # 解析请求数据
+            data, _ = _parse_request_data([data_str] if data_str else [])
+
+            # 状态追踪（线程安全）
+            with state_lock:
+                is_new = uri not in seen_uris
+                if is_new:
+                    seen_uris.add(uri)
+                    discovered_apis.append({
+                        "uri": uri, "method": method, "data": data_str
+                    })
+                request_count[0] += 1
+                is_known = uri in known_urls
+
+            # 显示
+            path = uri.replace(BASE_URL, "")
+            prefix = f"[{tag}] "
+
+            safe_print("", Colors.RESET)  # 空行分隔
+
+            if is_error := (full_data and "_error" in full_data):
+                safe_print(f"{prefix}!! {method} {path}", Colors.RED, bold=True)
+            elif is_new:
+                safe_print(f"{prefix}>> {method} {path} [NEW]", Colors.GREEN, bold=True)
+            else:
+                safe_print(f"{prefix}>> {method} {path}", Colors.BLUE)
+
+            # 请求参数
+            if data and data != {"raw": ""}:
+                data_display = json.dumps(data, ensure_ascii=False, indent=2) if isinstance(data, dict) else str(data)
+                safe_print(f"{prefix}   请求: {data_display}", Colors.DIM)
+
+            # 响应体
+            if full_data:
+                if "_error" in full_data:
+                    safe_print(f"{prefix}   响应: (requests调用失败: {full_data['_error']})", Colors.RED)
+                else:
+                    source_tag = " [requests]" if full_mode else " [logcat]"
+                    resp_display = json.dumps(full_data, ensure_ascii=False, indent=2)
+                    safe_print(f"{prefix}   响应{source_tag}:\n{resp_display}", Colors.WHITE)
+            elif is_error:
+                safe_print(f"{prefix}   响应: (异常/无响应)", Colors.RED)
+            else:
+                safe_print(f"{prefix}   响应: (等待中...)", Colors.DIM)
+
+            # 自动存入记忆库
+            if not is_known:
+                added = _memory_mgr.add(uri, method, data_str)
+                if added:
+                    safe_print(f"  [{tag}]  已存入记忆库: {method} {path}", Colors.DIM)
+
+            display_q.task_done()
+
+    # ============ Logcat 读取线程（每设备一个） ============
+
+    def process_line(content, device_id, buf):
+        """
+        处理一行 logcat 输出，解析DIO请求/响应。
+        当请求完整时放入请求队列。
+        返回值：是否触发了请求入队（用于计数）
+        """
+        enqueued = False
+
+        # ---- 新请求开始 → 先把上一个完整的请求入队 ----
         if "*** Request ***" in content:
-            if buf["uri"]:
-                request_q.put((
-                    buf["uri"], buf["method"],
-                    buf["data_lines"][:], buf["response_lines"][:]
-                ))
+            if buf["uri"] and buf["method"]:
+                req_id = buf["seq"]
+                request_q.put((req_id, device_id, buf["uri"], buf["method"], " ".join(buf["data_lines"])))
+                enqueued = True
+            # 重置缓冲区
+            buf["seq"] += 1
             buf["uri"] = None
             buf["method"] = None
             buf["data_lines"] = []
@@ -860,25 +950,32 @@ def cmd_auto(args):
             buf["response_lines"] = []
             buf["in_data"] = False
             buf["in_response"] = False
+            return enqueued
 
+        # ---- 响应开始 ----
         elif "*** Response ***" in content:
             buf["in_response"] = "headers"
             buf["response_lines"] = []
+            return enqueued
 
+        # ---- Dio 异常 ----
         elif "*** DioException ***" in content:
-            if buf["uri"]:
-                request_q.put((
-                    buf["uri"], buf["method"],
-                    buf["data_lines"][:], buf["response_lines"][:]
-                ))
+            if buf["uri"] and buf["method"]:
+                req_id = buf["seq"]
+                request_q.put((req_id, device_id, buf["uri"], buf["method"], " ".join(buf["data_lines"])))
+                enqueued = True
             buf["uri"] = None
             buf["in_response"] = False
+            return enqueued
 
+        # ---- 响应体 ----
         elif buf["in_response"] == "headers" and "Response Text:" in content:
             buf["in_response"] = "body"
             after_marker = content.split("Response Text:")[-1].strip()
             if after_marker and "[DIO]" not in after_marker:
                 buf["response_lines"].append(after_marker)
+            return enqueued
+
         elif buf["in_response"] == "body" and content:
             if "[DIO]" in content:
                 after_dio = content.split("[DIO]")[-1].strip()
@@ -886,33 +983,45 @@ def cmd_auto(args):
                     buf["response_lines"].append(after_dio)
             else:
                 buf["in_response"] = False
+            return enqueued
 
+        # ---- 解析请求头 ----
         elif "uri:" in content and "https://" in content:
             m = re.search(r'uri:\s*(https?://\S+)', content)
             if m:
                 buf["uri"] = m.group(1).strip()
+                # 提前过滤隐藏接口
+                path = buf["uri"].replace(BASE_URL, "")
+                if any(h in path for h in hide_list):
+                    buf["uri"] = None  # 标记为隐藏，后续不再处理
+            return enqueued
 
         elif "method:" in content:
             m = re.search(r'method:\s*(\w+)', content)
             if m:
                 buf["method"] = m.group(1).strip()
+            return enqueued
 
         elif "Authorization:" in content:
             m = re.search(r'Authorization:\s*(\S+)', content)
             if m:
                 buf["auth"] = m.group(1).strip()
+            return enqueued
 
         elif "refresh_token:" in content:
             m = re.search(r'refresh_token:\s*(\S+)', content)
             if m:
                 buf["refresh"] = m.group(1).strip()
+            return enqueued
 
+        # ---- 解析请求体（data） ----
         elif "data:" in content:
             buf["in_data"] = True
             buf["data_lines"] = []
             after_dio = content.split("[DIO]")[-1].strip() if "[DIO]" in content else content.strip()
             if "{" in after_dio and after_dio != "data:":
                 buf["data_lines"].append(after_dio.replace("data:", "").strip())
+            return enqueued
 
         elif buf["in_data"]:
             after_dio = content.split("[DIO]")[-1].strip() if "[DIO]" in content else content.strip()
@@ -920,6 +1029,9 @@ def cmd_auto(args):
                 buf["in_data"] = False
             elif after_dio and ("{" in after_dio or after_dio.startswith('"') or ":" in after_dio):
                 buf["data_lines"].append(after_dio)
+            return enqueued
+
+        return enqueued
 
     def logcat_reader(device_id):
         """为单个设备启动 logcat 流，实时解析DIO日志"""
@@ -927,6 +1039,7 @@ def cmd_auto(args):
         tag = _short_device_id(device_id)
         proc = None
         buf = {
+            "seq": 0,
             "uri": None, "method": None,
             "data_lines": [], "auth": None, "refresh": None,
             "response_lines": [], "in_data": False, "in_response": False,
@@ -940,41 +1053,47 @@ def cmd_auto(args):
                 bufsize=0
             )
 
-            import io
             stdout_reader = io.TextIOWrapper(proc.stdout, encoding='utf-8', errors='replace', line_buffering=True)
 
             for line in stdout_reader:
                 if stop_event.is_set():
                     break
                 content = line.strip()
-                request_q = device_queues.get(device_id)
-                if request_q:
-                    process_line(device_id, content, request_q, buf)
+                process_line(content, device_id, buf)
 
         except Exception as e:
-            with _print_lock:
-                cprint(f"  [{tag}] logcat错误: {e}", Colors.RED)
+            safe_print(f"  [{tag}] logcat错误: {e}", Colors.RED)
         finally:
             # 最后一个请求丢入队列
-            if buf["uri"]:
-                request_q = device_queues.get(device_id)
-                if request_q:
-                    request_q.put((
-                        buf["uri"], buf["method"],
-                        buf["data_lines"][:], buf["response_lines"][:]
-                    ))
+            if buf["uri"] and buf["method"]:
+                request_q.put((buf["seq"], device_id, buf["uri"], buf["method"], " ".join(buf["data_lines"])))
             if proc:
                 proc.terminate()
 
-    # 为每个设备启动 logcat 读取线程
+    # ============ 启动线程 ============
+
+    # 1. 每个设备一个 logcat 读取线程
     logcat_threads = []
     for device_id in devices:
         t = threading.Thread(target=logcat_reader, args=(device_id,), daemon=True)
         t.start()
         logcat_threads.append(t)
 
+    # 2. HTTP worker 线程池（--full 模式，并行获取响应）
+    worker_threads = []
+    if full_mode:
+        http_pool = ThreadPoolExecutor(max_workers=4, thread_name_prefix="http-worker")
+        for _ in range(4):
+            ft = http_pool.submit(http_worker)
+            worker_threads.append(ft)
+
+    # 3. 显示 worker 单线程（保证输出不乱序）
+    display_thread = threading.Thread(target=display_worker, daemon=True)
+    display_thread.start()
+
+    # ============ 主线程等待 Ctrl+C ============
+
     try:
-        # 主线程等待，直到 Ctrl+C
         while True:
             time.sleep(1)
             alive = any(t.is_alive() for t in logcat_threads)
@@ -986,110 +1105,33 @@ def cmd_auto(args):
     finally:
         stop_event.set()
 
-        # 等待工作线程处理完
-        for q in device_queues.values():
-            try:
-                q.join(timeout=3)
-            except:
-                pass
-        for wt in worker_threads:
-            wt.join(timeout=5)
+        # 等待队列处理完
+        try:
+            request_q.join(timeout=5)
+        except Exception:
+            pass
 
-        cprint(f"\n已停止，共捕获 {request_count[0]} 个请求，发现 {len(seen_uris) - len(known_uris)} 个新接口", Colors.DIM)
+        # 关闭 HTTP 线程池
+        if full_mode:
+            http_pool.shutdown(wait=False)
+
+        # 等待显示队列处理完
+        try:
+            display_q.join(timeout=5)
+        except Exception:
+            pass
+
+        # 保存记忆库
+        _memory_mgr.shutdown()
+
+        new_count = len(seen_uris) - len(known_urls)
+        cprint(f"\n已停止，共捕获 {request_count[0]} 个请求，发现 {new_count} 个新接口", Colors.DIM)
+
         if discovered_apis:
             cprint("\n发现的接口列表:", Colors.YELLOW, bold=True)
             for api in discovered_apis:
                 cprint(f"  {api['method']} {api['uri'].replace(BASE_URL, '')}", Colors.WHITE)
             cprint(f"\n提示: 将新接口添加到 api_tool.py 的 presets 中即可用 call 命令调用", Colors.DIM)
-
-
-def _dart_to_json(dart_str):
-    """将 Dart 风格对象转为 JSON（{key: value} → {"key": "value"}）"""
-    if not dart_str or not dart_str.strip().startswith("{"):
-        return None
-    s = dart_str.strip()
-    # 去掉外层 {}
-    inner = s[1:-1].strip() if s.endswith("}") else s[1:].strip()
-    if not inner:
-        return {}
-
-    result = {}
-    # 按逗号分割，但要处理嵌套 {}
-    parts = []
-    depth = 0
-    current = ""
-    for ch in inner:
-        if ch == "{":
-            depth += 1
-            current += ch
-        elif ch == "}":
-            depth -= 1
-            current += ch
-        elif ch == "," and depth == 0:
-            parts.append(current.strip())
-            current = ""
-        else:
-            current += ch
-    if current.strip():
-        parts.append(current.strip())
-
-    for part in parts:
-        if ":" in part:
-            key, _, value = part.partition(":")
-            key = key.strip()
-            value = value.strip()
-            # 判断值类型
-            if value == "null":
-                result[key] = None
-            elif value == "true":
-                result[key] = True
-            elif value == "false":
-                result[key] = False
-            elif value.isdigit() or (value.startswith("-") and value[1:].isdigit()):
-                result[key] = int(value)
-            elif "." in value:
-                try:
-                    result[key] = float(value)
-                except:
-                    result[key] = value
-            else:
-                result[key] = value
-    return result
-
-
-def _handle_new_api(uri, method, data_lines):
-    """处理新发现的接口"""
-    data_str = " ".join(data_lines)
-
-    # 尝试解析：先标准 JSON，再 Dart 格式
-    data = None
-    try:
-        data = json.loads(data_str)
-    except:
-        data = _dart_to_json(data_str)
-    if data is None:
-        data = {"raw": data_str}
-
-    cprint(f"\n{'=' * 60}", Colors.CYAN)
-    cprint(f"发现新接口! {method} {uri.replace(BASE_URL, '')}", Colors.GREEN, bold=True)
-    cprint(f"Data: {json.dumps(data, ensure_ascii=False)}", Colors.DIM)
-
-    # 自动调用获取完整响应
-    try:
-        resp = requests.post(uri, json=data, headers=HEADERS, timeout=10, proxies={"http": None, "https": None})
-        cprint(f"Status: {resp.status_code}", Colors.GREEN if resp.status_code == 200 else Colors.RED)
-
-        try:
-            result = resp.json()
-            formatted = json.dumps(result, ensure_ascii=False, indent=2)
-            # 截断过长的输出
-            if len(formatted) > 2000:
-                formatted = formatted[:2000] + "\n... (响应过长已截断)"
-            cprint(f"Response:\n{formatted}", Colors.WHITE)
-        except:
-            cprint(f"Response: {resp.text[:500]}", Colors.WHITE)
-    except Exception as e:
-        cprint(f"调用失败: {e}", Colors.RED)
 
 
 # ============== CLI ==============
@@ -1148,16 +1190,15 @@ def main():
     args = parser.parse_args()
 
     # 处理 -s 设备参数
-    device = None  # 用于 log/call 等单设备命令
-    devices = None  # 用于 auto 多设备命令
+    device = None
+    devices = None
 
     if args.command == "auto":
         if args.device:
-            devices = args.device  # nargs="+" 返回 list
+            devices = args.device
             for d in devices:
                 cprint(f"指定设备: {d}", Colors.CYAN)
         else:
-            # 未指定设备时，自动获取所有已连接设备
             all_devices = []
             try:
                 result = subprocess.run(["adb", "devices"], capture_output=True, text=True, timeout=5)
@@ -1165,7 +1206,7 @@ def main():
                     parts = line.split()
                     if len(parts) >= 2 and parts[1] == "device":
                         all_devices.append(parts[0])
-            except:
+            except (FileNotFoundError, subprocess.TimeoutExpired):
                 pass
             if all_devices:
                 devices = all_devices
@@ -1174,7 +1215,6 @@ def main():
 
         args._devices = devices
     else:
-        # 其他命令：单设备逻辑
         if hasattr(args, 'device') and args.device:
             device = args.device
             cprint(f"指定设备: {device}", Colors.CYAN)
