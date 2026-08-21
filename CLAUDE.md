@@ -476,6 +476,18 @@
 - 推送服务: 极光推送
 - 分享SDK: 微信SDK + 抖音开放平台
 
+### client_id 业务逻辑
+
+- **定义**: `client_id` 是 App 安装在设备上后生成的唯一标识（UUID），写入 `video_client_status.client_id` 字段
+- **生成时机**: 首次安装 App 时生成，存储在本地（非 Android_ID，是 App 自身生成的 UUID）
+- **⚠️ 卸载重装会重新生成**: 每次卸载重装 App，client_id 都会变化，同一设备会产生多个 client_id 记录
+- **影响范围**: `video_client_status` 表通过 `video_id + client_id` 唯一标识某设备上某视频的制作状态。同一视频在不同 client_id 下各自独立跟踪状态
+- **查询方式**: `video_client_status` 表无 `user_id` 字段，需通过 `video_order` 桥接：`user_id → video_order.video_id → video_client_status.client_id`
+- **从日志获取 client_id**: 新 APK 的 `mp/event/track` 埋点请求体携带 `clientId`，实时提取：
+  ```bash
+  adb logcat | grep "DIO.*data:" -A1 | grep -i "clientId"
+  ```
+
 ---
 
 ## API 抓包规范（无需 root、无需 Reqable）

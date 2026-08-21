@@ -565,5 +565,13 @@
     },
     "description": "",
     "discovered_at": "2026-08-20 21:53:45"
+  },
+  "pageEnter https://tb.ele.me/app/TBTakeout/et-order-detail/detail?wx_statusbar_hidden=true&tms_force=true&weex_force_tms=true&wh_weex=true&weex_mode=dom&wx_use_layoutng=true&wx_navbar_transparent=true&status_bar_transparent=true&from=miniapp.taobao&channelInfo=%7B%22subSubChannel%22%3A%22miniapp.taobao.et%22%7D&orderId=8002150366855183698&alsc_exsrc=ES0008239276&packageName=com.vivo.pushservice&surge_ssr=true&afcflow=com.vivo.pushservice&isNeedHome=0&bxsign=haiYUa5Q%2Fr4tUgEx8t3eX5OqQoyW9MR5N2%2FVLfb2K7dVzRe0KljRy5z9oyuXQvG7XKfuKHd64TCeJ2trV2ReeqSAGHEL%2FjepDdo%2F5zDvLcqwDM%3D&_afc_link=1&utparamcnt=%7B%22_afc_link%22%3A%221%22%7D&_ele_prefetch_id_=ele_prefetch_id_1787324369683&o2o_extra_param=%7B%22p_e_id%22%3A%221787324369683%22%7D": {
+    "url": "https://tb.ele.me/app/TBTakeout/et-order-detail/detail?wx_statusbar_hidden=true&tms_force=true&weex_force_tms=true&wh_weex=true&weex_mode=dom&wx_use_layoutng=true&wx_navbar_transparent=true&status_bar_transparent=true&from=miniapp.taobao&channelInfo=%7B%22subSubChannel%22%3A%22miniapp.taobao.et%22%7D&orderId=8002150366855183698&alsc_exsrc=ES0008239276&packageName=com.vivo.pushservice&surge_ssr=true&afcflow=com.vivo.pushservice&isNeedHome=0&bxsign=haiYUa5Q%2Fr4tUgEx8t3eX5OqQoyW9MR5N2%2FVLfb2K7dVzRe0KljRy5z9oyuXQvG7XKfuKHd64TCeJ2trV2ReeqSAGHEL%2FjepDdo%2F5zDvLcqwDM%3D&_afc_link=1&utparamcnt=%7B%22_afc_link%22%3A%221%22%7D&_ele_prefetch_id_=ele_prefetch_id_1787324369683&o2o_extra_param=%7B%22p_e_id%22%3A%221787324369683%22%7D",
+    "method": "pageEnter",
+    "path": "https://tb.ele.me/app/TBTakeout/et-order-detail/detail?wx_statusbar_hidden=true&tms_force=true&weex_force_tms=true&wh_weex=true&weex_mode=dom&wx_use_layoutng=true&wx_navbar_transparent=true&status_bar_transparent=true&from=miniapp.taobao&channelInfo=%7B%22subSubChannel%22%3A%22miniapp.taobao.et%22%7D&orderId=8002150366855183698&alsc_exsrc=ES0008239276&packageName=com.vivo.pushservice&surge_ssr=true&afcflow=com.vivo.pushservice&isNeedHome=0&bxsign=haiYUa5Q%2Fr4tUgEx8t3eX5OqQoyW9MR5N2%2FVLfb2K7dVzRe0KljRy5z9oyuXQvG7XKfuKHd64TCeJ2trV2ReeqSAGHEL%2FjepDdo%2F5zDvLcqwDM%3D&_afc_link=1&utparamcnt=%7B%22_afc_link%22%3A%221%22%7D&_ele_prefetch_id_=ele_prefetch_id_1787324369683&o2o_extra_param=%7B%22p_e_id%22%3A%221787324369683%22%7D",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-21 23:08:24"
   }
 }
