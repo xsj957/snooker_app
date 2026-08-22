@@ -573,5 +573,143 @@
     "data": null,
     "description": "",
     "discovered_at": "2026-08-21 23:08:24"
+  },
+  "GET ": {
+    "url": "https://test.supervisions.cn",
+    "method": "GET",
+    "path": "",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-22 10:57:58"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6aa938775001834817001209665/LQeZoxdMpKcA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6aa938775001834817001209665/LQeZoxdMpKcA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6aa938775001834817001209665/LQeZoxdMpKcA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-22 14:01:46"
+  },
+  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6aa938775001834817001209665/LQeZoxdMpKcA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6aa938775001834817001209665/LQeZoxdMpKcA.mp4",
+    "method": "POST",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6aa938775001834817001209665/LQeZoxdMpKcA.mp4",
+    "data": {
+      "clientId": "2d14c8a0-66c6-4f04-aaa2-6cd00c991432",
+      "status": 5,
+      "videoId": 12359,
+      "videoOrderId": 2182,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-08-22 14:01:49"
+  },
+  "POST /mp/video/addVideoEventFromMobile": {
+    "url": "https://test.supervisions.cn/mp/video/addVideoEventFromMobile",
+    "method": "POST",
+    "path": "/mp/video/addVideoEventFromMobile",
+    "data": {
+      "clientId": "2d14c8a0-66c6-4f04-aaa2-6cd00c991432",
+      "eventDataList": "[{videoId: 12352, eventTime: 2026-08-22 14:00:57, playCount: 1, playMs: 1}]",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-08-22 14:02:09"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8651eae35001834817049371809/kWBCkkPbn3UA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8651eae35001834817049371809/kWBCkkPbn3UA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8651eae35001834817049371809/kWBCkkPbn3UA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-22 15:17:44"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/132b2fc15001834817003885465/c52wKYrtCgMA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/132b2fc15001834817003885465/c52wKYrtCgMA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/132b2fc15001834817003885465/c52wKYrtCgMA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-22 15:17:44"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bf5e2ea55001834817019296736/bPg8CsJa2YIA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bf5e2ea55001834817019296736/bPg8CsJa2YIA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bf5e2ea55001834817019296736/bPg8CsJa2YIA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-22 16:37:14"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7fd184195001834817018815323/Ptt4YT9uDToA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7fd184195001834817018815323/Ptt4YT9uDToA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7fd184195001834817018815323/Ptt4YT9uDToA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-22 16:37:15"
+  },
+  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7fd184195001834817018815323/Ptt4YT9uDToA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7fd184195001834817018815323/Ptt4YT9uDToA.mp4",
+    "method": "POST",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7fd184195001834817018815323/Ptt4YT9uDToA.mp4",
+    "data": {
+      "clientId": "2d14c8a0-66c6-4f04-aaa2-6cd00c991432",
+      "status": 3,
+      "videoId": 12354,
+      "videoOrderId": 2218,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-08-22 16:37:19"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/658d28e05001834817069632480/uhhjtTi3K68A.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/658d28e05001834817069632480/uhhjtTi3K68A.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/658d28e05001834817069632480/uhhjtTi3K68A.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-22 16:37:20"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bc9ac9ba5001834817019133645/Oxcl4Ac51R8A.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bc9ac9ba5001834817019133645/Oxcl4Ac51R8A.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bc9ac9ba5001834817019133645/Oxcl4Ac51R8A.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-22 16:37:23"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/dc6aaa3e5001834817071092188/rFYkIw8HIaoA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/dc6aaa3e5001834817071092188/rFYkIw8HIaoA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/dc6aaa3e5001834817071092188/rFYkIw8HIaoA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-22 16:37:34"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8167c2685001834816619723847/Wgk548FcZ0IA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8167c2685001834816619723847/Wgk548FcZ0IA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8167c2685001834816619723847/Wgk548FcZ0IA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-22 16:41:11"
+  },
+  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8167c2685001834816619723847/Wgk548FcZ0IA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8167c2685001834816619723847/Wgk548FcZ0IA.mp4",
+    "method": "POST",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8167c2685001834816619723847/Wgk548FcZ0IA.mp4",
+    "data": {
+      "clientId": "2d14c8a0-66c6-4f04-aaa2-6cd00c991432",
+      "status": 3,
+      "videoId": 12396,
+      "videoOrderId": 2214,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-08-22 16:41:14"
   }
 }
