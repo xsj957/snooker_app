@@ -14,18 +14,16 @@ import urllib.parse
 from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-# ============== 配置 ==============
+# ============== 配置（由 configure() 或 logcat 自动检测动态注入） ==============
 
 BASE_URL = "https://test.supervisions.cn"
 
 HEADERS = {
     "Content-Type": "application/json",
     "Accept": "application/json",
-    "Authorization": "<JWT_TOKEN>",
-    "refresh_token": "<REFRESH_TOKEN>"
 }
 
-USER_ID = "<USER_ID>"
+USER_ID = None
 
 
 def configure(user_id=None, token=None, refresh_token=None):
