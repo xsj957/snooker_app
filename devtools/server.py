@@ -21,11 +21,11 @@ BASE_URL = "https://test.supervisions.cn"
 HEADERS = {
     "Content-Type": "application/json",
     "Accept": "application/json",
-    "Authorization": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjanNqIiwiaXNzIjoiY2pzaiIsImV4cCI6MTgxNzQ2NzY1MywiYXV0aFR5cGUiOjQsInVzZXJJZCI6IjU3ZDcwM2RjLTY1OWEtNDQ3NC04OThlLWI3NWVmYTFmMmUwYSJ9.evzNsb2k7yv33yNU8BDsit7FCN-eNCQk5iD5YL12h2c",
-    "refresh_token": "ecbe9fe8a12e045be53db01e88f81da2"
+    "Authorization": "<JWT_TOKEN>",
+    "refresh_token": "<REFRESH_TOKEN>"
 }
 
-USER_ID = "57d703dc-659a-4474-898e-b75efa1f2e0a"
+USER_ID = "<USER_ID>"
 
 
 def configure(user_id=None, token=None, refresh_token=None):
