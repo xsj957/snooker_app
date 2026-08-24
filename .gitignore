@@ -2,3 +2,11 @@
 i4Tools9/
 video/
 app-android.apk
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Claude Code 本地配置
+.claude/settings.local.json

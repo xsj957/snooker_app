@@ -711,5 +711,37 @@
     },
     "description": "",
     "discovered_at": "2026-08-22 16:41:14"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ff3c552e5001834816995157962/hR3H6keeH9gA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ff3c552e5001834816995157962/hR3H6keeH9gA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ff3c552e5001834816995157962/hR3H6keeH9gA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-23 01:14:24"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d1618e525001834817081408102/RTSkoCo7HqkA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d1618e525001834817081408102/RTSkoCo7HqkA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d1618e525001834817081408102/RTSkoCo7HqkA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-23 01:14:29"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/afcd38ba5001834817029429204/BCvawPLtgocA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/afcd38ba5001834817029429204/BCvawPLtgocA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/afcd38ba5001834817029429204/BCvawPLtgocA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-23 01:14:42"
+  },
+  "pageEnter https://tb.ele.me/app/TBTakeout/et-scene-site/home?wh_weex=true&weex_mode=dom&tms_force=true&_wx_statusbar_hidden=true&wx_navbar_hidden=true&disableNav=YES&status_bar_transparent=true&isTab=false&from=miniapp.taobao&channelInfo=%7B%22channel%22%3A%22miniapp%22%2C%22subChannel%22%3A%22miniapp.taobao%22%2C%22subSubChannel%22%3A%22miniapp.taobao.et%22%7D&wx_snapshot_key=wx-etHome-notInTab-meishi_channel-cache&iconBizType=meishi_channel&isIndependent=true&skiplocation=true&spmB=bx1439604&cargoPoolIds=5422071&isNewApi=true&outLinkAddressId=1922372221062&locationName=%E6%B8%AF%E5%A4%A9%E6%97%B6%E5%B0%9A%E5%85%AC%E5%AF%93(%E6%B7%B1%E5%9C%B3%E5%8C%97%E7%AB%99%E5%BA%97)&longitude=114.039117&latitude=22.612068&isPageSeparate=false&kkJumpTagText=%E6%96%B0%E5%93%81&kkJumpTagExtension=%7B%22strategy%22%3A%5B%7B%22strategyRuleKey%22%3A%22xinpin%22%2C%22cornText%22%3A%22%E6%96%B0%E5%93%81%22%2C%22supplyMode%22%3A%22commodity%22%7D%5D%7D&isFromHome=true&geohash=ws10eh2ub4bz&spm=a2f6g.bx1399788.cx272276.dx426524_1&weex_force_tms=true&deviceId=Z5RGr3IFRd8DACC/FHW39sas": {
+    "url": "https://tb.ele.me/app/TBTakeout/et-scene-site/home?wh_weex=true&weex_mode=dom&tms_force=true&_wx_statusbar_hidden=true&wx_navbar_hidden=true&disableNav=YES&status_bar_transparent=true&isTab=false&from=miniapp.taobao&channelInfo=%7B%22channel%22%3A%22miniapp%22%2C%22subChannel%22%3A%22miniapp.taobao%22%2C%22subSubChannel%22%3A%22miniapp.taobao.et%22%7D&wx_snapshot_key=wx-etHome-notInTab-meishi_channel-cache&iconBizType=meishi_channel&isIndependent=true&skiplocation=true&spmB=bx1439604&cargoPoolIds=5422071&isNewApi=true&outLinkAddressId=1922372221062&locationName=%E6%B8%AF%E5%A4%A9%E6%97%B6%E5%B0%9A%E5%85%AC%E5%AF%93(%E6%B7%B1%E5%9C%B3%E5%8C%97%E7%AB%99%E5%BA%97)&longitude=114.039117&latitude=22.612068&isPageSeparate=false&kkJumpTagText=%E6%96%B0%E5%93%81&kkJumpTagExtension=%7B%22strategy%22%3A%5B%7B%22strategyRuleKey%22%3A%22xinpin%22%2C%22cornText%22%3A%22%E6%96%B0%E5%93%81%22%2C%22supplyMode%22%3A%22commodity%22%7D%5D%7D&isFromHome=true&geohash=ws10eh2ub4bz&spm=a2f6g.bx1399788.cx272276.dx426524_1&weex_force_tms=true&deviceId=Z5RGr3IFRd8DACC/FHW39sas",
+    "method": "pageEnter",
+    "path": "https://tb.ele.me/app/TBTakeout/et-scene-site/home?wh_weex=true&weex_mode=dom&tms_force=true&_wx_statusbar_hidden=true&wx_navbar_hidden=true&disableNav=YES&status_bar_transparent=true&isTab=false&from=miniapp.taobao&channelInfo=%7B%22channel%22%3A%22miniapp%22%2C%22subChannel%22%3A%22miniapp.taobao%22%2C%22subSubChannel%22%3A%22miniapp.taobao.et%22%7D&wx_snapshot_key=wx-etHome-notInTab-meishi_channel-cache&iconBizType=meishi_channel&isIndependent=true&skiplocation=true&spmB=bx1439604&cargoPoolIds=5422071&isNewApi=true&outLinkAddressId=1922372221062&locationName=%E6%B8%AF%E5%A4%A9%E6%97%B6%E5%B0%9A%E5%85%AC%E5%AF%93(%E6%B7%B1%E5%9C%B3%E5%8C%97%E7%AB%99%E5%BA%97)&longitude=114.039117&latitude=22.612068&isPageSeparate=false&kkJumpTagText=%E6%96%B0%E5%93%81&kkJumpTagExtension=%7B%22strategy%22%3A%5B%7B%22strategyRuleKey%22%3A%22xinpin%22%2C%22cornText%22%3A%22%E6%96%B0%E5%93%81%22%2C%22supplyMode%22%3A%22commodity%22%7D%5D%7D&isFromHome=true&geohash=ws10eh2ub4bz&spm=a2f6g.bx1399788.cx272276.dx426524_1&weex_force_tms=true&deviceId=Z5RGr3IFRd8DACC/FHW39sas",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-23 13:43:19"
   }
 }

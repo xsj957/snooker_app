@@ -356,8 +356,8 @@ adb logcat -d | grep "user_id\|userId" | grep "flutter" | head -1
 ```
 
 ```python
-# api_debug.py — 用 Python 获取完整 API 响应
-# 从 logcat 提取以下信息后填入：
+# devtools/api_tool.py — DevTools 抓包调试工具（自动获取完整响应）
+# 使用方式：python devtools/api_tool.py auto --full --html
 TOKEN = "从 DIO Authorization 行提取的 JWT Token"
 USER_ID = "从 FlutterSharedPreferences 或日志中提取的 userId"
 BASE_URL = "https://test.supervisions.cn"
@@ -833,13 +833,16 @@ adb shell am start -n com.supervisions.snookermastercn/.MainActivity
 # 3. 操作 App 到目标页面
 # （手动操作...）
 
-# 4. 抓取日志
-adb logcat -d | grep "DIO" > api_debug.txt
+# 4. 使用 DevTools 工具自动抓包（推荐）
+python devtools/api_tool.py auto --full --html
+
+# 或手动抓取日志
+adb logcat -d | grep "DIO" > app_log.txt
 
 # 5. 提取关键信息
-grep "uri:" api_debug.txt        # 所有接口 URL
-grep "data:" api_debug.txt      # 所有请求参数
-grep "Response Text" -A 1 api_debug.txt  # 所有响应
+grep "uri:" app_log.txt        # 所有接口 URL
+grep "data:" app_log.txt      # 所有请求参数
+grep "Response Text" -A 1 app_log.txt  # 所有响应
 ```
 
 ### 登录/Token 问题排查

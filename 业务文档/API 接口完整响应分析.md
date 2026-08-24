@@ -482,7 +482,7 @@
 
 ```bash
 cd E:\work\cn_app_plus
-python api_debug.py
+python devtools/api_tool.py auto --full --html
 ```
 
 ### 4.2 输出内容
@@ -497,7 +497,7 @@ python api_debug.py
 
 ### 4.3 自定义修改
 
-如需修改参数，编辑 `api_debug.py` 中的 `API_ENDPOINTS` 字典：
+如需修改参数，编辑 `devtools/api_tool.py` 中的预设接口配置：
 
 ```python
 API_ENDPOINTS = {
