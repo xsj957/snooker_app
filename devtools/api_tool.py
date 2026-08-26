@@ -358,6 +358,8 @@ def cmd_auto(args):
     html_mode = getattr(args, 'html', False)
     html_port = getattr(args, 'port', 8765)
     hide_list = getattr(args, 'hide', []) or []
+    restart_app = getattr(args, 'restart', False)
+    pkg_override = getattr(args, 'pkg', None)
 
     if len(devices) > 1:
         cprint(f"自动监控模式 v3.0 | {len(devices)} 台设备并行", Colors.CYAN, bold=True)
@@ -726,15 +728,83 @@ def cmd_auto(args):
             if proc:
                 proc.terminate()
 
-    # 清空 logcat 缓冲区
-    for device_id in devices:
-        tag = short_device_id(device_id)
-        try:
-            subprocess.run(["adb", "-s", device_id, "logcat", "-c"],
-                           capture_output=True, timeout=5)
-            safe_print(f"  [{tag}] 已清空 logcat 缓冲区", Colors.DIM)
-        except Exception:
-            pass
+    # 检测 App 包名（--pkg 指定优先，否则自动扫描已安装的斯诺克大师包）
+    def _detect_pkg(device_id):
+        if pkg_override:
+            return pkg_override
+        for pkg in ("com.supervisions.snookermastercn", "com.supervisions.snookermaster"):
+            try:
+                r = subprocess.run(
+                    ["adb", "-s", device_id, "shell", "pm", "path", pkg],
+                    capture_output=True, text=True, timeout=5,
+                )
+                if r.returncode == 0 and "package:" in r.stdout:
+                    return pkg
+            except Exception:
+                pass
+        return None
+
+    # 抓包前强制重启 App（确保 Dio 日志从启动开始即可见）
+    if restart_app:
+        for device_id in devices:
+            tag = short_device_id(device_id)
+            pkg = _detect_pkg(device_id)
+            if not pkg:
+                safe_print(f"  [{tag}] 未检测到 App 包名，跳过重启", Colors.YELLOW)
+                continue
+            try:
+                # 获取 MainActivity（兜底用 <pkg>/.MainActivity）
+                r = subprocess.run(
+                    ["adb", "-s", device_id, "shell", "pm", "dump", pkg],
+                    capture_output=True, text=True, timeout=10,
+                )
+                activity = None
+                for line in r.stdout.splitlines():
+                    if "MAIN" in line and "LAUNCHER" in line:
+                        m = re.search(r'(\S+\.MainActivity|\S+\.SplashActivity|\S+\/\S+Activity)', line)
+                        if m:
+                            activity = m.group(1)
+                            break
+                if not activity:
+                    # 用 aapt2 方式 fallback：取 exported=true 的 MAIN/LAUNCHER
+                    r2 = subprocess.run(
+                        ["adb", "-s", device_id, "shell", "cmd", "package", "resolve-activity", "--brief", pkg],
+                        capture_output=True, text=True, timeout=5,
+                    )
+                    for line in r2.stdout.splitlines():
+                        parts = line.strip().split()
+                        if len(parts) >= 4 and parts[0] == pkg:
+                            activity = f"{parts[0]}/{parts[3]}"
+                            break
+                if not activity:
+                    activity = f"{pkg}/.MainActivity"
+                safe_print(f"  [{tag}] 启动页: {activity}", Colors.DIM)
+                subprocess.run(
+                    ["adb", "-s", device_id, "shell", "am", "force-stop", pkg],
+                    capture_output=True, timeout=5,
+                )
+                subprocess.run(
+                    ["adb", "-s", device_id, "logcat", "-c"],
+                    capture_output=True, timeout=5,
+                )
+                safe_print(f"  [{tag}] 已清空 logcat 缓冲区", Colors.DIM)
+                subprocess.run(
+                    ["adb", "-s", device_id, "shell", "am", "start", "-n", activity],
+                    capture_output=True, timeout=5,
+                )
+                safe_print(f"  [{tag}] 已重启 App，等待 3 秒...", Colors.CYAN)
+                time.sleep(3)
+            except Exception as e:
+                safe_print(f"  [{tag}] 重启失败: {e}", Colors.RED)
+    else:
+        for device_id in devices:
+            tag = short_device_id(device_id)
+            try:
+                subprocess.run(["adb", "-s", device_id, "logcat", "-c"],
+                               capture_output=True, timeout=5)
+                safe_print(f"  [{tag}] 已清空 logcat 缓冲区", Colors.DIM)
+            except Exception:
+                pass
 
     logcat_threads = []
     for device_id in devices:
@@ -847,6 +917,8 @@ def main():
     auto_parser.add_argument("--full", action="store_true", help="异步获取完整响应（含 status/headers/timing）")
     auto_parser.add_argument("--html", action="store_true", help="启动 DevTools HTML 界面")
     auto_parser.add_argument("--port", type=int, default=8765, help="HTML 服务端口 (默认 8765)")
+    auto_parser.add_argument("--restart", action="store_true", default=False, help="抓包前强制重启 App（确保产生新的请求日志）")
+    auto_parser.add_argument("--pkg", default=None, help="指定 App 包名（默认自动检测）")
 
     subparsers.add_parser("list", help="列出所有已知接口")
 
