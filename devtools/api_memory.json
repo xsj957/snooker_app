@@ -1,940 +1,83 @@
 {
-  "POST /mp/user/info": {
-    "url": "https://test.supervisions.cn/mp/user/info",
-    "method": "POST",
-    "path": "/mp/user/info",
-    "data": {
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:20"
-  },
-  "POST /mp/event/track": {
-    "url": "https://test.supervisions.cn/mp/event/track",
-    "method": "POST",
-    "path": "/mp/event/track",
-    "data": {
-      "modelType": 1,
-      "eventType": 5,
-      "attrName": "me",
-      "attrValue": null,
-      "clientType": 1,
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:20"
-  },
-  "POST /mp/rank/clubList": {
-    "url": "https://test.supervisions.cn/mp/rank/clubList",
-    "method": "POST",
-    "path": "/mp/rank/clubList",
-    "data": {
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:20"
-  },
-  "POST /mp/rank/userBreakRank": {
-    "url": "https://test.supervisions.cn/mp/rank/userBreakRank",
-    "method": "POST",
-    "path": "/mp/rank/userBreakRank",
-    "data": {
-      "rankRange": null,
-      "timeRange": null,
-      "merchantAddressId": null,
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:20"
-  },
-  "POST /mobile/getUserBoxStatus": {
-    "url": "https://test.supervisions.cn/mobile/getUserBoxStatus",
-    "method": "POST",
-    "path": "/mobile/getUserBoxStatus",
-    "data": {
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:20"
-  },
-  "POST /mp/coupon/trialList": {
-    "url": "https://test.supervisions.cn/mp/coupon/trialList",
-    "method": "POST",
-    "path": "/mp/coupon/trialList",
-    "data": {
-      "pageNo": 1,
-      "pageSize": 10,
-      "status": 2,
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:20"
-  },
-  "POST /mp/rank/ratingList": {
-    "url": "https://test.supervisions.cn/mp/rank/ratingList",
-    "method": "POST",
-    "path": "/mp/rank/ratingList",
-    "data": {
-      "type": 3,
-      "merchantAddressId": 45376,
-      "areaId": null,
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:20"
-  },
-  "POST /mp/rank/breakList": {
-    "url": "https://test.supervisions.cn/mp/rank/breakList",
-    "method": "POST",
-    "path": "/mp/rank/breakList",
-    "data": {
-      "type": 0,
-      "merchantAddressId": 45376,
-      "areaId": null,
-      "rankRange": 0,
-      "timeRange": 0,
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:20"
-  },
-  "POST /mp/rank/winRateList": {
-    "url": "https://test.supervisions.cn/mp/rank/winRateList",
-    "method": "POST",
-    "path": "/mp/rank/winRateList",
-    "data": {
-      "type": 2,
-      "merchantAddressId": 45376,
-      "areaId": null,
-      "rankRange": 0,
-      "timeRange": 0,
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:20"
-  },
-  "POST /mp/record/opponentListWithVideos": {
-    "url": "https://test.supervisions.cn/mp/record/opponentListWithVideos",
-    "method": "POST",
-    "path": "/mp/record/opponentListWithVideos",
-    "data": {
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:20"
-  },
-  "POST /mp/record/opponentStatistics": {
-    "url": "https://test.supervisions.cn/mp/record/opponentStatistics",
-    "method": "POST",
-    "path": "/mp/record/opponentStatistics",
-    "data": {
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
-      "startTime": "2026-08-03 00:00:00",
-      "endTime": "2026-08-09 23:59:59"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:20"
-  },
-  "POST /video/videoClient/myVideos/readyV2": {
-    "url": "https://test.supervisions.cn/video/videoClient/myVideos/readyV2",
-    "method": "POST",
-    "path": "/video/videoClient/myVideos/readyV2",
-    "data": {
-      "pageNo": 1,
-      "pageSize": 10,
-      "clientId": "BP2A.250605.031.A3_V000L1",
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:24"
-  },
-  "POST /mp/coupon/checkEligibility": {
-    "url": "https://test.supervisions.cn/mp/coupon/checkEligibility",
-    "method": "POST",
-    "path": "/mp/coupon/checkEligibility",
-    "data": {
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:24"
-  },
-  "POST /mp/record/competitionListWithVideos": {
-    "url": "https://test.supervisions.cn/mp/record/competitionListWithVideos",
-    "method": "POST",
-    "path": "/mp/record/competitionListWithVideos",
-    "data": {
-      "userA": "57d703dc-659a-4474-898e-b75efa1f2e0a",
-      "userB": "aff7eae4-3680-4b89-9f01-819e02c3b6b5",
-      "startTime": "2026-08-03 00:00:00",
-      "endTime": "2026-08-09 23:59:59",
-      "page": 1,
-      "pageSize": 10,
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:24"
-  },
-  "POST /mobile/loginBoxAfterScanningQrCode": {
-    "url": "https://test.supervisions.cn/mobile/loginBoxAfterScanningQrCode",
-    "method": "POST",
-    "path": "/mobile/loginBoxAfterScanningQrCode",
-    "data": {
-      "encryptedString": "http://weixin.qq.com/q/02AYDNBsWOf9E1JX0n1GcW",
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:29:25"
-  },
-  "POST /mp/record/deviceOnlineInfo": {
-    "url": "https://test.supervisions.cn/mp/record/deviceOnlineInfo",
-    "method": "POST",
-    "path": "/mp/record/deviceOnlineInfo",
-    "data": {
-      "competitionId": "fecd7c799ea5495ca23caceafaaca04b",
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:36:41"
-  },
-  "POST /mp/record/inningList": {
-    "url": "https://test.supervisions.cn/mp/record/inningList",
-    "method": "POST",
-    "path": "/mp/record/inningList",
-    "data": {
-      "competitionId": "fecd7c799ea5495ca23caceafaaca04b",
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:36:41"
-  },
-  "POST /video/videoinfo/competitionVideos": {
-    "url": "https://test.supervisions.cn/video/videoinfo/competitionVideos",
-    "method": "POST",
-    "path": "/video/videoinfo/competitionVideos",
-    "data": {
-      "competitionId": "fecd7c799ea5495ca23caceafaaca04b",
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:36:41"
-  },
-  "POST /mp/record/barchart": {
-    "url": "https://test.supervisions.cn/mp/record/barchart",
-    "method": "POST",
-    "path": "/mp/record/barchart",
-    "data": {
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
-      "startTime": "2026-08-03 00:00:00",
-      "endTime": "2026-08-09 23:59:59"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:37:27"
-  },
-  "POST /mp/record/statics": {
-    "url": "https://test.supervisions.cn/mp/record/statics",
-    "method": "POST",
-    "path": "/mp/record/statics",
-    "data": {
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
-      "startTime": "2026-08-03 00:00:00",
-      "endTime": "2026-08-09 23:59:59"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:37:27"
-  },
-  "POST /mp/record/inningStatistics": {
-    "url": "https://test.supervisions.cn/mp/record/inningStatistics",
-    "method": "POST",
-    "path": "/mp/record/inningStatistics",
-    "data": {
-      "competitionId": "bf0442cd43214739a799233bc4852738",
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 10:56:30"
-  },
-  "POST /video/videoClient/myVideos/failedV2": {
-    "url": "https://test.supervisions.cn/video/videoClient/myVideos/failedV2",
-    "method": "POST",
-    "path": "/video/videoClient/myVideos/failedV2",
-    "data": {
-      "pageNo": 1,
-      "pageSize": 10,
-      "clientId": "BP2A.250605.031.A3_V000L1",
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 11:25:51"
-  },
-  "POST /mp/user/myClubs": {
-    "url": "https://test.supervisions.cn/mp/user/myClubs",
-    "method": "POST",
-    "path": "/mp/user/myClubs",
-    "data": {
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 11:35:58"
-  },
-  "POST /mp/app/version/check": {
-    "url": "https://test.supervisions.cn/mp/app/version/check",
-    "method": "POST",
-    "path": "/mp/app/version/check",
-    "data": {
-      "platform": 2,
-      "currentVersion": "1.0.0",
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 11:36:13"
-  },
-  "POST /mp/user/saveDefaultClub": {
-    "url": "https://test.supervisions.cn/mp/user/saveDefaultClub",
-    "method": "POST",
-    "path": "/mp/user/saveDefaultClub",
-    "data": {
-      "clubId": 45376,
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 11:36:18"
-  },
-  "POST /mp/oauth/wechatLogin": {
-    "url": "https://test.supervisions.cn/mp/oauth/wechatLogin",
-    "method": "POST",
-    "path": "/mp/oauth/wechatLogin",
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7c71dd7e5001834818151099280/Z0NxBTq1aEgA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7c71dd7e5001834818151099280/Z0NxBTq1aEgA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7c71dd7e5001834818151099280/Z0NxBTq1aEgA.mp4",
     "data": null,
     "description": "",
-    "discovered_at": "2026-08-06 11:37:09"
+    "discovered_at": "2026-08-28 14:32:24"
   },
-  "POST /mp/record/competitionStatistics": {
-    "url": "https://test.supervisions.cn/mp/record/competitionStatistics",
-    "method": "POST",
-    "path": "/mp/record/competitionStatistics",
-    "data": {
-      "userA": "57d703dc-659a-4474-898e-b75efa1f2e0a",
-      "userB": "902b8978-03dc-4797-a529-3ba7572b6096",
-      "startTime": "2026-08-01 00:00:00",
-      "endTime": "2026-08-31 23:59:59",
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/80bf8b3f5001834818151245486/Ze4I8kbOGwsA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/80bf8b3f5001834818151245486/Ze4I8kbOGwsA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/80bf8b3f5001834818151245486/Ze4I8kbOGwsA.mp4",
+    "data": null,
     "description": "",
-    "discovered_at": "2026-08-06 14:28:56"
+    "discovered_at": "2026-08-28 14:35:10"
   },
-  "POST /mp/user/breakScoreList": {
-    "url": "https://test.supervisions.cn/mp/user/breakScoreList",
-    "method": "POST",
-    "path": "/mp/user/breakScoreList",
-    "data": {
-      "pageNo": 1,
-      "pageSize": 30,
-      "sortingFields": "[Instance of 'SortingFieldsModel']",
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a"
-    },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5853ba865001834817551691872/eaau1YYgavgA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5853ba865001834817551691872/eaau1YYgavgA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5853ba865001834817551691872/eaau1YYgavgA.mp4",
+    "data": null,
     "description": "",
-    "discovered_at": "2026-08-06 14:43:54"
+    "discovered_at": "2026-08-28 14:59:41"
   },
-  "POST /video/videoClient/getVideoStatistics": {
-    "url": "https://test.supervisions.cn/video/videoClient/getVideoStatistics",
-    "method": "POST",
-    "path": "/video/videoClient/getVideoStatistics",
-    "data": {
-      "clientId": "BP2A.250605.031.A3",
-      "userId": "aff7eae4-3680-4b89-9f01-819e02c3b6b5"
-    },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/302f0be15001834818041921777/UQgVVWlCBVMA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/302f0be15001834818041921777/UQgVVWlCBVMA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/302f0be15001834818041921777/UQgVVWlCBVMA.mp4",
+    "data": null,
     "description": "",
-    "discovered_at": "2026-08-06 15:31:07"
+    "discovered_at": "2026-08-28 15:23:19"
   },
-  "POST /video/videoClient/myVideos/processingV2": {
-    "url": "https://test.supervisions.cn/video/videoClient/myVideos/processingV2",
+  "POST /video/videoOrder/appPostVideoRefund": {
+    "url": "https://test.supervisions.cn/video/videoOrder/appPostVideoRefund",
     "method": "POST",
-    "path": "/video/videoClient/myVideos/processingV2",
+    "path": "/video/videoOrder/appPostVideoRefund",
     "data": {
-      "pageNo": 1000,
-      "pageSize": 1,
-      "clientId": "BP2A.250605.031.A3",
-      "userId": "aff7eae4-3680-4b89-9f01-819e02c3b6b5"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 16:24:49"
-  },
-  "POST /mp/record/markVideoViewed": {
-    "url": "https://test.supervisions.cn/mp/record/markVideoViewed",
-    "method": "POST",
-    "path": "/mp/record/markVideoViewed",
-    "data": {
-      "videoOrderId": 2004,
-      "userId": "aff7eae4-3680-4b89-9f01-819e02c3b6b5"
-    },
-    "description": "",
-    "discovered_at": "2026-08-06 16:30:35"
-  },
-  "POST /mp/user/rating": {
-    "url": "https://test.supervisions.cn/mp/user/rating",
-    "method": "POST",
-    "path": "/mp/user/rating",
-    "data": {
-      "userId": "4ac883d7-0eaa-4086-b609-0b384955c0d8",
-      "lang": "zh_CN"
-    },
-    "description": "",
-    "discovered_at": "2026-08-19 15:34:55"
-  },
-  "POST /mp/coupon/queryCouponList": {
-    "url": "https://test.supervisions.cn/mp/coupon/queryCouponList",
-    "method": "POST",
-    "path": "/mp/coupon/queryCouponList",
-    "data": {
-      "pageNo": 1,
-      "pageSize": 10,
-      "status": 0,
+      "orderId": 2494,
       "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
       "lang": "zh_CN"
     },
     "description": "",
-    "discovered_at": "2026-08-19 15:58:30"
-  },
-  "POST /video/videoinfo/buyitUseComboV3": {
-    "url": "https://test.supervisions.cn/video/videoinfo/buyitUseComboV3",
-    "method": "POST",
-    "path": "/video/videoinfo/buyitUseComboV3",
-    "data": {
-      "videoId": 12246,
-      "payChannel": 2,
-      "clientId": "ea6580d7-339d-4a88-83d9-1fbbd9df300b",
-      "userId": "4ac883d7-0eaa-4086-b609-0b384955c0d8",
-      "lang": "zh_CN"
-    },
-    "description": "",
-    "discovered_at": "2026-08-19 17:27:02"
-  },
-  "query_window_state /video/videoClient/updateClientInfo": {
-    "url": "https://test.supervisions.cn/video/videoClient/updateClientInfo",
-    "method": "query_window_state",
-    "path": "/video/videoClient/updateClientInfo",
-    "data": {
-      "clientId": "ea6580d7-339d-4a88-83d9-1fbbd9df300b",
-      "attributeType": 1,
-      "attributeValue": 1,
-      "userId": "4ac883d7-0eaa-4086-b609-0b384955c0d8",
-      "lang": "zh_CN"
-    },
-    "description": "",
-    "discovered_at": "2026-08-20 12:09:20"
-  },
-  "POST /video/videoClient/updateClientInfo": {
-    "url": "https://test.supervisions.cn/video/videoClient/updateClientInfo",
-    "method": "POST",
-    "path": "/video/videoClient/updateClientInfo",
-    "data": {
-      "userId": "4ac883d7-0eaa-4086-b609-0b384955c0d8",
-      "startTime": "2026-08-17 00:00:00",
-      "endTime": "2026-08-23 23:59:59",
-      "lang": "zh_CN"
-    },
-    "description": "",
-    "discovered_at": "2026-08-20 12:09:21"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6f3975e55001834816762357356/a4pyRbuhpMkA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6f3975e55001834816762357356/a4pyRbuhpMkA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6f3975e55001834816762357356/a4pyRbuhpMkA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-20 15:52:38"
-  },
-  "POST /video/videoClient/updateStatus": {
-    "url": "https://test.supervisions.cn/video/videoClient/updateStatus",
-    "method": "POST",
-    "path": "/video/videoClient/updateStatus",
-    "data": {
-      "clientId": "61009c54-b18b-41a1-8de6-b8a3a63c1405",
-      "status": 3,
-      "videoId": 12284,
-      "videoOrderId": 2100,
-      "userId": "4ac883d7-0eaa-4086-b609-0b384955c0d8",
-      "lang": "zh_CN} 08-20 15:52:37.234  1312  1312 I mtkpower_client: perf_lock_rel, hdl:23434, tid:1312 08-20 15:52:37.240  1254  1254 E HWC2    : Invalid CT ID. displayId: 0 08-20 15:52:37.250  1969  4510 D ActivityManager: sync unfroze 11559 com.oplus.notificationmanager for 4 08-20 15:52:37.286 11559 11638 D NotificationCenter: OplusBatchTrack-->when reboot, mcs/rus source not report 08-20 15:52:37.361  1099  1184 E UxUtility: notifyAppState error = NULL 08-20 15:52:37.361  1099  1184 I TouchUtility: notifyAppState error = NULL 08-20 15:52:37.380 12226 12226 W LOG_FLOWCTRL: ==LOGS OVER PROC QUOTA(300), rows(74) bytes(3417) com.supervisions.snookermastercn DROPPED== 08-20 15:52:37.380 12226 12226 I flutter : 下载进度: https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6f3975e55001834816762357356/a4pyRbuhpMkA.mp412284-- 0.00002796288352066844 (0%) 08-20 15:52:37.418  1969  1981 I system_server: gc_priority_optimize ctrlAppThreadUx sharedAppUxFd=663pid=1969tid=1981value=768 ret=0 08-20 15:52:37.446  1254  1833 D SurfaceFlinger: calculateTimeoutTime, triggerInterval = 2 sec + 603701231 nsec 08-20 15:52:37.447  1969  1981 I system_server: gc_priority_optimize ctrlAppThreadUx sharedAppUxFd=663pid=1969tid=1981value=130 ret=2 08-20 15:52:37.447  1969  1981 I system_server: gc_priority_optimize set UX success2 08-20 15:52:37.452  1969  1981 I system_server: gc_priority_optimize ctrlAppThreadUx sharedAppUxFd=663pid=1969tid=1981value=768 ret=0 08-20 15:52:37.464  1254  1254 I BufferQueueProducer: [SurfaceView[com.supervisions.snookermastercn/com.supervisions.snookermastercn.MainActivity](BLAST)#7719](this:0xb4000072ed3679e0,id:-1,api:0,p:-1,c:1254) queueBuffer: fps=25.75 dur=1048.60 max=223.56 min=9.84 08-20 15:52:37.464  1254  1254 E HWC2    : Invalid CT ID. displayId: 0 08-20 15:52:37.477  1969  1981 I system_server: gc_priority_optimize ctrlAppThreadUx sharedAppUxFd=663pid=1969tid=1981value=130 ret=2 08-20 15:52:37.477  1969  1981 I system_server: gc_priority_optimize set UX success2 08-20 15:52:37.480  1969  1981 I system_server: gc_priority_optimize ctrlAppThreadUx sharedAppUxFd=663pid=1969tid=1981value=768 ret=0 08-20 15:52:37.491  1254  1850 D VRR [OTI]: handleIdle from 0 to 1 08-20 15:52:37.491  1254  1850 D VRR [OTI-HW]: isStateReady 0 08-20 15:52:37.491  1254  1850 D VRR [OTI-HW]: keep rate. 08-20 15:52:37.494  1969  1981 I system_server: gc_priority_optimize ctrlAppThreadUx sharedAppUxFd=663pid=1969tid=1981value=130 ret=2 08-20 15:52:37.494  1969  1981 I system_server: gc_priority_optimize set UX success2 08-20 15:52:37.513  1969  1981 I system_server: gc_priority_optimize ctrlAppThreadUx sharedAppUxFd=663pid=1969tid=1981value=768 ret=0 08-20 15:52:37.589  1142  1191 D vendor.oplus.hardware.charger-V6-service: ret_value:116, read content:,325,350,3765,3765,-218,21,21,1,1,0,410,4850,21,1,4470,600,500,0,4,-22,4,0,1,0,2,0,0,0,1,49030,0,-5367,0,0,0,0,0,71 08-20 15:52:37.589  1142  1191 D vendor.oplus.hardware.charger-V6-service: gmtime: 2026-08-20-15-52-37 08-20 15:52:37.590  1142  1191 D vendor.oplus.hardware.charger-V6-service: usb_online:1, ac_online:-2147483648, wireless_online:-2147483648 08-20 15:52:37.610  1312  1312 I mtkpower_client: perf_lock_acq, hdl:0, dur:30000, num:2, tid:1312 08-20 15:52:37.612  1312  1312 I mtkpower_client: ret_hdl:23435 08-20 15:52:37.658  1969  1981 I system_server: Background concurrent mark compact GC freed 94MB AllocSpace bytes, 108(2748KB) LOS objects, 53% free,82MB(M:79MB,L:3344KB)/178MB, paused 3.520ms,3.898ms total 469.351ms 08-20 15:52:37.660  1254  3804 D SurfaceFlinger: ~DisplayToken Removing display 08-20 15:52:37.660  1969  1982 I BpBinder: onLastStrongRef automatically unlinking death recipients: 08-20 15:52:37.662  1969  1982 I BpBinder: onLastStrongRef automatically unlinking death recipients: 08-20 15:52:37.664  1254  1254 E HWC2    : Invalid CT ID. displayId: 0 08-20 15:52:37.666  1969  1982 I BpBinder: onLastStrongRef automatically unlinking death recipients: 08-20 15:52:37.670  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /system_ext/priv-app/OplusLauncher/OplusLauncher.apk' with 1 weak references 08-20 15:52:37.671  1254  3804 I SurfaceFlinger: [SF client] REMOVE (0xb4000072fd5c55b0) for (1969:system_server) 08-20 15:52:37.671  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /system_ext/priv-app/OppoPackageInstaller/OppoPackageInstaller.apk' with 1 weak references 08-20 15:52:37.671  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /product/priv-app/HeyTapSpeechAssist/HeyTapSpeechAssist.apk' with 1 weak references 08-20 15:52:37.671  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /system_ext/app/AccessibilityMenu/AccessibilityMenu.apk' with 1 weak references 08-20 15:52:37.672  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /product/app/ColorAccessibilityAssistant/ColorAccessibilityAssistant.apk' with 1 weak references 08-20 15:52:37.672  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~epwNTW61tvTT02IAeGm-Qw==/com.coloros.codebook-MdJBAsqw5OExanZmzmyfRA==/base.apk' with 1 weak references 08-20 15:52:37.672  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~ZaaBtKDyU0Osp2kUSn9o8g==/com.coloros.colordirectservice-S5Tw8s8T4i0GyBLqkxvHfw==/base.apk' with 1 weak references 08-20 15:52:37.673  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /product/app/SwitchAccess/SwitchAccess.apk' with 1 weak references 08-20 15:52:37.673  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /product/app/talkback/talkback.apk' with 1 weak references 08-20 15:52:37.674  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /product/priv-app/GlobalSearch/GlobalSearch.apk' with 1 weak references 08-20 15:52:37.674  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /product/app/SogouInput_U_Product/SogouInput_U_Product.apk' with 1 weak references 08-20 15:52:37.674  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /product/priv-app/LinktoWindows/LinktoWindows.apk' with 1 weak references 08-20 15:52:37.675  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~Q4urTPp1HI2CZDMhaoISdg==/com.oplus.dmp-0OrXMiVPmvuqSKXO8Wruew==/base.apk' with 1 weak references 08-20 15:52:37.675  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~O4tzZe7g-gvA-SX5DNny2A==/com.oplus.matrix-YTgaoiDOQW512w6mjU7Ghg==/base.apk' with 1 weak references 08-20 15:52:37.675  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~C_V4XCx_08m1Zpo1VodCbw==/com.oplus.ocar-9TC7XCSZ2K3se74PMbqn8A==/base.apk' with 1 weak references 08-20 15:52:37.675  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /product/priv-app/TravelEngine/TravelEngine.apk' with 1 weak references 08-20 15:52:37.676  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/BaiduInput_U_Product_Del/BaiduInput_U_Product_Del.apk' with 1 weak references 08-20 15:52:37.676  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /product/app/OplusSecurityKeyboard/OplusSecurityKeyboard.apk' with 1 weak references 08-20 15:52:37.676  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /product/app/ViewTalk/ViewTalk.apk' with 1 weak references 08-20 15:52:37.676  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/OplusDocumentsReader/andes.oplus.documentsreader_16006002.apk' with 1 weak references 08-20 15:52:37.676  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~2b_UBQFvefLQCOcojBrFnA==/com.coloros.filemanager-W54GG4CXv9mJqo5j6ul4Fw==/base.apk' with 1 weak references 08-20 15:52:37.677  1969  1983 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/com.eg.android.AlipayGphone/com.eg.android.AlipayGphone.apk' with 1 weak references 08-20 15:52:37.677  1969  1983 W System  : A resource failed to call release. 08-20 15:52:37.678  1969  1983 W System  : A resource failed to call HardwareBuffer.close. 08-20 15:52:37.721  1142  1195 D BatteryChargeControl: bcc get no support from charging protocol 08-20 15:52:37.748  1142  4892 D charge_time: write 27387s(07:36:27) to ttf, rc=7 08-20 15:52:37.749  1142  4892 D charge_time: type=sdp,reserve_soc=0,soc=21,ui_soc=21,current=-548,avg=206,not_chg_cnt=2,stable_cnt=7,fcc=4858,fcc_ratio=102,delta=0,debug=0,region=18,ttf=45915(12:45:15),ui_ttf=27387(07:36:27) 08-20 15:52:37.821  1969  2342 I CwbClient: setCWBDisplayType set mFeatureID = CWB_RGB_VALUE 08-20 15:52:37.861  3451  4091 D CommonApp-152-10342: commonScoreStrategy scenarios 1 08-20 15:52:37.861  3451  4091 D CommonApp-152-10342: notifyScoreChange appScene COMMON score 100 08-20 15:52:37.863  3451  4079 D T-Recommend: onPreHandleMessage 1014 08-20 15:52:37.863  3451  4079 D T-Recommend: onPostHandleMessage 1014 08-20 15:52:37.864  3451  4106 E OplusDualPsManager: getDdsNetId, dual ps not init 08-20 15:52:37.866 12226 12226 I flutter : 下载进度: https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6f3975e55001834816762357356/a4pyRbuhpMkA.mp412284-- 0.010011927632658287 (1%) 08-20 15:52:37.874  1150  1172 E DisplayPanel_Session: getDisplayPanelFeatureValue default, no choice! 08-20 15:52:37.874  1969  2570 W CwbClient: get display panel fps failed! 08-20 15:52:37.874  1969  2570 E CwbClient: Cwb client get fps failed or not support! 08-20 15:52:37.887  1312  1312 I mtkpower_client: perf_lock_rel, hdl:23435, tid:1312 08-20 15:52:37.900  1254  1254 E HWC2    : Invalid CT ID. displayId: 0 08-20 15:52:37.930  1127  1548 I touch-main: [touch-prevent][large_area_judged_V2][2350]: large_area_judged_V2: id(0) judge corner long move. 08-20 15:52:37.930  1127  1548 I touch-main: [report] first touch point id 0 :Down[15312 36893   18    3    2    1    1] 08-20 15:52:37.931  1254  1850 D VRR [OTI]: handleIdle from 1 to 0 08-20 15:52:37.931  1254  1850 D VRR [OTI-HW]: isStateReady 0 08-20 15:52:37.931  1254  1850 D VRR [OTI-HW]: keep rate. 08-20 15:52:37.932  1969  3038 I [UAH_CLIENT]: UahEventAcquire, cmdid:37, pkg:none, identity:OplusUAwareInputHelper 08-20 15:52:37.932 12226 12226 V AutofillManager: requestHideFillUi(null): anchor = null 08-20 15:52:37.932  1969  2585 D OMP_Detector: D:done mCurrStatus: 0 08-20 15:52:37.932  1969  3038 D UAH-UahAdaptHelper: adaptSetNotification identity = OplusUAwareInputHelpersrc = 1000 , type 0 ,p1 = -1 ,p2 = -1 ,p3 = -1 ,p4 = 08-20 15:52:37.932  1969  3038 I [UAH_CLIENT]: uahRuleCtl, ruleId:1000, status:0 08-20 15:52:37.933  1969  2050 D PowerManagerService: userActivityNoUpdateLocked: groupId=0, eventTime=85366149, event=touch, flags=0x0, uid=1000 08-20 15:52:37.948  1312  1312 I mtkpower_client: perf_lock_acq, hdl:0, dur:30000, num:2, tid:1312 08-20 15:52:37.950  1312  1312 I mtkpower_client: ret_hdl:23437 08-20 15:52:38.012  1127  1548 I touch-main: [touch-prevent][curved_large_handle_V2][2616]: up id(0) status: 7, 1, 1, 1. 08-20 15:52:38.012  1127  1548 I touch-main: [report] all touch up 08-20 15:52:38.013  1969  3038 D UAH-UahAdaptHelper: adaptSetNotification identity = OplusUAwareInputHelpersrc = 1000 , type 1 ,p1 = -1 ,p2 = -1 ,p3 = -1 ,p4 = 08-20 15:52:38.014  1969  3038 I [UAH_CLIENT]: uahRuleCtl, ruleId:1000, status:1 08-20 15:52:38.014 12226 12226 D OplusViewDragTouchViewHelper: dispatchTouchView action = 1 08-20 15:52:38.014 12226 12226 D ViewRootImplExtImpl: the up motion event handled by client, just return 08-20 15:52:38.021  1969  2342 D FusionLightNextGen: raw_lux -1.0, raw_cct -1.0, r/g/b/c: 20468.0/18533.0/13030.0/48035.0, R/G/B: 83.0/153.0/246.0, bri 1611.0, lux: 266.100098, cct: -1.0, ir: 0.043459, conf: 0, cnt: 0 08-20 15:52:38.255  2861  2861 E LockScreenNotificationDispatcherImp: updateNotificationListOnKg size:0 08-20 15:52:38.259  2861  2861 I SystemUi--Notification: LockScreenNotificationDispatcherImp-->updateNotificationListOnKg resultCode: 0 08-20 15:52:38.280  1254  1254 I BufferQueueProducer: [StatusBar#89](this:0xb4000072f73879e0,id:-1,api:0,p:-1,c:1254) queueBuffer: fps=0.03 dur=33130.36 max=33130.36 min=33130.36 08-20 15:52:38.280 12226 12226 I flutter : 下载进度: https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6f3975e55001834816762357356/a4pyRbuhpMkA.mp412284-- 0.020023862093025892 (2%) 08-20 15:52:38.281  1254  1254 E HWC2    : Invalid CT ID. displayId: 0 08-20 15:52:38.310  1312  1312 I mtkpower_client: perf_lock_rel, hdl:23437, tid:1312 08-20 15:52:38.311  1254  1254 E HWC2    : Invalid CT ID. displayId: 0 08-20 15:52:38.362  1099  1184 E UxUtility: notifyAppState error = NULL 08-20 15:52:38.362  1099  1184 I TouchUtility: notifyAppState error = NULL 08-20 15:52:38.372  1312  1312 I mtkpower_client: perf_lock_acq, hdl:0, dur:30000, num:2, tid:1312 08-20 15:52:38.373  1312  1312 I mtkpower_client: ret_hdl:23438 08-20 15:52:38.414  1254  1850 D VRR [OTI]: handleIdle from 0 to 1 08-20 15:52:38.414  1254  1850 D VRR [OTI-HW]: isStateReady 0 08-20 15:52:38.414  1254  1850 D VRR [OTI-HW]: keep rate. 08-20 15:52:38.420  1084  1159 I sensors-hal-HfLooper: pwm_rgb: lux:295, time_delta:100, pwm_turbo:0, bri:1611, r:19594, g:17691, b:12516, c:45885, algo:2 08-20 15:52:38.473  1043 14927 E TetherController: property_get sys.radio.data.modem_share_flag return 0, 1! 08-20 15:52:38.504  1127  1548 I touch-main: [report] first touch point id 0 :Down[13484 37188   17    3    0    1    0] 08-20 15:52:38.505  1254  1850 D VRR [OTI]: handleIdle from 1 to 0 08-20 15:52:38.505  1254  1850 D VRR [OTI-HW]: isStateReady 0 08-20 15:52:38.505  1254  1850 D VRR [OTI-HW]: keep rate. 08-20 15:52:38.505  1969  3038 I [UAH_CLIENT]: UahEventAcquire, cmdid:37, pkg:none, identity:OplusUAwareInputHelper 08-20 15:52:38.505 12108 12108 I WifiHAL : wifi_get_link_stats: result=0 08-20 15:52:38.506  1969  3038 D UAH-UahAdaptHelper: adaptSetNotification identity = OplusUAwareInputHelpersrc = 1000 , type 0 ,p1 = -1 ,p2 = -1 ,p3 = -1 ,p4 = 08-20 15:52:38.506  1969  3038 I [UAH_CLIENT]: uahRuleCtl, ruleId:1000, status:0 08-20 15:52:38.506 12226 12226 V AutofillManager: requestHideFillUi(null): anchor = null 08-20 15:52:38.506  1969  2585 D OMP_Detector: D:done mCurrStatus: 0 08-20 15:52:38.507  1099  1184 I [UAH_CLIENT]: UahPlatformResAcquire 08-20 15:52:38.507  1099  1184 I [UAH_CLIENT]: UahEventAcquire, cmdid:-3, pkg:1099 8, identity:mtk-powerd 08-20 15:52:38.507  1969  2050 D PowerManagerService: userActivityNoUpdateLocked: groupId=0, eventTime=85366723, event=touch, flags=0x0, uid=1000 08-20 15:52:38.510  3451  4091 V MonthTrafficAlert: getWarningNotification subId:1 numWarningNotificaion:0 08-20 15:52:38.521  3451  3451 D CSM-manager: wifi event:9 08-20 15:52:38.521  3480  3480 D VendorWifiService: onEvent event:9,action:1 08-20 15:52:38.528  1969  2566 D OplusWifiPower_TriggerCenter: mComponentCallback: wifistat 08-20 15:52:38.577  1099  1184 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:23440 08-20 15:52:38.577  1099  1184 I [UAH_CLIENT]: UahRelease, handle:15201 08-20 15:52:38.577  1127  1548 I touch-main: [touch-prevent][curved_large_handle_V2][2616]: up id(0) status: 1, 1, 1, 0. 08-20 15:52:38.577  1127  1548 I touch-main: [report] all touch up 08-20 15:52:38.578  1969  3038 D UAH-UahAdaptHelper: adaptSetNotification identity = OplusUAwareInputHelpersrc = 1000 , type 1 ,p1 = -1 ,p2 = -1 ,p3 = -1 ,p4 = 08-20 15:52:38.578  1969  3038 I [UAH_CLIENT]: uahRuleCtl, ruleId:1000, status:1 08-20 15:52:38.579 12226 12226 D OplusViewDragTouchViewHelper: dispatchTouchView action = 1 08-20 15:52:38.580 12226 12226 D ViewRootImplExtImpl: the up motion event handled by client, just return 08-20 15:52:38.628 16792 16865 I kcglog  : core::entrance::ProxyServerFilter(325)::check timeout : 0 08-20 15:52:38.629 16792 16865 D kcglog  : core::supernode::HttpServer(432)::update conn status:0/0 08-20 15:52:38.629 16792 16865 D kcglog  : core::supernode::PService(410)::KC config (1/1/1) 08-20 15:52:38.629 16792 16865 I kcglog  : core::supernode::PService(458)::enableTitan end, enableTitan:1, enableHttp:1, result:1 08-20 15:52:38.717 12226 12226 I flutter : 下载进度: https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6f3975e55001834816762357356/a4pyRbuhpMkA.mp412284-- 0.030007833669872832 (3%) 08-20 15:52:38.723  1142  1195 D BatteryChargeControl: bcc get no support from charging protocol 08-20 15:52:38.744  1312  1312 I mtkpower_client: perf_lock_rel, hdl:23438, tid:1312 08-20 15:52:38.748  1254  1254 I BufferQueueProducer: [SurfaceView[com.supervisions.snookermastercn/com.supervisions.snookermastercn.MainActivity](BLAST)#7719](this:0xb4000072ed3679e0,id:-1,api:0,p:-1,c:1254) queueBuffer: fps=2.34 dur=1283.81 max=436.43 min=411.90 08-20 15:52:38.748  1254  1254 E HWC2    : Invalid CT ID. displayId: 0 08-20 15:52:38.752  1142  4892 D charge_time: type=sdp,reserve_soc=0,soc=21,ui_soc=21,current=-285,avg=206,not_chg_cnt=3,stable_cnt=7,fcc=4858,fcc_ratio=102,delta=0,debug=0,region=18,ttf=45915(12:45:15),ui_ttf=27386(07:36:26) 08-20 15:52:38.757  1969  3621 D ActivityManager: Async freezing 11559 com.oplus.notificationmanager 08-20 15:52:38.805  1312  1312 I mtkpower_client: perf_lock_acq, hdl:0, dur:30000, num:2, tid:1312 08-20 15:52:38.807  1312  1312 I mtkpower_client: ret_hdl:23441 08-20 15:52:38.886  3451  4091 D CommonApp-152-10342: commonScoreStrategy scenarios 1 08-20 15:52:38.886  3451  4091 D CommonApp-152-10342: notifyScoreChange appScene COMMON score 100 08-20 15:52:38.887  3451  4079 D T-Recommend: onPreHandleMessage 1014 08-20 15:52:38.887  3451  4079 D T-Recommend: onPostHandleMessage 1014 08-20 15:52:38.887  3451  4106 E OplusDualPsManager: getDdsNetId, dual ps not init 08-20 15:52:38.979  1254  1850 D VRR [OTI]: handleIdle from 0 to 1 08-20 15:52:38.979  1254  1850 D VRR [OTI-HW]: isStateReady 0 08-20 15:52:38.979  1254  1850 D VRR [OTI-HW]: keep rate. 08-20 15:52:38.996  1127  1548 I touch-main: [touch-prevent][large_area_judged_V2][2350]: large_area_judged_V2: id(0) judge corner long move. 08-20 15:52:38.996  1127  1548 I touch-main: [report] first touch point id 0 :Down[14483 36800   19    3    1    0    1] 08-20 15:52:38.998  1254  1850 D VRR [OTI]: handleIdle from 1 to 0 08-20 15:52:38.998  1254  1850 D VRR [OTI-HW]: isStateReady 0 08-20 15:52:38.998  1254  1850 D VRR [OTI-HW]: keep rate. 08-20 15:52:38.999  1969  3038 I [UAH_CLIENT]: UahEventAcquire, cmdid:37, pkg:none, identity:OplusUAwareInputHelper 08-20 15:52:38.999  1969  3038 D UAH-UahAdaptHelper: adaptSetNotification identity = OplusUAwareInputHelpersrc = 1000 , type 0 ,p1 = -1 ,p2 = -1 ,p3 = -1 ,p4 = 08-20 15:52:38.999  1969  3038 I [UAH_CLIENT]: uahRuleCtl, ruleId:1000, status:0 08-20 15:52:39.000 12226 12226 V AutofillManager: requestHideFillUi(null): anchor = null 08-20 15:52:39.000  1969  2585 D OMP_Detector: D:done mCurrStatus: 0 08-20 15:52:39.000  1969  2050 D PowerManagerService: userActivityNoUpdateLocked: groupId=0, eventTime=85367215, event=touch, flags=0x0, uid=1000 08-20 15:52:39.004  1099  1184 I [UAH_CLIENT]: UahPlatformResAcquire 08-20 15:52:39.005  1099  1184 I [UAH_CLIENT]: UahEventAcquire, cmdid:-3, pkg:1099 8, identity:mtk-powerd 08-20 15:52:39.052  1127  1548 I touch-main: [touch-prevent][curved_large_handle_V2][2616]: up id(0) status: 7, 1, 1, 1. 08-20 15:52:39.052  1127  1548 I touch-main: [report] all touch up 08-20 15:52:39.054  1969  3038 D UAH-UahAdaptHelper: adaptSetNotification identity = OplusUAwareInputHelpersrc = 1000 , type 1 ,p1 = -1 ,p2 = -1 ,p3 = -1 ,p4 = 08-20 15:52:39.054  1969  3038 I [UAH_CLIENT]: uahRuleCtl, ruleId:1000, status:1 08-20 15:52:39.054 12226 12226 D OplusViewDragTouchViewHelper: dispatchTouchView action = 1 08-20 15:52:39.054 12226 12226 D ViewRootImplExtImpl: the up motion event handled by client, just return 08-20 15:52:39.075  1099  1184 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:23443 08-20 15:52:39.075  1099  1184 I [UAH_CLIENT]: UahRelease, handle:15203"
-    },
-    "description": "",
-    "discovered_at": "2026-08-20 15:52:40"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/34c75f0c5001834816618772389/aAHWY01C1F4A.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/34c75f0c5001834816618772389/aAHWY01C1F4A.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/34c75f0c5001834816618772389/aAHWY01C1F4A.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-20 16:36:18"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9e547fed5001834816766138669/OdLor0LXqDwA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9e547fed5001834816766138669/OdLor0LXqDwA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9e547fed5001834816766138669/OdLor0LXqDwA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-20 16:36:18"
-  },
-  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9e547fed5001834816766138669/OdLor0LXqDwA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9e547fed5001834816766138669/OdLor0LXqDwA.mp4",
-    "method": "POST",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9e547fed5001834816766138669/OdLor0LXqDwA.mp4",
-    "data": {
-      "clientId": "61009c54-b18b-41a1-8de6-b8a3a63c1405",
-      "status": 3,
-      "videoId": 12286,
-      "videoOrderId": 2103,
-      "userId": "4ac883d7-0eaa-4086-b609-0b384955c0d8",
-      "lang": "zh_CN"
-    },
-    "description": "",
-    "discovered_at": "2026-08-20 16:36:19"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/acbedc2c5001834816766796208/o3DKFow57LoA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/acbedc2c5001834816766796208/o3DKFow57LoA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/acbedc2c5001834816766796208/o3DKFow57LoA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-20 16:36:56"
-  },
-  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/acbedc2c5001834816766796208/o3DKFow57LoA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/acbedc2c5001834816766796208/o3DKFow57LoA.mp4",
-    "method": "POST",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/acbedc2c5001834816766796208/o3DKFow57LoA.mp4",
-    "data": {
-      "clientId": "61009c54-b18b-41a1-8de6-b8a3a63c1405",
-      "status": 3,
-      "videoId": 12283,
-      "videoOrderId": 2102,
-      "userId": "4ac883d7-0eaa-4086-b609-0b384955c0d8",
-      "lang": "zh_CN"
-    },
-    "description": "",
-    "discovered_at": "2026-08-20 16:36:56"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/2b2b17835001834816720647691/4LYpPNfy1VoA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/2b2b17835001834816720647691/4LYpPNfy1VoA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/2b2b17835001834816720647691/4LYpPNfy1VoA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-20 17:11:08"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c4028a05001834816819108372/f55r6NCOHdMA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c4028a05001834816819108372/f55r6NCOHdMA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c4028a05001834816819108372/f55r6NCOHdMA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-20 21:52:31"
-  },
-  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c4028a05001834816819108372/f55r6NCOHdMA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c4028a05001834816819108372/f55r6NCOHdMA.mp4",
-    "method": "POST",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c4028a05001834816819108372/f55r6NCOHdMA.mp4",
-    "data": {
-      "clientId": "2149f99f-3c66-42d7-b640-e7a48a34ebb8",
-      "status": 3,
-      "videoId": 12326,
-      "videoOrderId": 2107,
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
-      "lang": "zh_CN"
-    },
-    "description": "",
-    "discovered_at": "2026-08-20 21:52:32"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9f5c57355001834816820602262/lLC82JEQz4EA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9f5c57355001834816820602262/lLC82JEQz4EA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9f5c57355001834816820602262/lLC82JEQz4EA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-20 21:53:44"
-  },
-  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9f5c57355001834816820602262/lLC82JEQz4EA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9f5c57355001834816820602262/lLC82JEQz4EA.mp4",
-    "method": "POST",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9f5c57355001834816820602262/lLC82JEQz4EA.mp4",
-    "data": {
-      "clientId": "2149f99f-3c66-42d7-b640-e7a48a34ebb8",
-      "status": 3,
-      "videoId": 12325,
-      "videoOrderId": 2108,
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
-      "lang": "zh_CN"
-    },
-    "description": "",
-    "discovered_at": "2026-08-20 21:53:45"
-  },
-  "pageEnter https://tb.ele.me/app/TBTakeout/et-order-detail/detail?wx_statusbar_hidden=true&tms_force=true&weex_force_tms=true&wh_weex=true&weex_mode=dom&wx_use_layoutng=true&wx_navbar_transparent=true&status_bar_transparent=true&from=miniapp.taobao&channelInfo=%7B%22subSubChannel%22%3A%22miniapp.taobao.et%22%7D&orderId=8002150366855183698&alsc_exsrc=ES0008239276&packageName=com.vivo.pushservice&surge_ssr=true&afcflow=com.vivo.pushservice&isNeedHome=0&bxsign=haiYUa5Q%2Fr4tUgEx8t3eX5OqQoyW9MR5N2%2FVLfb2K7dVzRe0KljRy5z9oyuXQvG7XKfuKHd64TCeJ2trV2ReeqSAGHEL%2FjepDdo%2F5zDvLcqwDM%3D&_afc_link=1&utparamcnt=%7B%22_afc_link%22%3A%221%22%7D&_ele_prefetch_id_=ele_prefetch_id_1787324369683&o2o_extra_param=%7B%22p_e_id%22%3A%221787324369683%22%7D": {
-    "url": "https://tb.ele.me/app/TBTakeout/et-order-detail/detail?wx_statusbar_hidden=true&tms_force=true&weex_force_tms=true&wh_weex=true&weex_mode=dom&wx_use_layoutng=true&wx_navbar_transparent=true&status_bar_transparent=true&from=miniapp.taobao&channelInfo=%7B%22subSubChannel%22%3A%22miniapp.taobao.et%22%7D&orderId=8002150366855183698&alsc_exsrc=ES0008239276&packageName=com.vivo.pushservice&surge_ssr=true&afcflow=com.vivo.pushservice&isNeedHome=0&bxsign=haiYUa5Q%2Fr4tUgEx8t3eX5OqQoyW9MR5N2%2FVLfb2K7dVzRe0KljRy5z9oyuXQvG7XKfuKHd64TCeJ2trV2ReeqSAGHEL%2FjepDdo%2F5zDvLcqwDM%3D&_afc_link=1&utparamcnt=%7B%22_afc_link%22%3A%221%22%7D&_ele_prefetch_id_=ele_prefetch_id_1787324369683&o2o_extra_param=%7B%22p_e_id%22%3A%221787324369683%22%7D",
-    "method": "pageEnter",
-    "path": "https://tb.ele.me/app/TBTakeout/et-order-detail/detail?wx_statusbar_hidden=true&tms_force=true&weex_force_tms=true&wh_weex=true&weex_mode=dom&wx_use_layoutng=true&wx_navbar_transparent=true&status_bar_transparent=true&from=miniapp.taobao&channelInfo=%7B%22subSubChannel%22%3A%22miniapp.taobao.et%22%7D&orderId=8002150366855183698&alsc_exsrc=ES0008239276&packageName=com.vivo.pushservice&surge_ssr=true&afcflow=com.vivo.pushservice&isNeedHome=0&bxsign=haiYUa5Q%2Fr4tUgEx8t3eX5OqQoyW9MR5N2%2FVLfb2K7dVzRe0KljRy5z9oyuXQvG7XKfuKHd64TCeJ2trV2ReeqSAGHEL%2FjepDdo%2F5zDvLcqwDM%3D&_afc_link=1&utparamcnt=%7B%22_afc_link%22%3A%221%22%7D&_ele_prefetch_id_=ele_prefetch_id_1787324369683&o2o_extra_param=%7B%22p_e_id%22%3A%221787324369683%22%7D",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-21 23:08:24"
-  },
-  "GET ": {
-    "url": "https://test.supervisions.cn",
-    "method": "GET",
-    "path": "",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-22 10:57:58"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6aa938775001834817001209665/LQeZoxdMpKcA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6aa938775001834817001209665/LQeZoxdMpKcA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6aa938775001834817001209665/LQeZoxdMpKcA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-22 14:01:46"
-  },
-  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6aa938775001834817001209665/LQeZoxdMpKcA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6aa938775001834817001209665/LQeZoxdMpKcA.mp4",
-    "method": "POST",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/6aa938775001834817001209665/LQeZoxdMpKcA.mp4",
-    "data": {
-      "clientId": "2d14c8a0-66c6-4f04-aaa2-6cd00c991432",
-      "status": 5,
-      "videoId": 12359,
-      "videoOrderId": 2182,
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
-      "lang": "zh_CN"
-    },
-    "description": "",
-    "discovered_at": "2026-08-22 14:01:49"
+    "discovered_at": "2026-08-28 15:46:04"
   },
   "POST /mp/video/addVideoEventFromMobile": {
     "url": "https://test.supervisions.cn/mp/video/addVideoEventFromMobile",
     "method": "POST",
     "path": "/mp/video/addVideoEventFromMobile",
     "data": {
-      "clientId": "2d14c8a0-66c6-4f04-aaa2-6cd00c991432",
-      "eventDataList": "[{videoId: 12352, eventTime: 2026-08-22 14:00:57, playCount: 1, playMs: 1}]",
+      "clientId": "8757315d-c83b-4448-8898-9f8d0e79880b",
+      "eventDataList": "[{videoId: 12772, eventTime: 2026-08-28 15:47:44, playCount: 1, playMs: 1}]",
       "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
       "lang": "zh_CN"
     },
     "description": "",
-    "discovered_at": "2026-08-22 14:02:09"
+    "discovered_at": "2026-08-28 15:47:47"
   },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8651eae35001834817049371809/kWBCkkPbn3UA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8651eae35001834817049371809/kWBCkkPbn3UA.mp4",
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/80eb0e275001834818090982556/Ml0cvOQ9YeMA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/80eb0e275001834818090982556/Ml0cvOQ9YeMA.mp4",
     "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8651eae35001834817049371809/kWBCkkPbn3UA.mp4",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/80eb0e275001834818090982556/Ml0cvOQ9YeMA.mp4",
     "data": null,
     "description": "",
-    "discovered_at": "2026-08-22 15:17:44"
+    "discovered_at": "2026-08-28 17:54:14"
   },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/132b2fc15001834817003885465/c52wKYrtCgMA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/132b2fc15001834817003885465/c52wKYrtCgMA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/132b2fc15001834817003885465/c52wKYrtCgMA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-22 15:17:44"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bf5e2ea55001834817019296736/bPg8CsJa2YIA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bf5e2ea55001834817019296736/bPg8CsJa2YIA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bf5e2ea55001834817019296736/bPg8CsJa2YIA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-22 16:37:14"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7fd184195001834817018815323/Ptt4YT9uDToA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7fd184195001834817018815323/Ptt4YT9uDToA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7fd184195001834817018815323/Ptt4YT9uDToA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-22 16:37:15"
-  },
-  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7fd184195001834817018815323/Ptt4YT9uDToA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7fd184195001834817018815323/Ptt4YT9uDToA.mp4",
+  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/80eb0e275001834818090982556/Ml0cvOQ9YeMA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/80eb0e275001834818090982556/Ml0cvOQ9YeMA.mp4",
     "method": "POST",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7fd184195001834817018815323/Ptt4YT9uDToA.mp4",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/80eb0e275001834818090982556/Ml0cvOQ9YeMA.mp4",
     "data": {
-      "clientId": "2d14c8a0-66c6-4f04-aaa2-6cd00c991432",
+      "clientId": "bc79e221-3620-4be2-8904-30ba798051f3",
       "status": 3,
-      "videoId": 12354,
-      "videoOrderId": 2218,
+      "videoId": 12741,
+      "videoOrderId": 2565,
       "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
       "lang": "zh_CN"
     },
     "description": "",
-    "discovered_at": "2026-08-22 16:37:19"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/658d28e05001834817069632480/uhhjtTi3K68A.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/658d28e05001834817069632480/uhhjtTi3K68A.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/658d28e05001834817069632480/uhhjtTi3K68A.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-22 16:37:20"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bc9ac9ba5001834817019133645/Oxcl4Ac51R8A.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bc9ac9ba5001834817019133645/Oxcl4Ac51R8A.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bc9ac9ba5001834817019133645/Oxcl4Ac51R8A.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-22 16:37:23"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/dc6aaa3e5001834817071092188/rFYkIw8HIaoA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/dc6aaa3e5001834817071092188/rFYkIw8HIaoA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/dc6aaa3e5001834817071092188/rFYkIw8HIaoA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-22 16:37:34"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8167c2685001834816619723847/Wgk548FcZ0IA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8167c2685001834816619723847/Wgk548FcZ0IA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8167c2685001834816619723847/Wgk548FcZ0IA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-22 16:41:11"
-  },
-  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8167c2685001834816619723847/Wgk548FcZ0IA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8167c2685001834816619723847/Wgk548FcZ0IA.mp4",
-    "method": "POST",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/8167c2685001834816619723847/Wgk548FcZ0IA.mp4",
-    "data": {
-      "clientId": "2d14c8a0-66c6-4f04-aaa2-6cd00c991432",
-      "status": 3,
-      "videoId": 12396,
-      "videoOrderId": 2214,
-      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
-      "lang": "zh_CN"
-    },
-    "description": "",
-    "discovered_at": "2026-08-22 16:41:14"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ff3c552e5001834816995157962/hR3H6keeH9gA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ff3c552e5001834816995157962/hR3H6keeH9gA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ff3c552e5001834816995157962/hR3H6keeH9gA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-23 01:14:24"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d1618e525001834817081408102/RTSkoCo7HqkA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d1618e525001834817081408102/RTSkoCo7HqkA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d1618e525001834817081408102/RTSkoCo7HqkA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-23 01:14:29"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/afcd38ba5001834817029429204/BCvawPLtgocA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/afcd38ba5001834817029429204/BCvawPLtgocA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/afcd38ba5001834817029429204/BCvawPLtgocA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-23 01:14:42"
-  },
-  "pageEnter https://tb.ele.me/app/TBTakeout/et-scene-site/home?wh_weex=true&weex_mode=dom&tms_force=true&_wx_statusbar_hidden=true&wx_navbar_hidden=true&disableNav=YES&status_bar_transparent=true&isTab=false&from=miniapp.taobao&channelInfo=%7B%22channel%22%3A%22miniapp%22%2C%22subChannel%22%3A%22miniapp.taobao%22%2C%22subSubChannel%22%3A%22miniapp.taobao.et%22%7D&wx_snapshot_key=wx-etHome-notInTab-meishi_channel-cache&iconBizType=meishi_channel&isIndependent=true&skiplocation=true&spmB=bx1439604&cargoPoolIds=5422071&isNewApi=true&outLinkAddressId=1922372221062&locationName=%E6%B8%AF%E5%A4%A9%E6%97%B6%E5%B0%9A%E5%85%AC%E5%AF%93(%E6%B7%B1%E5%9C%B3%E5%8C%97%E7%AB%99%E5%BA%97)&longitude=114.039117&latitude=22.612068&isPageSeparate=false&kkJumpTagText=%E6%96%B0%E5%93%81&kkJumpTagExtension=%7B%22strategy%22%3A%5B%7B%22strategyRuleKey%22%3A%22xinpin%22%2C%22cornText%22%3A%22%E6%96%B0%E5%93%81%22%2C%22supplyMode%22%3A%22commodity%22%7D%5D%7D&isFromHome=true&geohash=ws10eh2ub4bz&spm=a2f6g.bx1399788.cx272276.dx426524_1&weex_force_tms=true&deviceId=Z5RGr3IFRd8DACC/FHW39sas": {
-    "url": "https://tb.ele.me/app/TBTakeout/et-scene-site/home?wh_weex=true&weex_mode=dom&tms_force=true&_wx_statusbar_hidden=true&wx_navbar_hidden=true&disableNav=YES&status_bar_transparent=true&isTab=false&from=miniapp.taobao&channelInfo=%7B%22channel%22%3A%22miniapp%22%2C%22subChannel%22%3A%22miniapp.taobao%22%2C%22subSubChannel%22%3A%22miniapp.taobao.et%22%7D&wx_snapshot_key=wx-etHome-notInTab-meishi_channel-cache&iconBizType=meishi_channel&isIndependent=true&skiplocation=true&spmB=bx1439604&cargoPoolIds=5422071&isNewApi=true&outLinkAddressId=1922372221062&locationName=%E6%B8%AF%E5%A4%A9%E6%97%B6%E5%B0%9A%E5%85%AC%E5%AF%93(%E6%B7%B1%E5%9C%B3%E5%8C%97%E7%AB%99%E5%BA%97)&longitude=114.039117&latitude=22.612068&isPageSeparate=false&kkJumpTagText=%E6%96%B0%E5%93%81&kkJumpTagExtension=%7B%22strategy%22%3A%5B%7B%22strategyRuleKey%22%3A%22xinpin%22%2C%22cornText%22%3A%22%E6%96%B0%E5%93%81%22%2C%22supplyMode%22%3A%22commodity%22%7D%5D%7D&isFromHome=true&geohash=ws10eh2ub4bz&spm=a2f6g.bx1399788.cx272276.dx426524_1&weex_force_tms=true&deviceId=Z5RGr3IFRd8DACC/FHW39sas",
-    "method": "pageEnter",
-    "path": "https://tb.ele.me/app/TBTakeout/et-scene-site/home?wh_weex=true&weex_mode=dom&tms_force=true&_wx_statusbar_hidden=true&wx_navbar_hidden=true&disableNav=YES&status_bar_transparent=true&isTab=false&from=miniapp.taobao&channelInfo=%7B%22channel%22%3A%22miniapp%22%2C%22subChannel%22%3A%22miniapp.taobao%22%2C%22subSubChannel%22%3A%22miniapp.taobao.et%22%7D&wx_snapshot_key=wx-etHome-notInTab-meishi_channel-cache&iconBizType=meishi_channel&isIndependent=true&skiplocation=true&spmB=bx1439604&cargoPoolIds=5422071&isNewApi=true&outLinkAddressId=1922372221062&locationName=%E6%B8%AF%E5%A4%A9%E6%97%B6%E5%B0%9A%E5%85%AC%E5%AF%93(%E6%B7%B1%E5%9C%B3%E5%8C%97%E7%AB%99%E5%BA%97)&longitude=114.039117&latitude=22.612068&isPageSeparate=false&kkJumpTagText=%E6%96%B0%E5%93%81&kkJumpTagExtension=%7B%22strategy%22%3A%5B%7B%22strategyRuleKey%22%3A%22xinpin%22%2C%22cornText%22%3A%22%E6%96%B0%E5%93%81%22%2C%22supplyMode%22%3A%22commodity%22%7D%5D%7D&isFromHome=true&geohash=ws10eh2ub4bz&spm=a2f6g.bx1399788.cx272276.dx426524_1&weex_force_tms=true&deviceId=Z5RGr3IFRd8DACC/FHW39sas",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-23 13:43:19"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/818e90935001834817032473123/SqOZVB8feSMA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/818e90935001834817032473123/SqOZVB8feSMA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/818e90935001834817032473123/SqOZVB8feSMA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-25 16:55:00"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/81b11d3c5001834817032490187/1KoHd24KgnQA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/81b11d3c5001834817032490187/1KoHd24KgnQA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/81b11d3c5001834817032490187/1KoHd24KgnQA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-25 17:04:32"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/36e97d3e5001834817031573188/OLZcqBIwb3EA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/36e97d3e5001834817031573188/OLZcqBIwb3EA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/36e97d3e5001834817031573188/OLZcqBIwb3EA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-25 17:04:39"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/344afb195001834817031431928/5SZRaQbne1AA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/344afb195001834817031431928/5SZRaQbne1AA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/344afb195001834817031431928/5SZRaQbne1AA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-25 17:04:56"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/581458675001834817568343745/wJ4eRxvOeaIA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/581458675001834817568343745/wJ4eRxvOeaIA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/581458675001834817568343745/wJ4eRxvOeaIA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-25 17:11:46"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7f3a080c5001834816619649529/NsyGJGGYyscA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7f3a080c5001834816619649529/NsyGJGGYyscA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7f3a080c5001834816619649529/NsyGJGGYyscA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-25 20:17:14"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/3122ee5c5001834817357133453/kPMyOtTP7NEA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/3122ee5c5001834817357133453/kPMyOtTP7NEA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/3122ee5c5001834817357133453/kPMyOtTP7NEA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-25 20:32:34"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/e6d8d4625001834817356284156/CB27D57ujYUA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/e6d8d4625001834817356284156/CB27D57ujYUA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/e6d8d4625001834817356284156/CB27D57ujYUA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-25 20:32:40"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/fa98c6fa5001834816621280527/SywQEbgIEAYA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/fa98c6fa5001834816621280527/SywQEbgIEAYA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/fa98c6fa5001834816621280527/SywQEbgIEAYA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-25 20:32:41"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/31215ec05001834817357130973/5zROpbXmApEA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/31215ec05001834817357130973/5zROpbXmApEA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/31215ec05001834817357130973/5zROpbXmApEA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-25 20:33:01"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/b0b07c0a5001834817647784921/uA5Y8WJWzjYA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/b0b07c0a5001834817647784921/uA5Y8WJWzjYA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/b0b07c0a5001834817647784921/uA5Y8WJWzjYA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 14:33:50"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5d09c5545001834817568588648/vytjJ9v9LJAA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5d09c5545001834817568588648/vytjJ9v9LJAA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5d09c5545001834817568588648/vytjJ9v9LJAA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 14:33:55"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5d1a30935001834817568595478/f1WNHHNJo18A.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5d1a30935001834817568595478/f1WNHHNJo18A.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5d1a30935001834817568595478/f1WNHHNJo18A.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 16:11:28"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7cedf9485001834817626149819/a7bxJtJQuAsA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7cedf9485001834817626149819/a7bxJtJQuAsA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7cedf9485001834817626149819/a7bxJtJQuAsA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 16:17:28"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5844f04a5001834817551687952/SVnJVoDpJcsA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5844f04a5001834817551687952/SVnJVoDpJcsA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5844f04a5001834817551687952/SVnJVoDpJcsA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 16:17:31"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/4ac033485001834817395261893/BCUFux6nVQ0A.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/4ac033485001834817395261893/BCUFux6nVQ0A.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/4ac033485001834817395261893/BCUFux6nVQ0A.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 16:17:36"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c77dc055001834817568506364/ditoVNon3coA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c77dc055001834817568506364/ditoVNon3coA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5c77dc055001834817568506364/ditoVNon3coA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 16:17:42"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ddb145695001834817359928146/ZiHiSNtgp6IA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ddb145695001834817359928146/ZiHiSNtgp6IA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ddb145695001834817359928146/ZiHiSNtgp6IA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 16:17:51"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/09575f3f5001834817360405388/c6AW851CLUUA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/09575f3f5001834817360405388/c6AW851CLUUA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/09575f3f5001834817360405388/c6AW851CLUUA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 16:18:11"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ef7cc1f05001834817587871792/NW0pbLJYejoA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ef7cc1f05001834817587871792/NW0pbLJYejoA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ef7cc1f05001834817587871792/NW0pbLJYejoA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 16:18:27"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/3fa2eb6e5001834817697139719/CrdQcBAutAcA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/3fa2eb6e5001834817697139719/CrdQcBAutAcA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/3fa2eb6e5001834817697139719/CrdQcBAutAcA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 16:18:29"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5d17ed235001834817568591007/hOFCWVIcadEA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5d17ed235001834817568591007/hOFCWVIcadEA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5d17ed235001834817568591007/hOFCWVIcadEA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 16:21:29"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/edfb0c715001834817397658818/TyKZjAmWJCIA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/edfb0c715001834817397658818/TyKZjAmWJCIA.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/edfb0c715001834817397658818/TyKZjAmWJCIA.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 16:22:08"
-  },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/1ab1fb5f5001834817581581900/s8rqFCmzpt8A.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/1ab1fb5f5001834817581581900/s8rqFCmzpt8A.mp4",
-    "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/1ab1fb5f5001834817581581900/s8rqFCmzpt8A.mp4",
-    "data": null,
-    "description": "",
-    "discovered_at": "2026-08-26 16:23:46"
+    "discovered_at": "2026-08-28 17:54:31"
   },
   "POST /mp/app/domestic/version/check": {
     "url": "https://test.supervisions.cn/mp/app/domestic/version/check",
@@ -947,86 +90,142 @@
       "lang": "zh_CN"
     },
     "description": "",
-    "discovered_at": "2026-08-26 19:14:07"
+    "discovered_at": "2026-08-28 18:02:16"
   },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5f4bc9b35001834817568676964/1UJD27s1aGkA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5f4bc9b35001834817568676964/1UJD27s1aGkA.mp4",
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9ffe8e9a5001834818022727515/hOxg17wSIEcA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9ffe8e9a5001834818022727515/hOxg17wSIEcA.mp4",
     "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5f4bc9b35001834817568676964/1UJD27s1aGkA.mp4",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/9ffe8e9a5001834818022727515/hOxg17wSIEcA.mp4",
     "data": null,
     "description": "",
-    "discovered_at": "2026-08-26 19:43:44"
+    "discovered_at": "2026-08-28 18:39:19"
   },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ccce06285001834817692744644/7vGsHPlZ4goA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ccce06285001834817692744644/7vGsHPlZ4goA.mp4",
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/b4b0db8f5001834818189595267/ZPK1NzfJylwA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/b4b0db8f5001834818189595267/ZPK1NzfJylwA.mp4",
     "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/ccce06285001834817692744644/7vGsHPlZ4goA.mp4",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/b4b0db8f5001834818189595267/ZPK1NzfJylwA.mp4",
     "data": null,
     "description": "",
-    "discovered_at": "2026-08-26 19:51:07"
+    "discovered_at": "2026-08-28 18:39:33"
   },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/b91b09c95001834817583752962/u9sA0oSPahAA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/b91b09c95001834817583752962/u9sA0oSPahAA.mp4",
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/a2f36d735001834818202197102/6GlsyUs43cUA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/a2f36d735001834818202197102/6GlsyUs43cUA.mp4",
     "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/b91b09c95001834817583752962/u9sA0oSPahAA.mp4",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/a2f36d735001834818202197102/6GlsyUs43cUA.mp4",
     "data": null,
     "description": "",
-    "discovered_at": "2026-08-26 23:30:41"
+    "discovered_at": "2026-08-28 20:15:37"
   },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5853ba865001834817551691872/eaau1YYgavgA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5853ba865001834817551691872/eaau1YYgavgA.mp4",
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/dee235125001834818081823100/rpeAfH4dJCwA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/dee235125001834818081823100/rpeAfH4dJCwA.mp4",
     "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/5853ba865001834817551691872/eaau1YYgavgA.mp4",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/dee235125001834818081823100/rpeAfH4dJCwA.mp4",
     "data": null,
     "description": "",
-    "discovered_at": "2026-08-26 23:30:50"
+    "discovered_at": "2026-08-28 20:30:19"
   },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/66aa78d75001834818083090332/rpAqrV6ziW0A.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/66aa78d75001834818083090332/rpAqrV6ziW0A.mp4",
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7d692eb75001834818103242286/lWfLgbxi5nsA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7d692eb75001834818103242286/lWfLgbxi5nsA.mp4",
     "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/66aa78d75001834818083090332/rpAqrV6ziW0A.mp4",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/7d692eb75001834818103242286/lWfLgbxi5nsA.mp4",
     "data": null,
     "description": "",
-    "discovered_at": "2026-08-27 21:53:36"
+    "discovered_at": "2026-08-28 20:34:43"
   },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/71b657a15001834818083509391/kCLMdCNS7qgA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/71b657a15001834818083509391/kCLMdCNS7qgA.mp4",
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/2044c3915001834818082333210/HppDbAB0hGQA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/2044c3915001834818082333210/HppDbAB0hGQA.mp4",
     "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/71b657a15001834818083509391/kCLMdCNS7qgA.mp4",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/2044c3915001834818082333210/HppDbAB0hGQA.mp4",
     "data": null,
     "description": "",
-    "discovered_at": "2026-08-27 21:56:12"
+    "discovered_at": "2026-08-28 20:35:03"
   },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/f04228825001834818088405257/nBwquiakcnMA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/f04228825001834818088405257/nBwquiakcnMA.mp4",
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/b2f52f025001834817987209104/G0YQgxxX8QoA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/b2f52f025001834817987209104/G0YQgxxX8QoA.mp4",
     "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/f04228825001834818088405257/nBwquiakcnMA.mp4",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/b2f52f025001834817987209104/G0YQgxxX8QoA.mp4",
     "data": null,
     "description": "",
-    "discovered_at": "2026-08-27 22:09:21"
+    "discovered_at": "2026-08-28 20:37:58"
   },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/f75564865001834818088718371/Gzd7AsyGbO8A.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/f75564865001834818088718371/Gzd7AsyGbO8A.mp4",
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d7674fe25001834818193749321/I9QjOtyel4sA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d7674fe25001834818193749321/I9QjOtyel4sA.mp4",
     "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/f75564865001834818088718371/Gzd7AsyGbO8A.mp4",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d7674fe25001834818193749321/I9QjOtyel4sA.mp4",
     "data": null,
     "description": "",
-    "discovered_at": "2026-08-27 22:10:34"
+    "discovered_at": "2026-08-28 21:27:53"
   },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/c4a359eb5001834818091593849/q45Afo7p0EcA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/c4a359eb5001834818091593849/q45Afo7p0EcA.mp4",
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d5684b895001834818193691629/y3DJHckIFgEA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d5684b895001834818193691629/y3DJHckIFgEA.mp4",
     "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/c4a359eb5001834818091593849/q45Afo7p0EcA.mp4",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d5684b895001834818193691629/y3DJHckIFgEA.mp4",
     "data": null,
     "description": "",
-    "discovered_at": "2026-08-27 22:46:31"
+    "discovered_at": "2026-08-28 21:27:59"
   },
-  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/80eb0e275001834818090982556/Ml0cvOQ9YeMA.mp4": {
-    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/80eb0e275001834818090982556/Ml0cvOQ9YeMA.mp4",
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/aae49e525001834817956659475/iEiOMYPUnrgA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/aae49e525001834817956659475/iEiOMYPUnrgA.mp4",
     "method": "GET",
-    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/80eb0e275001834818090982556/Ml0cvOQ9YeMA.mp4",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/aae49e525001834817956659475/iEiOMYPUnrgA.mp4",
     "data": null,
     "description": "",
-    "discovered_at": "2026-08-27 22:49:52"
+    "discovered_at": "2026-08-28 21:29:29"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/4ce556605001834818007909732/6ew88335GV4A.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/4ce556605001834818007909732/6ew88335GV4A.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/4ce556605001834818007909732/6ew88335GV4A.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-28 21:29:37"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d26c80255001834817977714125/m358GB2lzmYA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d26c80255001834817977714125/m358GB2lzmYA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d26c80255001834817977714125/m358GB2lzmYA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-28 21:29:41"
+  },
+  "POST https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d26c80255001834817977714125/m358GB2lzmYA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d26c80255001834817977714125/m358GB2lzmYA.mp4",
+    "method": "POST",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/d26c80255001834817977714125/m358GB2lzmYA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-28 21:30:03"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/c149215b5001834818179271032/AFQeUUadTaoA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/c149215b5001834818179271032/AFQeUUadTaoA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/c149215b5001834818179271032/AFQeUUadTaoA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-28 21:33:28"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/947144fe5001834818175580405/JaywaThCs1QA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/947144fe5001834818175580405/JaywaThCs1QA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/947144fe5001834818175580405/JaywaThCs1QA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-28 21:33:29"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/a2f56b565001834818165302226/cEFrlUryth8A.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/a2f56b565001834818165302226/cEFrlUryth8A.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/a2f56b565001834818165302226/cEFrlUryth8A.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-28 21:33:31"
+  },
+  "GET https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bc47ba2c5001834817987605753/EyhckN69JKUA.mp4": {
+    "url": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bc47ba2c5001834817987605753/EyhckN69JKUA.mp4",
+    "method": "GET",
+    "path": "https://1255586792.vod2.myqcloud.com/398c6e54vodcq1255586792/bc47ba2c5001834817987605753/EyhckN69JKUA.mp4",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-28 21:33:31"
   }
 }

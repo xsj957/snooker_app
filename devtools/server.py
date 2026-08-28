@@ -62,18 +62,13 @@ _auto_auth = {
     'refresh_token': None,
 }
 
-# HTML 文件路径（与本文件同目录下的 index.html）
-_HTML_DIR = os.path.dirname(os.path.abspath(__file__))
-_HTML_CACHE = {"content": None}
+# HTML 已内嵌到 devtools/html_template.py 中，无需外部 index.html 文件
 
 
 def get_html():
-    """读取 DevTools HTML 页面（带缓存）"""
-    if _HTML_CACHE["content"] is None:
-        path = os.path.join(_HTML_DIR, "index.html")
-        with open(path, "r", encoding="utf-8") as f:
-            _HTML_CACHE["content"] = f.read()
-    return _HTML_CACHE["content"]
+    """返回内嵌的 DevTools HTML 页面"""
+    from devtools.html_template import DEVTOOLS_HTML
+    return DEVTOOLS_HTML
 
 
 # ============== 颜色 ==============
@@ -373,11 +368,18 @@ class LogBuffer:
         with self._lock:
             logs = list(self._logs)
 
+        full_reset = False
         if since_id is not None:
+            found = False
             for i, log in enumerate(logs):
                 if log['id'] == since_id:
                     logs = logs[i + 1:]
+                    found = True
                     break
+            if not found:
+                # since_id 已被淘汰（buffer 溢出截断），返回全部数据让前端重建状态
+                logs = list(self._logs)
+                full_reset = True
 
         if method_filter:
             logs = [l for l in logs if l.get('method', '').upper() == method_filter.upper()]
@@ -397,7 +399,7 @@ class LogBuffer:
             except ValueError:
                 pass
 
-        return logs
+        return logs, full_reset
 
     def get_stats(self):
         with self._lock:
@@ -413,6 +415,11 @@ class LogBuffer:
             }
 
     def clear(self):
+        with self._lock:
+            self._logs.clear()
+
+    def reset(self):
+        """启动时重置缓冲区，确保不残留上次运行的数据"""
         with self._lock:
             self._logs.clear()
 
@@ -485,7 +492,7 @@ class HTMLRequestHandler(BaseHTTPRequestHandler):
         method_filter = params.get('method', [None])[0]
         status_filter = params.get('status', [None])[0]
 
-        logs = log_buffer.get_all(since_id, method_filter, status_filter)
+        logs, full_reset = log_buffer.get_all(since_id, method_filter, status_filter)
         stats = log_buffer.get_stats()
 
         self.send_response(200)
@@ -495,9 +502,16 @@ class HTMLRequestHandler(BaseHTTPRequestHandler):
 
         response = {
             'stats': stats,
-            'logs': logs
+            'logs': logs,
+            'full_reset': full_reset,  # True = 前端应替换而非追加
         }
         self.wfile.write(_safe_json_dumps(response).encode('utf-8'))
+
+
+class ReusableHTTPServer(HTTPServer):
+    """支持 SO_REUSEADDR 的 HTTPServer，避免 TIME_WAIT 导致端口绑定失败"""
+    allow_reuse_address = True
+    allow_reuse_port = True
 
 
 def start_html_server(port):
@@ -508,7 +522,7 @@ def start_html_server(port):
 
     for p in ports_to_try:
         try:
-            server = HTTPServer(('127.0.0.1', p), HTMLRequestHandler)
+            server = ReusableHTTPServer(('127.0.0.1', p), HTMLRequestHandler)
             actual_port = p
             if p != port:
                 cprint(f"  端口 {port} 被占用，使用备用端口 {p}", Colors.YELLOW)

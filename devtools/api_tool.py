@@ -59,6 +59,7 @@ from devtools.server import (
     log_buffer, configure,
     start_html_server,
     format_time, format_size, short_device_id,
+    next_log_id,
 )
 
 # ============== ADB 设备检测 ==============
@@ -387,6 +388,9 @@ def cmd_auto(args):
     cprint("Ctrl+C 停止", Colors.DIM)
     cprint("=" * 60)
 
+    # 启动前重置日志缓冲区，确保不残留上次运行的数据
+    log_buffer.reset()
+
     # 初始化已知接口
     builtin_paths = {
         "/mp/user/info", "/mp/user/myClubs", "/mp/user/saveDefaultClub",
@@ -514,7 +518,7 @@ def cmd_auto(args):
                         response_raw = str(resp_body)
 
                 log_entry = {
-                    'id': req_id,
+                    'id': next_log_id(),  # 全局唯一递增 ID，避免多设备 per-buffer seq 冲突
                     'timestamp': datetime.now().strftime('%H:%M:%S'),
                     'device': tag,
                     'method': method,
@@ -693,6 +697,20 @@ def cmd_auto(args):
         adb_cmd = ["adb", "-s", device_id, "logcat"]
         tag = short_device_id(device_id)
         proc = None
+
+        # 启动流式读取前，先排空设备端 logcat 环形缓冲区中的残留历史条目
+        # adb logcat -c 清空后，USB 管道可能仍残留旧数据；-d 模式一次性读走这些残留
+        try:
+            for _ in range(3):
+                drain = subprocess.run(
+                    ["adb", "-s", device_id, "logcat", "-d", "-v", "brief"],
+                    capture_output=True, text=True, timeout=3
+                )
+                if not drain.stdout or not drain.stdout.strip():
+                    break
+        except Exception as e:
+            safe_print(f"  [{tag}] logcat缓冲区排空失败(不影响使用): {e}", Colors.DIM)
+
         buf = {
             "seq": 0,
             "uri": None, "method": None,
