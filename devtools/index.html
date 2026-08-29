@@ -968,13 +968,49 @@ function renderPreviewTab(req) {
         return;
     }
 
-    if (!req.response_body || (typeof req.response_body === 'object' && Object.keys(req.response_body).length === 0)) {
+    // 获取响应数据，尝试解析为 JSON 对象
+    let body = req.response_body;
+
+    // 如果 response_body 是字符串，尝试解析为 JSON
+    if (typeof body === 'string') {
+        const trimmed = body.trim();
+        if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+            try {
+                body = JSON.parse(trimmed);
+            } catch (e) {
+                // 解析失败，保持原字符串
+            }
+        }
+    }
+
+    // 如果 response_body 仍为空，尝试使用 response_raw
+    if (!body && req.response_raw) {
+        const raw = req.response_raw.trim();
+        if (raw.startsWith('{') || raw.startsWith('[')) {
+            try {
+                body = JSON.parse(raw);
+            } catch (e) {
+                // 解析失败
+            }
+        }
+        if (!body) {
+            body = req.response_raw;
+        }
+    }
+
+    if (!body || (typeof body === 'object' && Object.keys(body).length === 0 && !Array.isArray(body))) {
         div.innerHTML = '<span style="color:#555">No response data' + (!req.status ? ' (pending...)' : '') + '</span>';
         return;
     }
 
+    // 如果是字符串（非 JSON），直接显示
+    if (typeof body === 'string') {
+        div.innerHTML = '<div class="raw-view">' + escapeHtml(body) + '</div>';
+        return;
+    }
+
     // 可折叠 JSON 树（根节点不显示 key）
-    div.innerHTML = buildJsonTree(req.response_body, null);
+    div.innerHTML = buildJsonTree(body, null);
 }
 
 // ----- Raw Tab -----
