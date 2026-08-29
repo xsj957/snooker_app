@@ -735,8 +735,14 @@ def cmd_auto(args):
             if "Response Text:" in content:
                 buf["in_response"] = "body"
                 after_marker = content.split("Response Text:")[-1].strip()
-                if after_marker and "[DIO]" not in after_marker:
-                    buf["response_lines"].append(after_marker)
+                # 总是尝试捕获 Response Text: 后面的内容，即使包含 [DIO]
+                if after_marker:
+                    # 去除 [DIO] 标记
+                    clean = after_marker
+                    if "[DIO]" in clean:
+                        clean = clean.split("[DIO]")[-1].strip()
+                    if clean and not clean.startswith("***"):
+                        buf["response_lines"].append(clean)
             elif content.strip():
                 m = re.match(r'^([\w\-]+)\s*:\s*(.+)$', content)
                 if m:
