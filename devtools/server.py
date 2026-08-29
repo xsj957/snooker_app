@@ -9,8 +9,10 @@ import re
 import json
 import time
 import base64
+import gzip
 import threading
 import urllib.parse
+import http.client
 from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -61,6 +63,7 @@ _auto_auth = {
     'token': None,
     'refresh_token': None,
 }
+_auto_auth_lock = threading.Lock()  # 保护 _auto_auth 的并发访问
 
 # HTML 已内嵌到 devtools/html_template.py 中，无需外部 index.html 文件
 
@@ -141,10 +144,12 @@ def _dart_to_json(dart_str):
         parts.append(current.strip())
 
     for part in parts:
-        if ":" in part:
-            key, _, value = part.partition(":")
-            key = key.strip()
-            value = value.strip()
+        # 用正则匹配 key: value 分隔符（key 后跟 `:` + 至少一个空白符）
+        # \s+ 确保 `https://` 不会被误匹配为 key='https'
+        m = re.match(r'^(\w+)\s*:\s+(.*)', part, re.DOTALL)
+        if m:
+            key = m.group(1).strip()
+            value = m.group(2).strip()
             if value == "null":
                 result[key] = None
             elif value == "true":
@@ -187,9 +192,9 @@ def _fetch_full_response(uri, method, data_str):
     if data is None:
         data = {"raw": data_str[:200] if data_str else ""}
 
+    conn = None
     try:
-        from urllib.parse import urlparse
-        parsed = urlparse(uri)
+        parsed = urllib.parse.urlparse(uri)
         host = parsed.hostname
         port = parsed.port or (443 if parsed.scheme == 'https' else 80)
         path = parsed.path or '/'
@@ -197,10 +202,8 @@ def _fetch_full_response(uri, method, data_str):
             path += '?' + parsed.query
 
         if parsed.scheme == 'https':
-            import http.client
             conn = http.client.HTTPSConnection(host, port, timeout=10)
         else:
-            import http.client
             conn = http.client.HTTPConnection(host, port, timeout=10)
 
         body_bytes = json.dumps(data).encode('utf-8')
@@ -215,7 +218,6 @@ def _fetch_full_response(uri, method, data_str):
         t_first_byte = time.time()
         resp_body_raw = resp.read()
         t_end = time.time()
-        conn.close()
 
         ttfb_ms = round((t_first_byte - t_start) * 1000, 1)
         download_ms = round((t_end - t_first_byte) * 1000, 1)
@@ -248,6 +250,12 @@ def _fetch_full_response(uri, method, data_str):
             'timing': {},
             'error': str(e)
         }
+    finally:
+        if conn is not None:
+            try:
+                conn.close()
+            except Exception:
+                pass
 
 
 # ============== API 记忆库 ==============
@@ -258,10 +266,15 @@ MEMORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "api_memo
 class MemoryManager:
     """线程安全的 API 记忆库管理器"""
 
+    # 条目过期时间（秒）。默认 30 天
+    MAX_AGE_SECONDS = 30 * 24 * 3600
+
     def __init__(self, filepath):
         self._filepath = filepath
-        self._lock = threading.Lock()
+        self._lock = threading.Lock()          # 保护 self._cache（内存）
+        self._disk_lock = threading.Lock()     # 保护文件写入（磁盘），与 _lock 分离避免 Windows PermissionError
         self._cache = self._load()
+        self._purge_expired()
         self._dirty = False
         self._save_timer = threading.Timer(30.0, self._periodic_save)
         self._save_timer.daemon = True
@@ -276,19 +289,49 @@ class MemoryManager:
                 return {}
         return {}
 
-    def _save_unlocked(self):
-        try:
-            with open(self._filepath, "w", encoding="utf-8") as f:
-                json.dump(self._cache, f, ensure_ascii=False, indent=2)
-            self._dirty = False
-        except OSError:
-            pass
+    def _purge_expired(self):
+        """清理超过 MAX_AGE_SECONDS 的旧条目"""
+        cutoff = datetime.now().timestamp() - self.MAX_AGE_SECONDS
+        to_remove = []
+        for key, val in self._cache.items():
+            discovered = val.get("discovered_at", "")
+            try:
+                dt = datetime.strptime(discovered, "%Y-%m-%d %H:%M:%S")
+                if dt.timestamp() < cutoff:
+                    to_remove.append(key)
+            except (ValueError, TypeError):
+                pass
+        for key in to_remove:
+            del self._cache[key]
+        if to_remove:
+            self._dirty = True
+
+    def _save_to_disk(self):
+        """写磁盘 — 原子写入：先写临时文件，再 rename，防止崩溃导致数据丢失"""
+        with self._disk_lock:
+            try:
+                # 在 disk_lock 内快照 cache，保证写入一致性
+                snapshot = dict(self._cache)
+                tmp_path = self._filepath + '.tmp'
+                with open(tmp_path, "w", encoding="utf-8") as f:
+                    json.dump(snapshot, f, ensure_ascii=False, indent=2)
+                # 原子替换（Windows 上 rename 会覆盖已存在的目标文件）
+                if os.path.exists(self._filepath):
+                    os.replace(tmp_path, self._filepath)
+                else:
+                    os.rename(tmp_path, self._filepath)
+                self._dirty = False
+            except OSError:
+                pass
 
     def _periodic_save(self):
         try:
+            should_save = False
             with self._lock:
                 if self._dirty:
-                    self._save_unlocked()
+                    should_save = True
+            if should_save:
+                self._save_to_disk()
         except Exception:
             pass
         try:
@@ -299,9 +342,12 @@ class MemoryManager:
             pass
 
     def flush(self):
+        should_save = False
         with self._lock:
             if self._dirty:
-                self._save_unlocked()
+                should_save = True
+        if should_save:
+            self._save_to_disk()
 
     def shutdown(self):
         try:
@@ -319,7 +365,11 @@ class MemoryManager:
         return f"{method} {path}"
 
     def add(self, uri, method, data_str, description=""):
+        # 跳过 CDN 视频原片（.mp4），不写入记忆库
+        if re.search(r'\.mp4(\?|$)', uri):
+            return False
         key = self.get_key(uri, method)
+        should_save = False
         with self._lock:
             if key in self._cache:
                 return False
@@ -337,8 +387,11 @@ class MemoryManager:
                 "discovered_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
             self._dirty = True
-            self._save_unlocked()
-            return True
+            should_save = True
+        # 在锁外写磁盘，不阻塞并发读
+        if should_save:
+            self._save_to_disk()
+        return True
 
     def known_urls(self):
         with self._lock:
@@ -360,7 +413,9 @@ class LogBuffer:
 
     def add(self, log_entry):
         with self._lock:
-            self._logs.append(log_entry)
+            # 入库前清洗一次，serve 时直接用 json.dumps（不重复清洗）
+            cleaned = _clean_for_json(log_entry)
+            self._logs.append(cleaned)
             if len(self._logs) > self._max_size:
                 self._logs = self._logs[-self._max_size:]
 
@@ -436,17 +491,21 @@ def next_log_id():
         return log_id_counter
 
 
+def _clean_for_json(o):
+    """递归清理字符串中的孤立 surrogate，确保 json.dumps + utf-8 编码不报错。
+    在数据入库时调用一次，避免每次轮询重复清洗。"""
+    if isinstance(o, str):
+        return o.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
+    elif isinstance(o, list):
+        return [_clean_for_json(item) for item in o]
+    elif isinstance(o, dict):
+        return {_clean_for_json(k): _clean_for_json(v) for k, v in o.items()}
+    return o
+
+
 def _safe_json_dumps(obj):
-    """递归清理字符串中的孤立 surrogate，确保 json.dumps + utf-8 编码不报错"""
-    def _clean(o):
-        if isinstance(o, str):
-            return o.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
-        elif isinstance(o, list):
-            return [_clean(item) for item in o]
-        elif isinstance(o, dict):
-            return {_clean(k): _clean(v) for k, v in o.items()}
-        return o
-    return json.dumps(_clean(obj), ensure_ascii=False)
+    """JSON 序列化（assume 数据已在入库时清洗过）"""
+    return json.dumps(obj, ensure_ascii=False, separators=(',', ':'))
 
 
 # ============== DevTools HTTP 服务 ==============
@@ -456,6 +515,42 @@ class HTMLRequestHandler(BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):
         pass
+
+    @staticmethod
+    def _is_safe_origin(origin):
+        """检查 origin 是否为安全的本地来源（防止 localhost.evil.com 绕过）"""
+        if not origin:
+            return False
+        # 精确匹配（无端口）或前缀匹配后跟 : 或 /（有端口或路径）
+        for prefix in ('http://localhost', 'http://127.0.0.1'):
+            if origin == prefix:
+                return True
+            if origin.startswith(prefix) and len(origin) > len(prefix) and origin[len(prefix)] in (':', '/'):
+                return True
+        return False
+
+    def _set_cors(self):
+        """设置 CORS 头 — 仅允许本地 origin（边界检查，防止 localhost.evil.com 绕过）"""
+        origin = self.headers.get('Origin', '')
+        if self._is_safe_origin(origin):
+            self.send_header('Access-Control-Allow-Origin', origin)
+
+    def _send_json(self, data, allow_gzip=True):
+        """发送 JSON 响应，支持 gzip 压缩"""
+        body = _safe_json_dumps(data).encode('utf-8')
+        use_gzip = (
+            allow_gzip
+            and len(body) > 1024
+            and 'gzip' in (self.headers.get('Accept-Encoding') or '')
+        )
+        self.send_header('Content-type', 'application/json; charset=utf-8')
+        self._set_cors()
+        if use_gzip:
+            body = gzip.compress(body)
+            self.send_header('Content-Encoding', 'gzip')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -468,7 +563,7 @@ class HTMLRequestHandler(BaseHTTPRequestHandler):
             log_buffer.clear()
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
+            self._set_cors()
             self.end_headers()
             self.wfile.write(b'{"ok":true}')
         else:
@@ -477,17 +572,27 @@ class HTMLRequestHandler(BaseHTTPRequestHandler):
     def serve_html(self):
         """返回 DevTools HTML 页面"""
         html = get_html()
+        body = html.encode('utf-8')
+        use_gzip = 'gzip' in (self.headers.get('Accept-Encoding') or '')
         self.send_response(200)
         self.send_header('Content-type', 'text/html; charset=utf-8')
+        self._set_cors()
+        if use_gzip and len(body) > 1024:
+            body = gzip.compress(body)
+            self.send_header('Content-Encoding', 'gzip')
+        self.send_header('Content-Length', str(len(body)))
         self.end_headers()
-        self.wfile.write(html.encode('utf-8'))
+        self.wfile.write(body)
 
     def serve_logs_json(self, parsed):
-        """返回日志 JSON 数据（支持筛选参数）"""
+        """返回日志 JSON 数据（支持筛选参数 + gzip）"""
         params = urllib.parse.parse_qs(parsed.query)
         since_id = params.get('since', [None])[0]
         if since_id is not None:
-            since_id = int(since_id)
+            try:
+                since_id = int(since_id)
+            except (ValueError, TypeError):
+                since_id = None
 
         method_filter = params.get('method', [None])[0]
         status_filter = params.get('status', [None])[0]
@@ -496,16 +601,7 @@ class HTMLRequestHandler(BaseHTTPRequestHandler):
         stats = log_buffer.get_stats()
 
         self.send_response(200)
-        self.send_header('Content-type', 'application/json; charset=utf-8')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-
-        response = {
-            'stats': stats,
-            'logs': logs,
-            'full_reset': full_reset,  # True = 前端应替换而非追加
-        }
-        self.wfile.write(_safe_json_dumps(response).encode('utf-8'))
+        self._send_json({'stats': stats, 'logs': logs, 'full_reset': full_reset})
 
 
 class ReusableHTTPServer(HTTPServer):
@@ -543,7 +639,7 @@ def start_html_server(port):
         except Exception as e:
             safe_print(f"  HTML 服务异常: {e}", Colors.RED)
 
-    thread = threading.Thread(target=_run_server, daemon=False)
+    thread = threading.Thread(target=_run_server, daemon=True)
     thread.start()
     return server, actual_port
 

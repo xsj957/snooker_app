@@ -3,6 +3,14 @@ i4Tools9/
 video/
 app-android.apk
 
+# ADB / scrcpy / 日志
+platform-tools/
+scrcpy-win64-v4.1/
+logs/
+
+# 抓包缓存（含临时 mp4 URL）
+devtools/api_memory.json
+
 # Python
 __pycache__/
 *.pyc

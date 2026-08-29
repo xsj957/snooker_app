@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-斯诺克大师 App API 抓包调试工具 v3.0
-功能：实时抓包 + Chrome DevTools 风格 HTML 界面
+斯诺克大师 App API 抓包调试工具 v3.1
+功能：实时抓包 + 智能阈值 + Chrome DevTools 风格 HTML 界面
+      小响应直接用 logcat 数据，大响应才走 Python requests 绕过截断
+
 用法：python devtools/api_tool.py <command> [options]
 
 命令：
@@ -18,7 +20,7 @@
                 示例：python devtools/api_tool.py auto -s 设备ID
 
 auto 专用参数：
-  --full        异步获取完整响应（Python requests 调用，绕过 logcat 截断）
+  --full        智能获取完整响应（小响应直接用 logcat，大响应才走 Python requests 绕过截断）
                 示例：python devtools/api_tool.py auto --full
   --html        启动 HTML DevTools 界面（浏览器访问 http://localhost:8765）
                 示例：python devtools/api_tool.py auto --full --html
@@ -55,7 +57,7 @@ from devtools.server import (
     BASE_URL, HEADERS, USER_ID,
     Colors, cprint, safe_print,
     _memory_mgr, _parse_request_data, _fetch_full_response,
-    _decode_jwt_payload, _auto_auth,
+    _decode_jwt_payload, _auto_auth, _auto_auth_lock,
     log_buffer, configure,
     start_html_server,
     format_time, format_size, short_device_id,
@@ -350,6 +352,10 @@ def cmd_list(_args):
 
 def cmd_auto(args):
     """实时监控 + DevTools 风格 HTML 界面"""
+    # 智能阈值：logcat 响应字符数低于此值时直接使用，超过则走 Python requests 获取完整响应
+    # Android logcat 单行限制 ~4096 字节，接近此长度的行可能被截断
+    RESPONSE_SIZE_THRESHOLD = 3500
+
     devices = getattr(args, '_devices', None)
     if not devices:
         cprint("未检测到 ADB 设备，请检查连接", Colors.RED)
@@ -371,17 +377,12 @@ def cmd_auto(args):
         cprint(f"自动监控模式 v3.0 | 设备: {devices[0]}", Colors.CYAN, bold=True)
 
     if full_mode:
-        cprint("模式: 异步获取完整响应 + DevTools 界面", Colors.CYAN)
+        cprint("模式: 智能阈值（小响应直接用 logcat，大响应走 Python）", Colors.CYAN)
     else:
-        cprint("模式: logcat 监听（大响应可能截断）", Colors.CYAN)
+        cprint("模式: logcat 监听（小响应直接显示）", Colors.CYAN)
 
-    if html_mode:
-        try:
-            html_server, actual_port = start_html_server(html_port)
-            cprint(f"DevTools 界面: http://localhost:{actual_port}", Colors.GREEN, bold=True)
-        except Exception as e:
-            cprint(f"HTML 服务启动失败: {e}", Colors.RED)
-            html_mode = False
+    # html_server 由重连循环管理
+    html_server = None
 
     if hide_list:
         cprint(f"已隐藏接口: {', '.join(hide_list)}", Colors.DIM)
@@ -424,9 +425,8 @@ def cmd_auto(args):
     discovered_apis = []
     request_count = [0]
 
-    request_q = queue.Queue()
-    display_q = queue.Queue()
-    stop_event = threading.Event()
+    # request_q / display_q / stop_event 在重连循环内每次重建
+    # 防止旧 worker 线程在新会话中复活（stop_event.clear() 不会唤醒它们）
 
     def http_worker():
         """异步 HTTP Worker：获取完整响应 + 状态码/headers/size/timing"""
@@ -454,7 +454,7 @@ def cmd_auto(args):
             request_q.task_done()
 
     def display_worker():
-        """显示 Worker：终端输出 + HTML 日志缓冲区"""
+        """显示 Worker：处理 HTTP worker 返回的大响应（小响应已由 _complete_request 直接处理）"""
         while not stop_event.is_set():
             try:
                 item = display_q.get(timeout=0.5)
@@ -472,7 +472,9 @@ def cmd_auto(args):
                 is_new = uri not in seen_uris
                 if is_new:
                     seen_uris.add(uri)
-                    discovered_apis.append({"uri": uri, "method": method, "data": data_str})
+                    # 过滤 CDN 视频原片，不进入已发现列表
+                    if not re.search(r'\.mp4(\?|$)', uri):
+                        discovered_apis.append({"uri": uri, "method": method, "data": data_str})
                 request_count[0] += 1
                 is_known = uri in known_urls
 
@@ -480,18 +482,26 @@ def cmd_auto(args):
             prefix = f"[{tag}] "
             is_error = error is not None
 
-            # 终端输出
-            safe_print("", Colors.RESET)
+            # HTTP worker 获取的完整响应 — 终端输出
             if is_error:
                 safe_print(f"{prefix}!! {method} {path} [{status_code}]", Colors.RED, bold=True)
             elif is_new:
-                safe_print(f"{prefix}>> {method} {path} [{status_code}] [NEW]", Colors.GREEN, bold=True)
+                safe_print(f"{prefix}>> {method} {path} [{status_code}] [NEW] 🔍http", Colors.GREEN, bold=True)
             else:
-                safe_print(f"{prefix}>> {method} {path} [{status_code}]", Colors.BLUE)
+                safe_print(f"{prefix}>> {method} {path} [{status_code}] 🔍http", Colors.BLUE)
 
             if data and data != {"raw": ""}:
                 data_display = json.dumps(data, ensure_ascii=False, indent=2) if isinstance(data, dict) else str(data)
                 safe_print(f"{prefix}   请求: {data_display}", Colors.DIM)
+
+            # 格式化响应 body（提前处理，HTML 模式复用）
+            response_body = resp_body
+            response_raw = None
+            if resp_body is not None:
+                if isinstance(resp_body, (dict, list)):
+                    response_raw = json.dumps(resp_body, ensure_ascii=False, separators=(',', ':'))
+                else:
+                    response_raw = str(resp_body)
 
             if resp_body is not None and not is_error:
                 resp_display = json.dumps(resp_body, ensure_ascii=False, indent=2) if isinstance(resp_body, (dict, list)) else str(resp_body)
@@ -499,7 +509,7 @@ def cmd_auto(args):
             elif is_error:
                 safe_print(f"{prefix}   响应: (请求异常: {error})", Colors.RED)
             else:
-                safe_print(f"{prefix}   响应: (等待解析...)", Colors.DIM)
+                safe_print(f"{prefix}   响应: (空)", Colors.DIM)
 
             # 存入记忆库
             if not is_known:
@@ -509,14 +519,6 @@ def cmd_auto(args):
 
             # HTML 模式：存入日志缓冲区
             if html_mode:
-                response_body = resp_body
-                response_raw = None
-                if resp_body is not None:
-                    if isinstance(resp_body, (dict, list)):
-                        response_raw = json.dumps(resp_body, ensure_ascii=False, separators=(',', ':'))
-                    else:
-                        response_raw = str(resp_body)
-
                 log_entry = {
                     'id': next_log_id(),  # 全局唯一递增 ID，避免多设备 per-buffer seq 冲突
                     'timestamp': datetime.now().strftime('%H:%M:%S'),
@@ -536,6 +538,7 @@ def cmd_auto(args):
                     'response_body': response_body,
                     'response_raw': response_raw,
                     'error': error,
+                    'source': 'http',
                 }
                 log_buffer.add(log_entry)
 
@@ -543,35 +546,156 @@ def cmd_auto(args):
 
     def _try_auto_auth(tag=""):
         """从 logcat 捕获的认证信息自动配置（只需成功一次）"""
-        if _auto_auth['detected']:
-            return
-        # 用户手动指定了认证信息，跳过自动检测
-        if getattr(args, 'user', None) or getattr(args, 'token', None):
-            return
-        if _auto_auth['token'] and _auto_auth['refresh_token']:
-            _auto_auth['detected'] = True
-            # 解码 JWT 获取 user_id
-            if not _auto_auth['user_id']:
-                payload = _decode_jwt_payload(_auto_auth['token'])
-                _auto_auth['user_id'] = payload.get('userId')
-            configure(
-                user_id=_auto_auth['user_id'],
-                token=_auto_auth['token'],
-                refresh_token=_auto_auth['refresh_token'],
-            )
-            uid = _auto_auth['user_id'] or '(未知)'
+        with _auto_auth_lock:
+            if _auto_auth['detected']:
+                return
+            # 用户手动指定了认证信息，跳过自动检测
+            if getattr(args, 'user', None) or getattr(args, 'token', None):
+                return
+            if _auto_auth['token'] and _auto_auth['refresh_token']:
+                _auto_auth['detected'] = True
+                # 解码 JWT 获取 user_id
+                if not _auto_auth['user_id']:
+                    payload = _decode_jwt_payload(_auto_auth['token'])
+                    _auto_auth['user_id'] = payload.get('userId')
+                token = _auto_auth['token']
+                refresh_token = _auto_auth['refresh_token']
+                user_id = _auto_auth['user_id']
+        # 在锁外调用 configure，避免持锁过久
+        if _auto_auth.get('detected'):
+            configure(user_id=user_id, token=token, refresh_token=refresh_token)
+            uid = user_id or '(未知)'
             safe_print(f"  [{tag}]  自动检测到用户身份: {uid}", Colors.GREEN)
+
+    def _complete_request(buf, device_id, reason="next_request"):
+        """
+        完成一个请求 — 智能判断使用 logcat 响应还是 Python requests
+        小响应（< RESPONSE_SIZE_THRESHOLD 字符）直接用 logcat 捕获的响应
+        大响应或疑似截断的响应走 Python HTTP worker 获取完整数据
+        非 --full 模式始终使用 logcat 响应（不走 HTTP worker）
+        """
+        if not buf["uri"] or not buf["method"]:
+            return
+
+        tag = short_device_id(device_id)
+        data_str = " ".join(buf["data_lines"])
+        req_headers = dict(buf["req_headers"]) if buf["req_headers"] else {}
+        response_raw = "".join(buf["response_lines"])
+
+        # 判断是否直接使用 logcat 响应
+        if not full_mode:
+            # 非 --full 模式：始终使用 logcat 响应
+            use_logcat = True
+        elif len(response_raw) < RESPONSE_SIZE_THRESHOLD:
+            # 小响应：直接使用 logcat 捕获的数据
+            use_logcat = True
+        else:
+            # 大响应：走 Python HTTP 重新获取完整数据
+            use_logcat = False
+
+        if use_logcat:
+            # === 直接使用 logcat 捕获的响应 ===
+            body = None
+            if response_raw:
+                try:
+                    body = json.loads(response_raw)
+                except (json.JSONDecodeError, ValueError):
+                    body = response_raw
+
+            # 从响应 body 中推断 status code
+            status = 200
+            if isinstance(body, dict) and 'code' in body:
+                try:
+                    code = int(body['code'])
+                    if code in (0, 200):
+                        status = 200
+                    else:
+                        status = code
+                except (ValueError, TypeError):
+                    pass
+
+            size = len(response_raw.encode('utf-8')) if response_raw else 0
+            req_id = next_log_id()  # 全局唯一 ID，避免多设备 buf['seq'] 冲突
+
+            # 终端输出
+            path = buf["uri"].replace(BASE_URL, "")
+            data_parsed, _ = _parse_request_data([data_str] if data_str else [])
+
+            with state_lock:
+                is_new = buf["uri"] not in seen_uris
+                if is_new:
+                    seen_uris.add(buf["uri"])
+                    if not re.search(r'\.mp4(\?|$)', buf["uri"]):
+                        discovered_apis.append({"uri": buf["uri"], "method": buf["method"], "data": data_str})
+                request_count[0] += 1
+                is_known = buf["uri"] in known_urls
+
+            if reason == "exception":
+                safe_print(f"\n[{tag}] !! {buf['method']} {path} [ERR]", Colors.RED, bold=True)
+            elif is_new:
+                safe_print(f"\n[{tag}] >> {buf['method']} {path} [{status}] [NEW] ⚡logcat", Colors.GREEN, bold=True)
+            else:
+                safe_print(f"\n[{tag}] >> {buf['method']} {path} [{status}] ⚡logcat", Colors.BLUE)
+
+            if data_parsed and data_parsed != {"raw": ""}:
+                data_display = json.dumps(data_parsed, ensure_ascii=False, indent=2) if isinstance(data_parsed, dict) else str(data_parsed)
+                safe_print(f"[{tag}]    请求: {data_display}", Colors.DIM)
+
+            if body is not None:
+                resp_display = json.dumps(body, ensure_ascii=False, indent=2) if isinstance(body, (dict, list)) else str(body)
+                safe_print(f"[{tag}]    响应 [{status}] ({format_size(size)}):\n{resp_display}", Colors.WHITE)
+
+            # 存入记忆库
+            if not is_known:
+                added = _memory_mgr.add(buf["uri"], buf["method"], data_str)
+                if added:
+                    safe_print(f"  [{tag}]   已存入记忆库: {buf['method']} {path}", Colors.DIM)
+
+            # HTML 模式：存入日志缓冲区
+            if html_mode:
+                response_raw_json = None
+                if body is not None:
+                    if isinstance(body, (dict, list)):
+                        response_raw_json = json.dumps(body, ensure_ascii=False, separators=(',', ':'))
+                    else:
+                        response_raw_json = str(body)
+
+                # DioException 时标记为错误
+                is_exception = (reason == "exception")
+                log_entry = {
+                    'id': req_id,
+                    'timestamp': datetime.now().strftime('%H:%M:%S'),
+                    'device': tag,
+                    'method': buf["method"],
+                    'path': path,
+                    'full_url': buf["uri"],
+                    'status': 0 if is_exception else status,
+                    'size': size,
+                    'time_ms': 0,
+                    'timing': {},
+                    'is_new': is_new,
+                    'is_error': is_exception,
+                    'request_data': data_parsed if data_parsed and data_parsed != {"raw": ""} else None,
+                    'request_headers': req_headers,
+                    'response_headers': dict(buf["resp_headers"]) if buf["resp_headers"] else {},
+                    'response_body': body,
+                    'response_raw': response_raw_json,
+                    'error': 'DioException' if is_exception else None,
+                    'source': 'logcat',
+                }
+                log_buffer.add(log_entry)
+        else:
+            # === 走 Python HTTP worker 获取完整响应 ===
+            safe_print(f"\n[{tag}] ⟳ {buf['method']} {buf['uri'].replace(BASE_URL, '')} → Python 获取完整响应...", Colors.YELLOW)
+            request_q.put((buf["seq"], device_id, buf["uri"], buf["method"],
+                           data_str, req_headers))
 
     def process_line(content, device_id, buf):
         """处理 logcat 行 — 解析 Dio 日志协议"""
         tag = short_device_id(device_id)
 
         if "*** Request ***" in content:
-            if buf["uri"] and buf["method"]:
-                req_id = buf["seq"]
-                request_q.put((req_id, device_id, buf["uri"], buf["method"],
-                               " ".join(buf["data_lines"]),
-                               dict(buf["req_headers"]) if buf["req_headers"] else {}))
+            _complete_request(buf, device_id, reason="next_request")
             buf["seq"] += 1
             buf["uri"] = None
             buf["method"] = None
@@ -593,12 +717,18 @@ def cmd_auto(args):
             return
 
         elif "*** DioException ***" in content:
-            if buf["uri"] and buf["method"]:
-                request_q.put((buf["seq"], device_id, buf["uri"], buf["method"],
-                               " ".join(buf["data_lines"]),
-                               dict(buf["req_headers"]) if buf["req_headers"] else {}))
+            _complete_request(buf, device_id, reason="exception")
+            # 完整重置 buf，防止脏数据泄漏到下一个请求
             buf["uri"] = None
+            buf["method"] = None
+            buf["data_lines"] = []
+            buf["req_headers"] = {}
+            buf["response_lines"] = []
+            buf["resp_headers"] = {}
+            buf["in_data"] = False
             buf["in_response"] = False
+            buf["captured_auth"] = False
+            buf["captured_refresh"] = False
             return
 
         elif buf["in_response"] == "headers":
@@ -627,6 +757,10 @@ def cmd_auto(args):
             m = re.search(r'uri:\s*(https?://\S+)', content)
             if m:
                 buf["uri"] = m.group(1).strip()
+                # 过滤 CDN 视频原片（.mp4），不抓不存
+                if re.search(r'\.mp4(\?|$)', buf["uri"]):
+                    buf["uri"] = None
+                    return
                 path = buf["uri"].replace(BASE_URL, "")
                 if any(h in path for h in hide_list):
                     buf["uri"] = None
@@ -644,13 +778,16 @@ def cmd_auto(args):
                 token = m.group(1).strip()
                 buf["req_headers"]["Authorization"] = token
                 # 自动认证：提取 JWT token
-                if not _auto_auth['detected'] and not buf.get("captured_auth"):
-                    _auto_auth['token'] = token
-                    buf["captured_auth"] = True
-                    # 尝试解码 JWT 获取 user_id
-                    payload = _decode_jwt_payload(token)
-                    if payload.get('userId'):
-                        _auto_auth['user_id'] = payload['userId']
+                should_auth = False
+                with _auto_auth_lock:
+                    if not _auto_auth['detected'] and not buf.get("captured_auth"):
+                        _auto_auth['token'] = token
+                        buf["captured_auth"] = True
+                        payload = _decode_jwt_payload(token)
+                        if payload.get('userId'):
+                            _auto_auth['user_id'] = payload['userId']
+                        should_auth = True
+                if should_auth:
                     _try_auto_auth(tag)
             return
 
@@ -660,9 +797,13 @@ def cmd_auto(args):
                 rt = m.group(1).strip()
                 buf["req_headers"]["refresh_token"] = rt
                 # 自动认证：提取 refresh_token
-                if not _auto_auth['detected'] and not buf.get("captured_refresh"):
-                    _auto_auth['refresh_token'] = rt
-                    buf["captured_refresh"] = True
+                should_auth = False
+                with _auto_auth_lock:
+                    if not _auto_auth['detected'] and not buf.get("captured_refresh"):
+                        _auto_auth['refresh_token'] = rt
+                        buf["captured_refresh"] = True
+                        should_auth = True
+                if should_auth:
                     _try_auto_auth(tag)
             return
 
@@ -739,17 +880,18 @@ def cmd_auto(args):
         except Exception as e:
             safe_print(f"  [{tag}] logcat错误: {e}", Colors.RED)
         finally:
-            if buf["uri"] and buf["method"]:
-                request_q.put((buf["seq"], device_id, buf["uri"], buf["method"],
-                               " ".join(buf["data_lines"]),
-                               dict(buf["req_headers"]) if buf["req_headers"] else {}))
+            _complete_request(buf, device_id, reason="flush")
             if proc:
                 proc.terminate()
 
     # 检测 App 包名（--pkg 指定优先，否则自动扫描已安装的斯诺克大师包）
+    _pkg_cache = {}
+
     def _detect_pkg(device_id):
         if pkg_override:
             return pkg_override
+        if device_id in _pkg_cache:
+            return _pkg_cache[device_id]
         for pkg in ("com.supervisions.snookermastercn", "com.supervisions.snookermaster"):
             try:
                 r = subprocess.run(
@@ -757,130 +899,251 @@ def cmd_auto(args):
                     capture_output=True, text=True, timeout=5,
                 )
                 if r.returncode == 0 and "package:" in r.stdout:
+                    _pkg_cache[device_id] = pkg
                     return pkg
             except Exception:
                 pass
+        # 缓存 None，避免每次重连重复探测
+        _pkg_cache[device_id] = None
         return None
 
-    # 抓包前强制重启 App（确保 Dio 日志从启动开始即可见）
-    if restart_app:
-        for device_id in devices:
-            tag = short_device_id(device_id)
-            pkg = _detect_pkg(device_id)
-            if not pkg:
-                safe_print(f"  [{tag}] 未检测到 App 包名，跳过重启", Colors.YELLOW)
-                continue
-            try:
-                # 获取 MainActivity（兜底用 <pkg>/.MainActivity）
-                r = subprocess.run(
-                    ["adb", "-s", device_id, "shell", "pm", "dump", pkg],
-                    capture_output=True, text=True, timeout=10,
-                )
-                activity = None
-                for line in r.stdout.splitlines():
-                    if "MAIN" in line and "LAUNCHER" in line:
-                        m = re.search(r'(\S+\.MainActivity|\S+\.SplashActivity|\S+\/\S+Activity)', line)
-                        if m:
-                            activity = m.group(1)
-                            break
-                if not activity:
-                    # 用 aapt2 方式 fallback：取 exported=true 的 MAIN/LAUNCHER
-                    r2 = subprocess.run(
-                        ["adb", "-s", device_id, "shell", "cmd", "package", "resolve-activity", "--brief", pkg],
-                        capture_output=True, text=True, timeout=5,
-                    )
-                    for line in r2.stdout.splitlines():
-                        parts = line.strip().split()
-                        if len(parts) >= 4 and parts[0] == pkg:
-                            activity = f"{parts[0]}/{parts[3]}"
-                            break
-                if not activity:
-                    activity = f"{pkg}/.MainActivity"
-                safe_print(f"  [{tag}] 启动页: {activity}", Colors.DIM)
-                subprocess.run(
-                    ["adb", "-s", device_id, "shell", "am", "force-stop", pkg],
-                    capture_output=True, timeout=5,
-                )
-                subprocess.run(
-                    ["adb", "-s", device_id, "logcat", "-c"],
-                    capture_output=True, timeout=5,
-                )
-                safe_print(f"  [{tag}] 已清空 logcat 缓冲区", Colors.DIM)
-                subprocess.run(
-                    ["adb", "-s", device_id, "shell", "am", "start", "-n", activity],
-                    capture_output=True, timeout=5,
-                )
-                safe_print(f"  [{tag}] 已重启 App，等待 3 秒...", Colors.CYAN)
-                time.sleep(3)
-            except Exception as e:
-                safe_print(f"  [{tag}] 重启失败: {e}", Colors.RED)
-    else:
-        for device_id in devices:
-            tag = short_device_id(device_id)
-            try:
-                subprocess.run(["adb", "-s", device_id, "logcat", "-c"],
-                               capture_output=True, timeout=5)
-                safe_print(f"  [{tag}] 已清空 logcat 缓冲区", Colors.DIM)
-            except Exception:
-                pass
+    # ============== USB 断开检测 + 重连循环 ==============
+    disconnect_detected = [False]
+    user_abort = [False]
+    total_requests = [0]
+    all_discovered = []
+    session_id = [0]  # 每次循环迭代递增，旧 watchdog 据此自动退出
 
-    logcat_threads = []
-    for device_id in devices:
-        t = threading.Thread(target=logcat_reader, args=(device_id,), daemon=True)
-        t.start()
-        logcat_threads.append(t)
-
-    worker_threads = []
-    http_pool = None
-    if full_mode:
-        http_pool = ThreadPoolExecutor(max_workers=4, thread_name_prefix="http-worker")
-        for _ in range(4):
-            ft = http_pool.submit(http_worker)
-            worker_threads.append(ft)
-
-    display_thread = threading.Thread(target=display_worker, daemon=True)
-    display_thread.start()
-
-    # 主线程等待
-    try:
-        while True:
-            time.sleep(1)
-            alive = any(t.is_alive() for t in logcat_threads)
-            if not alive:
-                cprint("\n所有设备 logcat 流已断开", Colors.DIM)
+    def _device_watchdog(my_session):
+        """监控所有 ADB 设备连接状态，任一设备断开时触发清理"""
+        check_interval = 3
+        consecutive_failures = {}  # per-device failure count
+        for d in devices:
+            consecutive_failures[d] = 0
+        while not stop_event.is_set():
+            time.sleep(check_interval)
+            if stop_event.is_set() or session_id[0] != my_session:
                 break
-    except KeyboardInterrupt:
-        pass
-    finally:
-        stop_event.set()
+            for dev in devices:
+                try:
+                    result = subprocess.run(
+                        ["adb", "-s", dev, "get-state"],
+                        capture_output=True, text=True, timeout=3
+                    )
+                    if result.returncode == 0 and "device" in result.stdout:
+                        consecutive_failures[dev] = 0
+                    else:
+                        consecutive_failures[dev] = consecutive_failures.get(dev, 0) + 1
+                        if consecutive_failures[dev] >= 2:
+                            if not disconnect_detected[0] and session_id[0] == my_session:
+                                disconnect_detected[0] = True
+                                tag = short_device_id(dev)
+                                safe_print(f"\n  [{tag}] ⚠ 设备连接丢失，正在清理...", Colors.YELLOW, bold=True)
+                                stop_event.set()
+                            return
+                except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+                    consecutive_failures[dev] = consecutive_failures.get(dev, 0) + 1
+                    if consecutive_failures[dev] >= 2:
+                        if not disconnect_detected[0] and session_id[0] == my_session:
+                            disconnect_detected[0] = True
+                            tag = short_device_id(dev)
+                            safe_print(f"\n  [{tag}] ⚠ 设备连接丢失，正在清理...", Colors.YELLOW, bold=True)
+                            stop_event.set()
+                        return
+
+    # ============== 重连循环 ==============
+    while True:
+        # 递增 session ID，使上一轮的 watchdog 自动退出
+        session_id[0] += 1
+        current_session = session_id[0]
+
+        # 每次重连创建全新的队列和事件（旧 worker 持有旧引用，无法复活）
+        request_q = queue.Queue()
+        display_q = queue.Queue()
+        stop_event = threading.Event()
+        disconnect_detected[0] = False
+
+        # 重置自动认证状态，使新会话重新从 logcat 捕获 token
+        with _auto_auth_lock:
+            _auto_auth['detected'] = False
+            _auto_auth['token'] = None
+            _auto_auth['refresh_token'] = None
+            _auto_auth['user_id'] = None
+
+        # 清空包名缓存，允许重新检测（用户可能在断连期间安装了 App）
+        _pkg_cache.clear()
+
+        # 清空上一次会话的 HTML 缓冲
+        log_buffer.clear()
+
+        # 重置会话计数器
+        seen_uris.clear()
+        seen_uris.update(known_urls)
+        discovered_apis.clear()
+        request_count[0] = 0
+
+        # 重启 HTML 服务（释放旧端口，重新绑定）
+        if html_mode:
+            if html_server:
+                try:
+                    html_server.shutdown()
+                except Exception:
+                    pass
+                time.sleep(0.5)
+            try:
+                html_server, actual_port = start_html_server(html_port)
+                cprint(f"  DevTools 界面: http://localhost:{actual_port}", Colors.GREEN, bold=True)
+            except Exception as e:
+                cprint(f"  HTML 服务启动失败: {e}", Colors.RED)
+
+        # 重启 App / 清空 logcat
+        if restart_app:
+            for device_id in devices:
+                tag = short_device_id(device_id)
+                pkg = _detect_pkg(device_id)
+                if not pkg:
+                    continue
+                try:
+                    r = subprocess.run(
+                        ["adb", "-s", device_id, "shell", "pm", "dump", pkg],
+                        capture_output=True, text=True, timeout=10,
+                    )
+                    activity = None
+                    for line in r.stdout.splitlines():
+                        if "MAIN" in line and "LAUNCHER" in line:
+                            m = re.search(r'(\S+\.MainActivity|\S+\.SplashActivity|\S+\/\S+Activity)', line)
+                            if m:
+                                activity = m.group(1)
+                                break
+                    if not activity:
+                        activity = f"{pkg}/.MainActivity"
+                    subprocess.run(
+                        ["adb", "-s", device_id, "shell", "am", "force-stop", pkg],
+                        capture_output=True, timeout=5,
+                    )
+                    subprocess.run(
+                        ["adb", "-s", device_id, "logcat", "-c"],
+                        capture_output=True, timeout=5,
+                    )
+                    subprocess.run(
+                        ["adb", "-s", device_id, "shell", "am", "start", "-n", activity],
+                        capture_output=True, timeout=5,
+                    )
+                    safe_print(f"  [{tag}] 已重启 App，等待 3 秒...", Colors.CYAN)
+                    time.sleep(3)
+                except Exception:
+                    pass
+        else:
+            for device_id in devices:
+                tag = short_device_id(device_id)
+                try:
+                    subprocess.run(["adb", "-s", device_id, "logcat", "-c"],
+                                   capture_output=True, timeout=5)
+                    safe_print(f"  [{tag}] 已清空 logcat 缓冲区", Colors.DIM)
+                except Exception:
+                    pass
+
+        # 重新启动 logcat 线程
+        logcat_threads = []
+        for device_id in devices:
+            t = threading.Thread(target=logcat_reader, args=(device_id,), daemon=True)
+            t.start()
+            logcat_threads.append(t)
+
+        # 重新启动 HTTP worker
+        worker_threads = []
+        http_pool = None
+        if full_mode:
+            http_pool = ThreadPoolExecutor(max_workers=4, thread_name_prefix="http-worker")
+            for _ in range(4):
+                ft = http_pool.submit(http_worker)
+                worker_threads.append(ft)
+
+        # 重新启动 display worker
+        display_thread = threading.Thread(target=display_worker, daemon=True)
+        display_thread.start()
+
+        # 重新启动 watchdog
+        watchdog = threading.Thread(target=_device_watchdog, args=(current_session,), daemon=True)
+        watchdog.start()
+
+        safe_print("=" * 60, Colors.DIM)
 
         try:
-            request_q.join(timeout=5)
-        except Exception:
-            pass
+            while True:
+                time.sleep(0.5)
+                if stop_event.is_set():
+                    break
+                alive = any(t.is_alive() for t in logcat_threads)
+                if not alive:
+                    cprint("\n所有设备 logcat 流已断开", Colors.DIM)
+                    break
+        except KeyboardInterrupt:
+            user_abort[0] = True
+            stop_event.set()
 
+        # 本次会话清理 — 排空队列（Queue.join 无 timeout 参数，改用轮询）
+        for q in (request_q, display_q):
+            deadline = time.monotonic() + 3
+            while time.monotonic() < deadline:
+                if q.unfinished_tasks == 0:
+                    break
+                time.sleep(0.1)
         if http_pool:
             http_pool.shutdown(wait=False)
+        # 清空队列残留，避免下一轮 worker 处理旧请求
+        for q in (request_q, display_q):
+            while True:
+                try:
+                    q.get_nowait()
+                    q.task_done()
+                except Exception:
+                    break
+        _memory_mgr.flush()
 
-        try:
-            display_q.join(timeout=5)
-        except Exception:
-            pass
+        total_requests[0] += request_count[0]
+        all_discovered.extend(discovered_apis)
 
-        _memory_mgr.shutdown()
+        if disconnect_detected[0]:
+            new_count = len(seen_uris) - len(known_urls)
+            cprint(f"本次捕获 {request_count[0]} 个请求，发现 {new_count} 个新接口", Colors.DIM)
+            cprint("等待设备重新连接...（Ctrl+C 退出）", Colors.YELLOW)
+            # 等待设备重新上线
+            while True:
+                try:
+                    if user_abort[0]:
+                        break
+                    result = subprocess.run(
+                        ["adb", "-s", devices[0], "get-state"],
+                        capture_output=True, text=True, timeout=3
+                    )
+                    if result.returncode == 0 and "device" in result.stdout:
+                        cprint("✓ 设备已重新连接，启动新会话...\n", Colors.GREEN, bold=True)
+                        time.sleep(1)
+                        break
+                    time.sleep(3)
+                except KeyboardInterrupt:
+                    user_abort[0] = True
+                    break
+                except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+                    time.sleep(3)
+            if user_abort[0]:
+                break
+        else:
+            break
 
-        if html_mode:
-            try:
-                html_server.shutdown()
-            except Exception:
-                pass
+    # 关闭记忆库定时器，防止 Timer 线程泄漏
+    _memory_mgr.shutdown()
 
-        new_count = len(seen_uris) - len(known_urls)
-        cprint(f"\n已停止，共捕获 {request_count[0]} 个请求，发现 {new_count} 个新接口", Colors.DIM)
-
-        if discovered_apis:
-            cprint("\n发现的接口列表:", Colors.YELLOW, bold=True)
-            for api in discovered_apis:
+    # ============== 最终总结 ==============
+    cprint(f"\n已停止，共捕获 {total_requests[0]} 个请求", Colors.DIM)
+    if all_discovered:
+        cprint("\n发现的接口列表:", Colors.YELLOW, bold=True)
+        seen_set = set()
+        for api in all_discovered:
+            key = f"{api['method']} {api['uri']}"
+            if key not in seen_set:
+                seen_set.add(key)
                 cprint(f"  {api['method']} {api['uri'].replace(BASE_URL, '')}", Colors.WHITE)
 
 
@@ -932,7 +1195,7 @@ def main():
         "/mp/record/opponentStatistics",
         "/mp/coupon/checkEligibility",
     ], help="隐藏接口（默认7个轮询接口；--hide 不跟值=全部显示；--hide /path=自定义）")
-    auto_parser.add_argument("--full", action="store_true", help="异步获取完整响应（含 status/headers/timing）")
+    auto_parser.add_argument("--full", action="store_true", help="智能获取完整响应（小响应直接用 logcat，大响应才走 Python requests）")
     auto_parser.add_argument("--html", action="store_true", help="启动 DevTools HTML 界面")
     auto_parser.add_argument("--port", type=int, default=8765, help="HTML 服务端口 (默认 8765)")
     auto_parser.add_argument("--restart", action="store_true", default=False, help="抓包前强制重启 App（确保产生新的请求日志）")
