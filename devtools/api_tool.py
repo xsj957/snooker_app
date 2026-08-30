@@ -2,29 +2,20 @@
 # -*- coding: utf-8 -*-
 """
 斯诺克大师 App API 抓包调试工具 v3.1
-功能：实时抓包 + 智能阈值 + Chrome DevTools 风格 HTML 界面
-      小响应直接用 logcat 数据，大响应才走 Python requests 绕过截断
+功能：实时抓包 + Chrome DevTools 风格 HTML 界面
+      所有接口均走 Python HTTP 获取完整响应（含 status/headers/size/timing）
 
-用法：python devtools/api_tool.py <command> [options]
+用法：python devtools/api_tool.py auto [options]
 
-命令：
-  log     - 实时查看 App 网络日志（类似 tail -f | grep）
-  extract - 从日志文件提取所有 API 接口信息
-  call    - 调用指定接口并显示完整响应
-  auto    - 实时监控 + 自动发现新接口 + DevTools 风格 HTML 界面
-  list    - 列出所有已发现的接口
+auto 参数：
+  -s, --device   指定 ADB 设备 ID（多设备时必须指定，单设备自动检测）
+  --hide         隐藏轮询接口（默认隐藏7个高频轮询接口；--hide 不跟值=全部显示）
+  --restart      抓包前强制重启 App（确保产生新的请求日志）
+  --pkg          指定 App 包名（默认自动检测国内/海外版）
 
-全局参数：
-  -s, --device  指定 ADB 设备 ID（多设备时必须指定）
-                设备 ID 可通过 adb devices 查看
-                示例：python devtools/api_tool.py auto -s 设备ID
-
-auto 专用参数：
-  --full        智能获取完整响应（小响应直接用 logcat，大响应才走 Python requests 绕过截断）
-                示例：python devtools/api_tool.py auto --full
-  --html        启动 HTML DevTools 界面（浏览器访问 http://localhost:8765）
-                示例：python devtools/api_tool.py auto --full --html
-  --port        HTML 服务端口（默认 8765）
+示例：
+  python devtools/api_tool.py auto                  # 启动抓包 + DevTools 界面
+  python devtools/api_tool.py auto --restart        # 重启 App 后抓包
 """
 
 import sys
@@ -84,286 +75,16 @@ def get_adb_device():
 ADB_DEVICE = get_adb_device()
 
 
-# ============== 日志实时查看 ==============
-
-def cmd_log(args):
-    """实时查看 App 网络日志"""
-    device = getattr(args, '_device', None)
-    if not device:
-        cprint("未检测到 ADB 设备，请检查连接", Colors.RED)
-        return
-    pattern = args.pattern or "DIO"
-    adb_cmd = ["adb", "-s", device, "logcat"]
-
-    cprint(f"实时日志流 | 过滤: {pattern} | Ctrl+C 停止", Colors.CYAN, bold=True)
-    cprint("=" * 60)
-
-    try:
-        proc = subprocess.Popen(
-            adb_cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            bufsize=0
-        )
-
-        stdout_reader = io.TextIOWrapper(proc.stdout, encoding='utf-8', errors='replace', line_buffering=True)
-
-        for line in stdout_reader:
-            if pattern.lower() in line.lower():
-                timestamp = line[:19] if len(line) > 19 else ""
-                content = line[19:].strip()
-
-                if "*** Request ***" in content:
-                    cprint(f"{timestamp} {content}", Colors.GREEN)
-                elif "*** Response ***" in content:
-                    cprint(f"{timestamp} {content}", Colors.YELLOW)
-                elif "uri:" in content:
-                    cprint(f"{timestamp} {content}", Colors.BLUE)
-                elif "data:" in content or "{" in content:
-                    cprint(f"{timestamp} {content}", Colors.WHITE)
-                elif "DioException" in content:
-                    cprint(f"{timestamp} {content}", Colors.RED)
-                else:
-                    print(f"{timestamp} {content}")
-
-    except KeyboardInterrupt:
-        cprint("\n已停止", Colors.DIM)
-    finally:
-        proc.terminate()
-
-
-# ============== 从日志文件提取接口 ==============
-
-def cmd_extract(args):
-    """从日志文件提取所有 API 接口"""
-    log_file = args.file
-    if not os.path.exists(log_file):
-        cprint(f"文件不存在: {log_file}", Colors.RED)
-        return
-
-    cprint(f"分析日志文件: {log_file}", Colors.CYAN, bold=True)
-    cprint("=" * 60)
-
-    with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
-        content = f.read()
-
-    apis = OrderedDict()
-    lines = content.split("\n")
-
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-        if "*** Request ***" in line:
-            uri = method = None
-            data_lines = []
-
-            j = i + 1
-            while j < min(i + 30, len(lines)):
-                l = lines[j]
-                if "*** Request ***" in l or "*** Response ***" in l:
-                    break
-
-                if uri is None and "uri:" in l and "https://" in l:
-                    m = re.search(r'uri:\s*(https?://\S+)', l)
-                    if m:
-                        uri = m.group(1).strip()
-
-                if method is None and "method:" in l:
-                    m = re.search(r'method:\s*(\w+)', l)
-                    if m:
-                        method = m.group(1).strip()
-
-                if "data:" in l and "{" in l:
-                    m = re.search(r'data:\s*(\{.*\})', l)
-                    if m:
-                        data_lines.append(m.group(1))
-                elif data_lines is not None and "{" in l and uri and method:
-                    stripped = l.split("flutter : [DIO]")[-1].strip() if "flutter" in l else l.strip()
-                    if stripped.startswith("{") or stripped.startswith('"'):
-                        data_lines.append(stripped)
-
-                j += 1
-
-            if uri and method:
-                path = uri.replace(BASE_URL, "")
-                key = f"{method} {path}"
-
-                raw_data = " ".join(data_lines) if data_lines else ""
-                try:
-                    parsed_data = json.loads(raw_data) if raw_data else {}
-                except (json.JSONDecodeError, ValueError):
-                    m = re.search(r'(\{.*\})', raw_data)
-                    try:
-                        parsed_data = json.loads(m.group(1)) if m else {}
-                    except (json.JSONDecodeError, ValueError):
-                        parsed_data = {"raw": raw_data[:200]}
-
-                if key not in apis:
-                    apis[key] = {
-                        "url": uri,
-                        "method": method,
-                        "data": parsed_data,
-                    }
-
-            i = j
-        else:
-            i += 1
-
-    cprint(f"\n共发现 {len(apis)} 个接口:\n", Colors.GREEN, bold=True)
-
-    for idx, (key, api) in enumerate(apis.items(), 1):
-        cprint(f"  {idx}. {key}", Colors.BOLD)
-        cprint(f"     URL: {api['url']}", Colors.DIM)
-        if api["data"]:
-            data_str = json.dumps(api["data"], ensure_ascii=False, indent=6)
-            cprint(f"     Data: {data_str}", Colors.DIM)
-        print()
-
-    if args.save:
-        output_file = args.save
-        with open(output_file, "w", encoding="utf-8") as f:
-            json.dump(apis, f, ensure_ascii=False, indent=2)
-        cprint(f"已保存到: {output_file}", Colors.GREEN)
-
-
-# ============== 调用指定接口 ==============
-
-def cmd_call(args):
-    """调用指定接口并显示完整响应"""
-
-    presets = {
-        "user": {
-            "name": "获取用户信息",
-            "method": "POST",
-            "url": f"{BASE_URL}/mp/user/info",
-            "data": {"userId": _server.USER_ID}
-        },
-        "box": {
-            "name": "获取盒子状态",
-            "method": "POST",
-            "url": f"{BASE_URL}/mobile/getUserBoxStatus",
-            "data": {"userId": _server.USER_ID}
-        },
-        "version": {
-            "name": "检查版本",
-            "method": "POST",
-            "url": f"{BASE_URL}/mp/app/version/check",
-            "data": {"platform": 2, "currentVersion": "1.0.0", "userId": _server.USER_ID}
-        },
-        "coupon": {
-            "name": "检查视频券",
-            "method": "POST",
-            "url": f"{BASE_URL}/mp/coupon/checkEligibility",
-            "data": {"userId": _server.USER_ID}
-        },
-        "matches": {
-            "name": "对手列表和视频",
-            "method": "POST",
-            "url": f"{BASE_URL}/mp/record/opponentListWithVideos",
-            "data": {"userId": _server.USER_ID}
-        },
-        "track": {
-            "name": "埋点上报",
-            "method": "POST",
-            "url": f"{BASE_URL}/mp/event/track",
-            "data": {"modelType": 1, "eventType": 5, "attrName": "me", "attrValue": None, "clientType": 1, "userId": _server.USER_ID}
-        },
-    }
-
-    if args.name in presets:
-        api = presets[args.name]
-    elif args.url:
-        api = {
-            "name": args.name or args.url,
-            "method": "POST",
-            "url": args.url,
-            "data": json.loads(args.data) if args.data else {"userId": _server.USER_ID}
-        }
-    else:
-        memory = _memory_mgr.get()
-        if args.name in memory:
-            api = memory[args.name]
-            api["name"] = args.name
-        else:
-            cprint(f"未知接口: {args.name}", Colors.RED)
-            cprint(f"\n内置快捷名称: {', '.join(presets.keys())}", Colors.YELLOW)
-            return
-
-    cprint(f"\n调用: {api['name']}", Colors.CYAN, bold=True)
-    cprint(f"URL: {api['url']}", Colors.BLUE)
-    cprint(f"Data: {json.dumps(api['data'], ensure_ascii=False)}", Colors.DIM)
-    cprint("-" * 60)
-
-    try:
-        start = time.time()
-        resp = requests.post(
-            api["url"],
-            json=api["data"],
-            headers=HEADERS,
-            timeout=10,
-            proxies={"http": None, "https": None}
-        )
-        elapsed = time.time() - start
-
-        cprint(f"Status: {resp.status_code} ({elapsed*1000:.0f}ms)", Colors.GREEN if resp.status_code == 200 else Colors.RED)
-
-        try:
-            result = resp.json()
-            formatted = json.dumps(result, ensure_ascii=False, indent=2)
-            cprint(f"\n{formatted}", Colors.WHITE)
-        except (json.JSONDecodeError, ValueError):
-            cprint(f"\n{resp.text}", Colors.WHITE)
-
-    except requests.exceptions.RequestException as e:
-        cprint(f"请求失败: {e}", Colors.RED)
-
-
-# ============== 列出所有接口 ==============
-
-def cmd_list(_args):
-    """列出所有已知接口"""
-    presets = {
-        "user": "POST /mp/user/info - 获取用户信息",
-        "box": "POST /mobile/getUserBoxStatus - 获取盒子状态",
-        "version": "POST /mp/app/version/check - 检查版本",
-        "coupon": "POST /mp/coupon/checkEligibility - 检查视频券",
-        "matches": "POST /mp/record/opponentListWithVideos - 对手列表和视频",
-        "track": "POST /mp/event/track - 埋点上报"
-    }
-
-    memory = _memory_mgr.get()
-
-    cprint("  内置接口:", Colors.CYAN, bold=True)
-    for key, desc in presets.items():
-        cprint(f"    {key:10s} {desc}", Colors.WHITE)
-
-    if memory:
-        cprint(f"\n  记忆库接口 ({len(memory)} 个):", Colors.YELLOW, bold=True)
-        for key, api in memory.items():
-            desc = api.get("description", "")
-            discovered = api.get("discovered_at", "")
-            cprint(f"    {key:50s} {desc}", Colors.WHITE)
-            cprint(f"    {'':50s} 发现于: {discovered}", Colors.DIM)
-
-    cprint(f"\n调用示例: python devtools/api_tool.py call user", Colors.DIM)
-
-
 # ============== 自动模式 v3.0（DevTools 风格） ==============
 
 def cmd_auto(args):
     """实时监控 + DevTools 风格 HTML 界面"""
-    # 智能阈值：logcat 响应字符数低于此值时直接使用，超过则走 Python requests 获取完整响应
-    # Android logcat 单行限制 ~4096 字节，接近此长度的行可能被截断
-    RESPONSE_SIZE_THRESHOLD = 3500
-
     devices = getattr(args, '_devices', None)
     if not devices:
         cprint("未检测到 ADB 设备，请检查连接", Colors.RED)
         return
 
-    full_mode = getattr(args, 'full', False)
-    html_mode = getattr(args, 'html', False)
-    html_port = getattr(args, 'port', 8765)
+    html_port = 8765
     hide_list = getattr(args, 'hide', []) or []
     restart_app = getattr(args, 'restart', False)
     pkg_override = getattr(args, 'pkg', None)
@@ -376,10 +97,7 @@ def cmd_auto(args):
     else:
         cprint(f"自动监控模式 v3.0 | 设备: {devices[0]}", Colors.CYAN, bold=True)
 
-    if full_mode:
-        cprint("模式: 智能阈值（小响应直接用 logcat，大响应走 Python）", Colors.CYAN)
-    else:
-        cprint("模式: logcat 监听（小响应直接显示）", Colors.CYAN)
+    cprint("模式: 全量获取（所有接口均走 Python HTTP 获取完整响应）", Colors.CYAN)
 
     # html_server 由重连循环管理
     html_server = None
@@ -517,30 +235,29 @@ def cmd_auto(args):
                 if added:
                     safe_print(f"  [{tag}]  已存入记忆库: {method} {path}", Colors.DIM)
 
-            # HTML 模式：存入日志缓冲区
-            if html_mode:
-                log_entry = {
-                    'id': next_log_id(),  # 全局唯一递增 ID，避免多设备 per-buffer seq 冲突
-                    'timestamp': datetime.now().strftime('%H:%M:%S'),
-                    'device': tag,
-                    'method': method,
-                    'path': path,
-                    'full_url': uri,
-                    'status': status_code,
-                    'size': resp_size,
-                    'time_ms': time_ms,
-                    'timing': timing_info,
-                    'is_new': is_new,
-                    'is_error': is_error,
-                    'request_data': data if data and data != {"raw": ""} else None,
-                    'request_headers': req_headers,
-                    'response_headers': resp_headers or {},
-                    'response_body': response_body,
-                    'response_raw': response_raw,
-                    'error': error,
-                    'source': 'http',
-                }
-                log_buffer.add(log_entry)
+            # 存入日志缓冲区（HTML DevTools 界面实时读取）
+            log_entry = {
+                'id': next_log_id(),  # 全局唯一递增 ID，避免多设备 per-buffer seq 冲突
+                'timestamp': datetime.now().strftime('%H:%M:%S'),
+                'device': tag,
+                'method': method,
+                'path': path,
+                'full_url': uri,
+                'status': status_code,
+                'size': resp_size,
+                'time_ms': time_ms,
+                'timing': timing_info,
+                'is_new': is_new,
+                'is_error': is_error,
+                'request_data': data if data and data != {"raw": ""} else None,
+                'request_headers': req_headers,
+                'response_headers': resp_headers or {},
+                'response_body': response_body,
+                'response_raw': response_raw,
+                'error': error,
+                'source': 'http',
+            }
+            log_buffer.add(log_entry)
 
             display_q.task_done()
 
@@ -569,10 +286,7 @@ def cmd_auto(args):
 
     def _complete_request(buf, device_id, reason="next_request"):
         """
-        完成一个请求 — 智能判断使用 logcat 响应还是 Python requests
-        小响应（< RESPONSE_SIZE_THRESHOLD 字符）直接用 logcat 捕获的响应
-        大响应或疑似截断的响应走 Python HTTP worker 获取完整数据
-        非 --full 模式始终使用 logcat 响应（不走 HTTP worker）
+        完成一个请求 — 始终走 Python HTTP worker 获取完整响应（含 status/headers/size/timing）
         """
         if not buf["uri"] or not buf["method"]:
             return
@@ -580,115 +294,10 @@ def cmd_auto(args):
         tag = short_device_id(device_id)
         data_str = " ".join(buf["data_lines"])
         req_headers = dict(buf["req_headers"]) if buf["req_headers"] else {}
-        response_raw = "".join(buf["response_lines"])
 
-        # 判断是否直接使用 logcat 响应
-        if not full_mode:
-            # 非 --full 模式：始终使用 logcat 响应
-            use_logcat = True
-        elif len(response_raw) < RESPONSE_SIZE_THRESHOLD:
-            # 小响应：直接使用 logcat 捕获的数据
-            use_logcat = True
-        else:
-            # 大响应：走 Python HTTP 重新获取完整数据
-            use_logcat = False
-
-        if use_logcat:
-            # === 直接使用 logcat 捕获的响应 ===
-            body = None
-            if response_raw:
-                try:
-                    body = json.loads(response_raw)
-                except (json.JSONDecodeError, ValueError):
-                    body = response_raw
-
-            # 从响应 body 中推断 status code
-            status = 200
-            if isinstance(body, dict) and 'code' in body:
-                try:
-                    code = int(body['code'])
-                    if code in (0, 200):
-                        status = 200
-                    else:
-                        status = code
-                except (ValueError, TypeError):
-                    pass
-
-            size = len(response_raw.encode('utf-8')) if response_raw else 0
-            req_id = next_log_id()  # 全局唯一 ID，避免多设备 buf['seq'] 冲突
-
-            # 终端输出
-            path = buf["uri"].replace(BASE_URL, "")
-            data_parsed, _ = _parse_request_data([data_str] if data_str else [])
-
-            with state_lock:
-                is_new = buf["uri"] not in seen_uris
-                if is_new:
-                    seen_uris.add(buf["uri"])
-                    if not re.search(r'\.mp4(\?|$)', buf["uri"]):
-                        discovered_apis.append({"uri": buf["uri"], "method": buf["method"], "data": data_str})
-                request_count[0] += 1
-                is_known = buf["uri"] in known_urls
-
-            if reason == "exception":
-                safe_print(f"\n[{tag}] !! {buf['method']} {path} [ERR]", Colors.RED, bold=True)
-            elif is_new:
-                safe_print(f"\n[{tag}] >> {buf['method']} {path} [{status}] [NEW] ⚡logcat", Colors.GREEN, bold=True)
-            else:
-                safe_print(f"\n[{tag}] >> {buf['method']} {path} [{status}] ⚡logcat", Colors.BLUE)
-
-            if data_parsed and data_parsed != {"raw": ""}:
-                data_display = json.dumps(data_parsed, ensure_ascii=False, indent=2) if isinstance(data_parsed, dict) else str(data_parsed)
-                safe_print(f"[{tag}]    请求: {data_display}", Colors.DIM)
-
-            if body is not None:
-                resp_display = json.dumps(body, ensure_ascii=False, indent=2) if isinstance(body, (dict, list)) else str(body)
-                safe_print(f"[{tag}]    响应 [{status}] ({format_size(size)}):\n{resp_display}", Colors.WHITE)
-
-            # 存入记忆库
-            if not is_known:
-                added = _memory_mgr.add(buf["uri"], buf["method"], data_str)
-                if added:
-                    safe_print(f"  [{tag}]   已存入记忆库: {buf['method']} {path}", Colors.DIM)
-
-            # HTML 模式：存入日志缓冲区
-            if html_mode:
-                response_raw_json = None
-                if body is not None:
-                    if isinstance(body, (dict, list)):
-                        response_raw_json = json.dumps(body, ensure_ascii=False, separators=(',', ':'))
-                    else:
-                        response_raw_json = str(body)
-
-                # DioException 时标记为错误
-                is_exception = (reason == "exception")
-                log_entry = {
-                    'id': req_id,
-                    'timestamp': datetime.now().strftime('%H:%M:%S'),
-                    'device': tag,
-                    'method': buf["method"],
-                    'path': path,
-                    'full_url': buf["uri"],
-                    'status': 0 if is_exception else status,
-                    'size': size,
-                    'time_ms': 0,
-                    'timing': {},
-                    'is_new': is_new,
-                    'is_error': is_exception,
-                    'request_data': data_parsed if data_parsed and data_parsed != {"raw": ""} else None,
-                    'request_headers': req_headers,
-                    'response_headers': dict(buf["resp_headers"]) if buf["resp_headers"] else {},
-                    'response_body': body,
-                    'response_raw': response_raw_json,
-                    'error': 'DioException' if is_exception else None,
-                    'source': 'logcat',
-                }
-                log_buffer.add(log_entry)
-        else:
-            # === 走 Python HTTP worker 获取完整响应 ===
-            safe_print(f"\n[{tag}] ⟳ {buf['method']} {buf['uri'].replace(BASE_URL, '')} → Python 获取完整响应...", Colors.YELLOW)
-            request_q.put((buf["seq"], device_id, buf["uri"], buf["method"],
-                           data_str, req_headers))
+        safe_print(f"\n[{tag}] ⟳ {buf['method']} {buf['uri'].replace(BASE_URL, '')} → Python 获取完整响应...", Colors.YELLOW)
+        request_q.put((buf["seq"], device_id, buf["uri"], buf["method"],
+                       data_str, req_headers))
 
     def process_line(content, device_id, buf):
         """处理 logcat 行 — 解析 Dio 日志协议"""
@@ -989,18 +598,17 @@ def cmd_auto(args):
         request_count[0] = 0
 
         # 重启 HTML 服务（释放旧端口，重新绑定）
-        if html_mode:
-            if html_server:
-                try:
-                    html_server.shutdown()
-                except Exception:
-                    pass
-                time.sleep(0.5)
+        if html_server:
             try:
-                html_server, actual_port = start_html_server(html_port)
-                cprint(f"  DevTools 界面: http://localhost:{actual_port}", Colors.GREEN, bold=True)
-            except Exception as e:
-                cprint(f"  HTML 服务启动失败: {e}", Colors.RED)
+                html_server.shutdown()
+            except Exception:
+                pass
+            time.sleep(0.5)
+        try:
+            html_server, actual_port = start_html_server(html_port)
+            cprint(f"  DevTools 界面: http://localhost:{actual_port}", Colors.GREEN, bold=True)
+        except Exception as e:
+            cprint(f"  HTML 服务启动失败: {e}", Colors.RED)
 
         # 重启 App / 清空 logcat
         if restart_app:
@@ -1056,14 +664,12 @@ def cmd_auto(args):
             t.start()
             logcat_threads.append(t)
 
-        # 重新启动 HTTP worker
+        # 重新启动 HTTP worker（始终启动，所有接口均走 Python HTTP 获取完整响应）
+        http_pool = ThreadPoolExecutor(max_workers=4, thread_name_prefix="http-worker")
         worker_threads = []
-        http_pool = None
-        if full_mode:
-            http_pool = ThreadPoolExecutor(max_workers=4, thread_name_prefix="http-worker")
-            for _ in range(4):
-                ft = http_pool.submit(http_worker)
-                worker_threads.append(ft)
+        for _ in range(4):
+            ft = http_pool.submit(http_worker)
+            worker_threads.append(ft)
 
         # 重新启动 display worker
         display_thread = threading.Thread(target=display_worker, daemon=True)
@@ -1157,38 +763,16 @@ def cmd_auto(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="斯诺克大师 App API 抓包调试工具 v3.0 — DevTools 风格",
+        description="斯诺克大师 App API 抓包调试工具 v3.1 — DevTools 风格",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
-  python devtools/api_tool.py log                                    # 实时查看日志
-  python devtools/api_tool.py extract app_log.txt                    # 从日志文件提取接口
-  python devtools/api_tool.py call user                              # 调用用户信息接口
-  python devtools/api_tool.py auto --full --html                     # 实时监控 + DevTools 界面（推荐）
-  python devtools/api_tool.py --user <ID> --token <JWT> call user    # 指定用户身份调用接口
-  python devtools/api_tool.py list                                   # 列出所有已知接口
+  python devtools/api_tool.py auto                         # 实时监控 + DevTools 界面（推荐）
+  python devtools/api_tool.py auto --restart               # 抓包前重启 App
         """
     )
 
-    # 全局认证参数（所有子命令共享）
-    parser.add_argument("--user", help="指定 user_id（覆盖默认值）")
-    parser.add_argument("--token", help="指定 Authorization JWT（覆盖默认值）")
-    parser.add_argument("--refresh-token", dest="refresh_token", help="指定 refresh_token（覆盖默认值）")
-
     subparsers = parser.add_subparsers(dest="command", help="子命令")
-
-    log_parser = subparsers.add_parser("log", help="实时查看 App 网络日志")
-    log_parser.add_argument("-s", "--device", help="指定 ADB 设备 ID")
-    log_parser.add_argument("-p", "--pattern", help="过滤关键词 (默认: DIO)")
-
-    ext_parser = subparsers.add_parser("extract", help="从日志文件提取接口")
-    ext_parser.add_argument("file", help="日志文件路径")
-    ext_parser.add_argument("-s", "--save", help="保存为 JSON 文件")
-
-    call_parser = subparsers.add_parser("call", help="调用指定接口")
-    call_parser.add_argument("name", nargs="?", help="接口快捷名称")
-    call_parser.add_argument("-u", "--url", help="自定义接口 URL")
-    call_parser.add_argument("-d", "--data", help="自定义请求数据 (JSON)")
 
     auto_parser = subparsers.add_parser("auto", help="实时监控 + DevTools 风格 HTML 界面")
     auto_parser.add_argument("-s", "--device", nargs="+", default=None, help="指定 ADB 设备 ID")
@@ -1201,27 +785,10 @@ def main():
         "/mp/record/opponentStatistics",
         "/mp/coupon/checkEligibility",
     ], help="隐藏接口（默认7个轮询接口；--hide 不跟值=全部显示；--hide /path=自定义）")
-    auto_parser.add_argument("--full", action="store_true", help="智能获取完整响应（小响应直接用 logcat，大响应才走 Python requests）")
-    auto_parser.add_argument("--html", action="store_true", help="启动 DevTools HTML 界面")
-    auto_parser.add_argument("--port", type=int, default=8765, help="HTML 服务端口 (默认 8765)")
     auto_parser.add_argument("--restart", action="store_true", default=False, help="抓包前强制重启 App（确保产生新的请求日志）")
     auto_parser.add_argument("--pkg", default=None, help="指定 App 包名（默认自动检测）")
 
-    subparsers.add_parser("list", help="列出所有已知接口")
-
     args = parser.parse_args()
-
-    # 动态注入用户身份（覆盖 server 层的默认值）
-    configure(
-        user_id=args.user,
-        token=args.token,
-        refresh_token=args.refresh_token,
-    )
-    if args.user:
-        cprint(f"当前用户: {args.user}", Colors.CYAN)
-
-    device = None
-    devices = None
 
     if args.command == "auto":
         if args.device:
@@ -1244,27 +811,10 @@ def main():
                 devices = [ADB_DEVICE] if ADB_DEVICE else None
 
         args._devices = devices
-    else:
-        if hasattr(args, 'device') and args.device:
-            device = args.device
-            cprint(f"指定设备: {device}", Colors.CYAN)
-        else:
-            device = ADB_DEVICE
-
-    if args.command == "log":
-        args._device = device
-        cmd_log(args)
-    elif args.command == "extract":
-        cmd_extract(args)
-    elif args.command == "call":
-        cmd_call(args)
-    elif args.command == "auto":
         if not args._devices:
             cprint("未检测到 ADB 设备，请检查连接", Colors.RED)
             sys.exit(1)
         cmd_auto(args)
-    elif args.command == "list":
-        cmd_list(args)
     else:
         parser.print_help()
 

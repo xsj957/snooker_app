@@ -220,7 +220,7 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
             <div class="icon">📡</div>
             <h3>等待抓包数据...</h3>
             <p>请在 App 中操作，网络请求将实时显示在此处</p>
-            <p style="margin-top:8px;color:#555">提示: 使用 <code>python devtools/api_tool.py auto --full --html</code> 启动</p>
+            <p style="margin-top:8px;color:#555">提示: 使用 <code>python devtools/api_tool.py auto</code> 启动</p>
         </div>
         <div id="vsWrapper" style="display:none">
             <div class="req-header-row">
@@ -244,6 +244,7 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
             <div class="tab" data-tab="raw">Raw</div>
             <div class="tab" data-tab="timing">Timing</div>
             <div class="tab-detail-info" id="tabDetailInfo"></div>
+            <button class="btn btn-copy" style="margin-left:auto;font-size:12px;padding:4px 14px" onclick="copyBugReport()" title="复制 URL+Payload+响应，直接发给开发"> 复制 Bug 报告</button>
         </div>
 
         <!-- Headers tab -->
@@ -276,10 +277,6 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
 
         <!-- Preview tab -->
         <div class="tab-content hidden" id="tabPreview">
-            <div class="preview-toolbar">
-                <span class="toolbar-left">Response Body（格式化 JSON）</span>
-                <button class="btn btn-copy" id="btnCopyJson" onclick="copyFormattedJson()">📋 复制 JSON</button>
-            </div>
             <div class="json-tree" id="responsePreview"></div>
         </div>
 
@@ -447,6 +444,52 @@ function showToast(msg, duration) {
     toast.classList.add('show');
     setTimeout(function() { toast.classList.remove('show'); }, duration || 2000);
 }
+
+// ==================== Copy Bug Report (URL + Payload + Response) ====================
+window.copyBugReport = function() {
+    var req = state.requests.find(function(r) { return r.id === state.selectedId; });
+    if (!req) { showToast(' 请先选择一条请求'); return; }
+    var lines = [];
+    lines.push('URL: ' + req.full_url);
+        var rh = req.request_headers || {};
+    var tokenKeys = ['Authorization', 'refresh_token'];
+    var tokenLines = tokenKeys.filter(function(k) { return rh[k]; }).map(function(k) { return k + ': ' + rh[k]; });
+    if (tokenLines.length) {
+        lines.push('--- Auth Headers ---');
+        tokenLines.forEach(function(l) { lines.push(l); });
+        lines.push('');
+    }
+    var rd = req.request_data;
+    if (rd && typeof rd === 'object') {
+        lines.push('--- Request Body ---');
+        lines.push(JSON.stringify(rd, null, 2));
+        lines.push('');
+    } else if (rd && typeof rd === 'string') {
+        lines.push('--- Request Body ---');
+        lines.push(rd);
+        lines.push('');
+    }
+    var rb = req.response_body;
+    if (rb !== null && rb !== undefined) {
+        lines.push('--- Response Body ---');
+        if (typeof rb === 'object') {
+            lines.push(JSON.stringify(rb, null, 2));
+        } else {
+            lines.push(String(rb));
+        }
+    }
+    var text = lines.join('\n');
+    navigator.clipboard.writeText(text).then(function() {
+        showToast(' 已复制 Bug 报告（' + text.length + ' 字符）');
+    }).catch(function() {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); showToast(' 已复制'); }
+        catch(e) { showToast(' 复制失败，请手动复制'); }
+        document.body.removeChild(ta);
+    });
+};
 
 // ==================== Copy Formatted JSON ====================
 window.copyFormattedJson = function() {
@@ -1092,8 +1135,7 @@ function renderTimingTab(req) {
             '<div class="timing-item" style="border-top:1px solid #333;padding-top:6px;margin-top:6px"><span class="timing-label" style="font-weight:bold">Total</span><div class="timing-bar-wrap"><div class="timing-bar" style="width:100%;background:#4ec9b0"></div></div><span class="timing-val" style="font-weight:bold">' + formatTime(total) + '</span></div>';
     } else {
         div.innerHTML =
-            '<div class="timing-item"><span class="timing-label">Total</span><div class="timing-bar-wrap"><div class="timing-bar" style="width:100%;background:#4ec9b0"></div></div><span class="timing-val" style="font-weight:bold">' + formatTime(ms) + '</span></div>' +
-            '<div style="margin-top:16px;color:#888;font-size:12px"><p>&#128161; 使用 <code>--full</code> 模式可获得更详细的 TTFB / Download 分解</p></div>';
+            '<div class="timing-item"><span class="timing-label">Total</span><div class="timing-bar-wrap"><div class="timing-bar" style="width:100%;background:#4ec9b0"></div></div><span class="timing-val" style="font-weight:bold">' + formatTime(ms) + '</span></div>';
     }
 }
 
