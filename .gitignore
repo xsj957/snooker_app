@@ -14,4 +14,4 @@ __pycache__/
 *.pyo
 
 # Claude Code 本地配置
-.claude/settings.local.json
+.claude/settings.local.json~$*

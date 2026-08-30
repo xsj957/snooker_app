@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c *)",
+      "Bash(python *)",
+      "Bash(git fetch --dry-run)",
+      "Bash(git pull origin main)",
+      "Bash(git clone *)",
+      "Bash(find * -exec *)",
+      "Bash(git add *)",
+      "Bash(git reset HEAD *)",
+      "Bash(git push *)"
+    ]
+  }
+}
