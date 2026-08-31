@@ -36,5 +36,13 @@
     },
     "description": "",
     "discovered_at": "2026-08-28 18:02:16"
+  },
+  "POST /mp/user/deleteAccount": {
+    "url": "https://test.supervisions.cn/mp/user/deleteAccount",
+    "method": "POST",
+    "path": "/mp/user/deleteAccount",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-08-31 20:21:28"
   }
 }
