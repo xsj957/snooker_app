@@ -50,6 +50,11 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
 .btn-record:hover{color:#d4d4d4}
 .btn-record.active{color:#e55}
 
+/* Layout toggle & expand buttons */
+.btn-layout{padding:4px 8px;border:none;background:transparent;color:#666;font-size:14px;cursor:pointer;transition:color .15s;line-height:1}
+.btn-layout:hover{color:#d4d4d4}
+.btn-layout.active{color:#007acc}
+
 /* Copy button (Preview tab toolbar) */
 .btn-copy{padding:4px 12px;border:1px solid #3a6a3a;border-radius:4px;background:transparent;color:#4ec9b0;font-size:11px;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit;margin-left:8px}
 .btn-copy:hover{background:#1a3a1a;border-color:#4ec9b0;color:#6ee7b7}
@@ -59,8 +64,12 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
 .toast{position:fixed;top:20px;right:20px;padding:10px 20px;border-radius:6px;background:#2d5a2d;color:#4ec9b0;font-size:13px;font-family:inherit;z-index:9999;opacity:0;transform:translateY(-10px);transition:all .3s;pointer-events:none;border:1px solid #4ec9b0}
 .toast.show{opacity:1;transform:translateY(0)}
 
+/* ===== Main Body: Horizontal Split Layout ===== */
+.main-body{display:flex;flex:1;overflow:hidden;position:relative}
+
 /* ===== Request List (Virtual Scroll) ===== */
-.request-list{flex:1;overflow-y:auto;border-bottom:1px solid #3c3c3c;min-height:180px;max-height:50vh;position:relative}
+.request-list{flex:1;overflow-y:auto;min-width:280px;position:relative;background:#1e1e1e}
+.request-list.full-width{position:absolute;left:0;right:0;top:0;bottom:0;z-index:5}
 .req-header-row{display:grid;grid-template-columns:48px 62px 1fr 75px 70px 70px;background:#2d2d2d;position:sticky;top:0;z-index:10}
 .req-header-row > *{color:#9cdcfe;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:5px 10px;text-align:left;user-select:none;border-bottom:2px solid #3c3c3c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .req-header-row > *:nth-child(5),.req-header-row > *:nth-child(6){text-align:right}
@@ -102,15 +111,16 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
 .req-time.very-slow{color:#f48771}
 .tag-new{display:inline-block;margin-left:6px;padding:0 4px;border-radius:2px;font-size:9px;background:#4ec9b0;color:#1e1e1e;font-weight:700;vertical-align:middle}
 
-/* ===== Empty & Loading ===== */
-.empty-state,.loading-state{text-align:center;padding:50px 20px;color:#666}
-.empty-state .icon,.loading-state .icon{font-size:40px;margin-bottom:12px}
-.empty-state h3{color:#999;font-size:15px;margin-bottom:6px}
-.loading-state p{color:#888}
+/* ===== Drag Handle ===== */
+.drag-handle{width:6px;background:#2d2d2d;cursor:col-resize;flex-shrink:0;position:relative;transition:background .15s;z-index:20}
+.drag-handle:hover,.drag-handle.active{background:#007acc}
+.drag-handle::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:2px;height:24px;background:#555;border-radius:1px}
+.drag-handle:hover::after,.drag-handle.active::after{background:#007acc}
 
 /* ===== Detail Panel ===== */
-.detail-panel{background:#1e1e1e;flex-shrink:0;display:flex;flex-direction:column;height:45vh}
+.detail-panel{flex:1;display:flex;flex-direction:column;min-width:300px;background:#1e1e1e;position:relative}
 .detail-panel.hidden{display:none}
+.detail-panel.expanded{position:absolute;left:0;right:0;top:0;bottom:0;z-index:30}
 
 /* Tabs */
 .tabs{display:flex;background:#2d2d2d;border-bottom:1px solid #3c3c3c;flex-shrink:0;align-items:center;gap:0}
@@ -179,6 +189,12 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
 .bar-ttfb{background:#ce9178}
 .bar-download{background:#c586c0}
 
+/* ===== Empty & Loading ===== */
+.empty-state,.loading-state{text-align:center;padding:50px 20px;color:#666}
+.empty-state .icon,.loading-state .icon{font-size:40px;margin-bottom:12px}
+.empty-state h3{color:#999;font-size:15px;margin-bottom:6px}
+.loading-state p{color:#888}
+
 /* ===== Footer ===== */
 .footer{display:flex;align-items:center;padding:4px 16px;background:#007acc;color:#fff;font-size:11px;gap:16px;flex-shrink:0}
 .footer-item{display:flex;align-items:center;gap:4px}
@@ -211,83 +227,92 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
             <button class="jt-nav-btn" id="matchPrev" style="display:none" title="上一个">&#9650;</button>
             <button class="jt-nav-btn" id="matchNext" style="display:none" title="下一个">&#9660;</button>
         </div>
+        <!-- 布局控制按钮 -->
+        <button class="btn-layout" id="btnLayoutToggle" title="切换左右/上下布局">⬌</button>
+        <button class="btn-layout" id="btnExpandDetail" title="展开/收起详情面板">⛶</button>
         <button class="btn btn-clear" id="btnClear" title="清空记录">🗑 清空</button>
     </div>
 
-    <!-- Request list (Virtual Scroll) -->
-    <div class="request-list" id="requestList">
-        <div class="empty-state" id="emptyState">
-            <div class="icon">📡</div>
-            <h3>等待抓包数据...</h3>
-            <p>请在 App 中操作，网络请求将实时显示在此处</p>
-            <p style="margin-top:8px;color:#555">提示: 使用 <code>python devtools/api_tool.py auto</code> 启动</p>
-        </div>
-        <div id="vsWrapper" style="display:none">
-            <div class="req-header-row">
-                <div>状态</div>
-                <div>方法</div>
-                <div>接口</div>
-                <div>设备</div>
-                <div style="text-align:right">大小</div>
-                <div style="text-align:right">耗时</div>
+    <!-- Main Body: 左右分栏 -->
+    <div class="main-body" id="mainBody">
+        <!-- Request list (Virtual Scroll) -->
+        <div class="request-list" id="requestList">
+            <div class="empty-state" id="emptyState">
+                <div class="icon">📡</div>
+                <h3>等待抓包数据...</h3>
+                <p>请在 App 中操作，网络请求将实时显示在此处</p>
+                <p style="margin-top:8px;color:#555">提示: 使用 <code>python devtools/api_tool.py auto</code> 启动</p>
             </div>
-            <div class="vs-container" id="vsContainer"></div>
-        </div>
-    </div>
-
-    <!-- Detail panel -->
-    <div class="detail-panel hidden" id="detailPanel">
-        <div class="tabs" id="tabsBar">
-            <div class="tab active" data-tab="headers">Headers</div>
-            <div class="tab" data-tab="payload">Payload</div>
-            <div class="tab" data-tab="preview">Preview</div>
-            <div class="tab" data-tab="raw">Raw</div>
-            <div class="tab" data-tab="timing">Timing</div>
-            <div class="tab-detail-info" id="tabDetailInfo"></div>
-            <button class="btn btn-copy" style="margin-left:auto;font-size:12px;padding:4px 14px" onclick="copyBugReport()" title="复制 URL+Payload+响应，直接发给开发"> 复制 Bug 报告</button>
-        </div>
-
-        <!-- Headers tab -->
-        <div class="tab-content" id="tabHeaders">
-            <div class="detail-section">
-                <div class="section-label">General</div>
-                <div id="generalInfo"></div>
-            </div>
-            <div class="detail-section">
-                <div class="section-label">Request Headers <span class="info" id="reqHeaderCount"></span></div>
-                <table class="headers-table" id="reqHeadersTable"></table>
-            </div>
-            <div class="detail-section" id="respHeadersSection">
-                <div class="section-label">Response Headers <span class="info" id="respHeaderCount"></span></div>
-                <table class="headers-table" id="respHeadersTable"></table>
+            <div id="vsWrapper" style="display:none">
+                <div class="req-header-row">
+                    <div>状态</div>
+                    <div>方法</div>
+                    <div>接口</div>
+                    <div>设备</div>
+                    <div style="text-align:right">大小</div>
+                    <div style="text-align:right">耗时</div>
+                </div>
+                <div class="vs-container" id="vsContainer"></div>
             </div>
         </div>
 
-        <!-- Payload tab -->
-        <div class="tab-content hidden" id="tabPayload">
-            <div class="detail-section">
-                <div class="section-label">Query String Parameters</div>
-                <div class="json-view" id="queryParams"></div>
+        <!-- Drag Handle -->
+        <div class="drag-handle" id="dragHandle" title="拖拽调整宽度"></div>
+
+        <!-- Detail panel -->
+        <div class="detail-panel hidden" id="detailPanel">
+            <div class="tabs" id="tabsBar">
+                <div class="tab active" data-tab="headers">Headers</div>
+                <div class="tab" data-tab="payload">Payload</div>
+                <div class="tab" data-tab="preview">Preview</div>
+                <div class="tab" data-tab="raw">Raw</div>
+                <div class="tab" data-tab="timing">Timing</div>
+                <div class="tab-detail-info" id="tabDetailInfo"></div>
+                <button class="btn btn-copy" style="margin-left:auto;font-size:12px;padding:4px 14px" onclick="copyBugReport()" title="复制 URL+Payload+响应，直接发给开发"> 复制 Bug 报告</button>
             </div>
-            <div class="detail-section">
-                <div class="section-label">Request Body</div>
-                <div class="json-view" id="requestBody"></div>
+
+            <!-- Headers tab -->
+            <div class="tab-content" id="tabHeaders">
+                <div class="detail-section">
+                    <div class="section-label">General</div>
+                    <div id="generalInfo"></div>
+                </div>
+                <div class="detail-section">
+                    <div class="section-label">Request Headers <span class="info" id="reqHeaderCount"></span></div>
+                    <table class="headers-table" id="reqHeadersTable"></table>
+                </div>
+                <div class="detail-section" id="respHeadersSection">
+                    <div class="section-label">Response Headers <span class="info" id="respHeaderCount"></span></div>
+                    <table class="headers-table" id="respHeadersTable"></table>
+                </div>
             </div>
-        </div>
 
-        <!-- Preview tab -->
-        <div class="tab-content hidden" id="tabPreview">
-            <div class="json-tree" id="responsePreview"></div>
-        </div>
+            <!-- Payload tab -->
+            <div class="tab-content hidden" id="tabPayload">
+                <div class="detail-section">
+                    <div class="section-label">Query String Parameters</div>
+                    <div class="json-view" id="queryParams"></div>
+                </div>
+                <div class="detail-section">
+                    <div class="section-label">Request Body</div>
+                    <div class="json-view" id="requestBody"></div>
+                </div>
+            </div>
 
-        <!-- Raw tab -->
-        <div class="tab-content hidden" id="tabRaw">
-            <div class="raw-view" id="responseRaw"></div>
-        </div>
+            <!-- Preview tab -->
+            <div class="tab-content hidden" id="tabPreview">
+                <div class="json-tree" id="responsePreview"></div>
+            </div>
 
-        <!-- Timing tab -->
-        <div class="tab-content hidden" id="tabTiming">
-            <div id="timingContent"></div>
+            <!-- Raw tab -->
+            <div class="tab-content hidden" id="tabRaw">
+                <div class="raw-view" id="responseRaw"></div>
+            </div>
+
+            <!-- Timing tab -->
+            <div class="tab-content hidden" id="tabTiming">
+                <div id="timingContent"></div>
+            </div>
         </div>
     </div>
 
@@ -327,6 +352,10 @@ const state = {
     // JSON 树搜索
     matchIndex: -1,
     matchElements: [],
+    // 布局状态
+    layoutMode: 'horizontal',  // 'horizontal' | 'vertical'
+    detailExpanded: false,     // 详情面板是否全屏
+    savedLeftWidth: null,      // 记住拖拽前的左侧宽度
 };
 
 // ==================== API Names ====================
@@ -940,7 +969,13 @@ function selectRequest(id) {
     const req = state.requests.find(function(r) { return r.id === id; });
     if (!req) return;
 
-    document.getElementById('detailPanel').classList.remove('hidden');
+    const detailPanel = document.getElementById('detailPanel');
+    const dragHandle = document.getElementById('dragHandle');
+    detailPanel.classList.remove('hidden');
+    // 手柄在水平布局 + 非全屏时显示
+    if (state.layoutMode === 'horizontal' && !state.detailExpanded) {
+        dragHandle.style.display = '';
+    }
     renderDetail(req);
     req._detailVersion = (req._detailVersion || 0) + 1;
     req._lastRenderedVersion = req._detailVersion;
@@ -1224,7 +1259,16 @@ function initEvents() {
         state.filtered = [];
         state.selectedId = null;
         state.lastId = null;
+        // 重置布局状态
+        if (state.detailExpanded) {
+            state.detailExpanded = false;
+            document.getElementById('detailPanel').classList.remove('expanded');
+            document.getElementById('btnExpandDetail').classList.remove('active');
+        }
         document.getElementById('detailPanel').classList.add('hidden');
+        document.getElementById('dragHandle').style.display = state.layoutMode === 'horizontal' ? '' : 'none';
+        document.getElementById('requestList').style.display = '';
+        document.getElementById('requestList').classList.remove('full-width');
         fetch('/api/clear').catch(function() {});
         requestAnimationFrame(updateVirtualScroll);
         updateStats({total: 0, by_status: {}});
@@ -1256,8 +1300,14 @@ function initEvents() {
                 searchInput.blur();
                 return;
             }
+            // 全屏模式先收起
+            if (state.detailExpanded) {
+                document.getElementById('btnExpandDetail').click();
+                return;
+            }
             state.selectedId = null;
             document.getElementById('detailPanel').classList.add('hidden');
+            document.getElementById('dragHandle').style.display = state.layoutMode === 'horizontal' ? '' : 'none';
             requestAnimationFrame(updateVirtualScroll);
         }
         if ((e.ctrlKey && e.key === 'f') || (e.key === '/' && document.activeElement.tagName !== 'INPUT')) {
@@ -1271,6 +1321,105 @@ function initEvents() {
         }
     });
 }
+
+// ==================== Layout: Drag Handle + Toggle + Expand ====================
+
+(function() {
+    const handle = document.getElementById('dragHandle');
+    const reqList = document.getElementById('requestList');
+    const detailPanel = document.getElementById('detailPanel');
+    const mainBody = document.getElementById('mainBody');
+    const btnLayout = document.getElementById('btnLayoutToggle');
+    const btnExpand = document.getElementById('btnExpandDetail');
+
+    let isDragging = false;
+    let startX = 0;
+    let startWidth = 0;
+
+    // --- Drag to resize ---
+    handle.addEventListener('mousedown', function(e) {
+        if (state.layoutMode !== 'horizontal') return;
+        isDragging = true;
+        startX = e.clientX;
+        startWidth = reqList.offsetWidth;
+        handle.classList.add('active');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const newWidth = Math.max(280, Math.min(startWidth + dx, window.innerWidth - 320));
+        reqList.style.flex = 'none';
+        reqList.style.width = newWidth + 'px';
+        requestAnimationFrame(updateVirtualScroll);
+    });
+
+    document.addEventListener('mouseup', function() {
+        if (!isDragging) return;
+        isDragging = false;
+        handle.classList.remove('active');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        requestAnimationFrame(updateVirtualScroll);
+    });
+
+    // --- Toggle layout: horizontal ↔ vertical ---
+    btnLayout.addEventListener('click', function() {
+        if (state.detailExpanded) return;  // 全屏时禁止切换布局
+        if (state.layoutMode === 'horizontal') {
+            // 切换到上下布局
+            state.layoutMode = 'vertical';
+            state.savedLeftWidth = reqList.style.width || '45%';
+            mainBody.style.flexDirection = 'column';
+            reqList.style.width = '';
+            reqList.style.flex = '1';
+            reqList.style.minHeight = '180px';
+            reqList.style.maxHeight = '50vh';
+            handle.style.display = 'none';
+            btnLayout.classList.remove('active');
+            btnLayout.title = '切换为左右布局';
+        } else {
+            // 切换到左右布局
+            state.layoutMode = 'horizontal';
+            mainBody.style.flexDirection = 'row';
+            reqList.style.maxHeight = '';
+            reqList.style.minHeight = '';
+            if (state.savedLeftWidth) {
+                reqList.style.flex = 'none';
+                reqList.style.width = state.savedLeftWidth;
+            }
+            handle.style.display = '';
+            btnLayout.classList.add('active');
+            btnLayout.title = '切换为上下布局';
+        }
+        requestAnimationFrame(updateVirtualScroll);
+    });
+
+    // --- Expand / Collapse detail panel ---
+    btnExpand.addEventListener('click', function() {
+        if (!state.selectedId) return;
+        state.detailExpanded = !state.detailExpanded;
+        if (state.detailExpanded) {
+            // 全屏展开：隐藏请求列表和手柄，详情占满
+            reqList.classList.add('full-width');
+            reqList.style.display = 'none';
+            handle.style.display = 'none';
+            detailPanel.classList.add('expanded');
+            btnExpand.classList.add('active');
+        } else {
+            // 恢复分栏
+            reqList.classList.remove('full-width');
+            reqList.style.display = '';
+            handle.style.display = state.layoutMode === 'horizontal' ? '' : 'none';
+            detailPanel.classList.remove('expanded');
+            btnExpand.classList.remove('active');
+        }
+        requestAnimationFrame(updateVirtualScroll);
+    });
+})();
 
 // ==================== Init ====================
 function init() {

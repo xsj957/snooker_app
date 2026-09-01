@@ -44,5 +44,280 @@
     "data": null,
     "description": "",
     "discovered_at": "2026-08-31 20:21:28"
+  },
+  "POST https://app.supervisions.cn/mp/coupon/queryCouponList": {
+    "url": "https://app.supervisions.cn/mp/coupon/queryCouponList",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/coupon/queryCouponList",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 1000,
+      "status": 0,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:48:33"
+  },
+  "POST https://app.supervisions.cn/mp/event/track": {
+    "url": "https://app.supervisions.cn/mp/event/track",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/event/track",
+    "data": {
+      "modelType": 1,
+      "eventType": 5,
+      "attrName": "matches_detail",
+      "clientType": 1,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:48:33"
+  },
+  "POST https://app.supervisions.cn/mp/record/competitionListWithVideos": {
+    "url": "https://app.supervisions.cn/mp/record/competitionListWithVideos",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/record/competitionListWithVideos",
+    "data": {
+      "userA": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "userB": "45db0d14-cc1a-4ea4-9dee-faac1d870fc0",
+      "startTime": "2026-08-31 00:00:00",
+      "endTime": "2026-09-06 23:59:59",
+      "page": 1,
+      "pageSize": 10,
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:48:37"
+  },
+  "POST https://app.supervisions.cn/mp/record/opponentListWithVideos": {
+    "url": "https://app.supervisions.cn/mp/record/opponentListWithVideos",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/record/opponentListWithVideos",
+    "data": {
+      "startTime": "2026-08-31 00:00:00",
+      "endTime": "2026-09-06 23:59:59",
+      "page": 1,
+      "pageSize": 20,
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:48:51"
+  },
+  "POST https://app.supervisions.cn/mp/record/inningList": {
+    "url": "https://app.supervisions.cn/mp/record/inningList",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/record/inningList",
+    "data": {
+      "competitionId": "a62a10738043443a86915a30dce907f8",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:54:01"
+  },
+  "POST https://app.supervisions.cn/video/videoinfo/competitionVideos": {
+    "url": "https://app.supervisions.cn/video/videoinfo/competitionVideos",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/video/videoinfo/competitionVideos",
+    "data": {
+      "competitionId": "a62a10738043443a86915a30dce907f8",
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:54:03"
+  },
+  "POST https://app.supervisions.cn/mp/record/inningStatistics": {
+    "url": "https://app.supervisions.cn/mp/record/inningStatistics",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/record/inningStatistics",
+    "data": {
+      "competitionId": "a62a10738043443a86915a30dce907f8",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:54:38"
+  },
+  "POST https://app.supervisions.cn/mp/record/barchart": {
+    "url": "https://app.supervisions.cn/mp/record/barchart",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/record/barchart",
+    "data": {
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "startTime": "2026-08-31 00:00:00",
+      "endTime": "2026-09-06 23:59:59",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:55:02"
+  },
+  "POST https://app.supervisions.cn/mp/record/statics": {
+    "url": "https://app.supervisions.cn/mp/record/statics",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/record/statics",
+    "data": {
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "startTime": "2026-08-31 00:00:00",
+      "endTime": "2026-09-06 23:59:59",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:55:02"
+  },
+  "POST https://app.supervisions.cn/mp/rank/ratingList": {
+    "url": "https://app.supervisions.cn/mp/rank/ratingList",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/rank/ratingList",
+    "data": {
+      "type": 3,
+      "merchantAddressId": 3150,
+      "areaId": null,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:55:52"
+  },
+  "POST https://app.supervisions.cn/mp/rank/breakList": {
+    "url": "https://app.supervisions.cn/mp/rank/breakList",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/rank/breakList",
+    "data": {
+      "type": 0,
+      "merchantAddressId": 3150,
+      "areaId": null,
+      "rankRange": 0,
+      "timeRange": 0,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:56:10"
+  },
+  "POST https://app.supervisions.cn/mp/rank/winRateList": {
+    "url": "https://app.supervisions.cn/mp/rank/winRateList",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/rank/winRateList",
+    "data": {
+      "type": 2,
+      "merchantAddressId": 3150,
+      "areaId": null,
+      "rankRange": 0,
+      "timeRange": 0,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:56:15"
+  },
+  "POST https://app.supervisions.cn/video/videoClient/getVideoStatistics": {
+    "url": "https://app.supervisions.cn/video/videoClient/getVideoStatistics",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/video/videoClient/getVideoStatistics",
+    "data": {
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:57:16"
+  },
+  "POST https://app.supervisions.cn/video/videoClient/myVideos/readyV2": {
+    "url": "https://app.supervisions.cn/video/videoClient/myVideos/readyV2",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/video/videoClient/myVideos/readyV2",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 10,
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:57:18"
+  },
+  "POST https://app.supervisions.cn/video/videoClient/myVideos/processingV2": {
+    "url": "https://app.supervisions.cn/video/videoClient/myVideos/processingV2",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/video/videoClient/myVideos/processingV2",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 10,
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:57:38"
+  },
+  "POST https://app.supervisions.cn/video/videoClient/myVideos/failedV2": {
+    "url": "https://app.supervisions.cn/video/videoClient/myVideos/failedV2",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/video/videoClient/myVideos/failedV2",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 10,
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:57:48"
+  },
+  "POST https://app.supervisions.cn/mp/user/myClubs": {
+    "url": "https://app.supervisions.cn/mp/user/myClubs",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/user/myClubs",
+    "data": {
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:59:28"
+  },
+  "POST https://app.supervisions.cn/mp/app/domestic/version/check": {
+    "url": "https://app.supervisions.cn/mp/app/domestic/version/check",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/app/domestic/version/check",
+    "data": {
+      "platform": 1,
+      "currentVersion": "1.0.0",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:59:33"
+  },
+  "POST https://app.supervisions.cn/video/videoClient/updateClientInfo": {
+    "url": "https://app.supervisions.cn/video/videoClient/updateClientInfo",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/video/videoClient/updateClientInfo",
+    "data": {
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "attributeType": 1,
+      "attributeValue": 1,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:59:33"
+  },
+  "POST https://app.supervisions.cn/mp/oauth/wechatLogin": {
+    "url": "https://app.supervisions.cn/mp/oauth/wechatLogin",
+    "method": "POST",
+    "path": "https://app.supervisions.cn/mp/oauth/wechatLogin",
+    "data": {
+      "appType": 5,
+      "code": "091E2F000UeI0X1pIH200RP0tt2E2F0t"
+    },
+    "description": "",
+    "discovered_at": "2026-09-01 10:59:33"
   }
 }
