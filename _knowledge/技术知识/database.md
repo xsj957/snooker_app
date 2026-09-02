@@ -2,7 +2,7 @@
 
 > **数据库**: supervisions（121.40.243.17:3306）
 > **账号**: linjiakun / 密码: Ljk@123456
-> **生成日期**: 2026-07-28（最后更新: 2026-08-31）
+> **生成日期**: 2026-07-28（最后更新: 2026-09-02）
 > **数据来源**: 直接读取 information_schema 字段注释 + 实际数据分析
 
 ---
@@ -34,7 +34,7 @@ video_list (视频目录)
     └── video_price (定价规则)
 ```
 
-### 2.2 video_list — 视频目录表（1438 条）
+### 2.2 video_list — 视频目录表（2573 条）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -61,8 +61,9 @@ video_list (视频目录)
 | replay / replay_duration | int | 回放次数 / 回放视频时长 |
 | break_score | int | 最高分 |
 | turnover / turnover_duration | int | 失败次数 / 失败时长 |
+| country_id / prov_id / city_id / area_id | int | 国家/省/市/地区 ID（地理位置字段） |
 
-### 2.3 video_order — 视频解锁订单表（1004 条）
+### 2.3 video_order — 视频解锁订单表（1768 条）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -93,6 +94,7 @@ video_list (视频目录)
 | **pay_channel** | tinyint | **支付渠道**：0=小程序android, 1=小程序ios, 2=app_android, 3=app_ios |
 | **refund_status** | tinyint | **退款状态**：0=未退款, 1=已申请退款, 2=已退款, 3=退款失败 |
 | bin_url | varchar(128) | 视频 bin 文件的 URL |
+| **make_by** | tinyint | **制作方式**：0=未确定, 1=工控机制作, 2=手机端制作 |
 
 **当前数据分布**：
 
@@ -103,6 +105,14 @@ video_list (视频目录)
 | 0 | 空 | 6 |
 | 0 | 支付失败 | 1 |
 | 2 | 未支付 | 1 |
+
+**make_by 分布**：
+
+| make_by | 含义 | 数量 |
+|---------|------|------|
+| 0 | 未确定 | 1050 |
+| 1 | 工控机制作 | 166 |
+| 2 | 手机端制作 | 642 |
 
 > **⚠️ 注意**：`video_status` 大部分为 0，与数据库注释不一致。0 可能是历史遗留值或新增的"待解锁"状态。国内 App 本地制作新增的状态目前数据库中尚未出现。
 
@@ -129,7 +139,7 @@ video_list (视频目录)
 
 > **⚠️ 数据异常**：price 字段值为 100/101/102 分（约 1 元），与 PRD 文档的 9.9/29.9/118.8 元严重不符。可能是测试环境数据。
 
-### 2.5 video_combo_order — 套餐订单表（2484 条）
+### 2.5 video_combo_order — 套餐订单表（2428 条）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -147,24 +157,32 @@ video_list (视频目录)
 | **video_order_id** | int | **视频订单 ID** |
 | **end_time** | datetime | **过期时间（23:59:59 之前）** |
 | **channel** | int | **渠道类型**：2=H5, 其他值=小程序 |
-| **pay_channel** | tinyint | **支付渠道**：0=android, 1=ios |
+| **pay_channel** | tinyint | **支付渠道**：0=android, 1=ios（DB 注释为 0~3 同 video_order，但实际数据只有 0/1） |
 | **refund_status** | tinyint | **退款状态**：0=未退款, 1=已申请退款, 2=已退款, 3=退款失败 |
 
-> **⚠️ 注意**：`channel` 字段注释为"2=H5, 其他值=小程序"，**没有 App 的值**。App 端购买记录可能需要后端新增渠道值。`pay_channel` 只有 0/1 两个值（android/ios），与 `video_order.pay_channel` 的 0~3 四个值不同。
+> **⚠️ 注意**：`channel` 字段注释为"2=H5, 其他值=小程序"，**没有 App 的值**。App 端购买记录可能需要后端新增渠道值。`pay_channel` 数据库注释定义为 0~3（同 video_order），但实际数据只有 0（2462条）和 1（63条），历史数据均为小程序。
 
-### 2.6 video_coupon_record — 视频券记录表（377 条）
+### 2.6 video_coupon_record — 视频券记录表（702 条）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | bigint | 自增主键，流水 ID |
 | user_id | varchar(36) | 用户 ID |
-| **coupon_id** | int | **优惠券 ID**：1=套餐的专享优惠券, 2=7天打卡活动的券 |
+| **coupon_id** | int | **优惠券类型**：1=套餐券（购买套餐获得）, 2=每日免费券/活动券（每天完成第一场比赛后系统自动发放）, 52=特殊活动券（运营手动发放） |
 | draw_time | datetime | 领取时间 |
 | end_date | datetime | 过期时间 |
 | **status** | tinyint | **状态**：0=有效, 1=已使用, 2=已过期 |
-| order_id | int | 对应视频订单 ID |
+| order_id | int | 对应视频订单 ID（使用时关联 video_order.id） |
 
-### 2.7 video_price — 视频定价规则表（60+ 条）
+> **⚠️ coupon_id 实际数据分布**：coupon_id=1 套餐券（36条），coupon_id=2 每日免费券（665条），coupon_id=52 特殊活动券（1条）。coupon_id=2 占绝大多数，说明大部分用户通过每日免费券解锁视频。
+
+> **🔴 视频解锁方式区分**：通过 `video_order.combo_order_id` 判断：
+> - `combo_order_id IS NOT NULL AND > 0` → **用券解锁**（1,341条），amount 为视频原价（非实际支付）
+> - `combo_order_id IS NULL OR = 0` → **现金解锁**（517条），amount 为实际支付金额
+>
+> **⚠️ 现金支付现状**：现金解锁目前只有小程序渠道（pay_channel=0/1）的数据，App端（pay_channel=2/3）的现金支付尚未产生记录。而用券解锁已有大量 App 端数据（680条），说明 App 端用券解锁已上线使用。
+
+### 2.7 video_price — 视频定价规则表（59 条）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -212,7 +230,7 @@ video_list (视频目录)
 
 > **🔴 重要修正**：`discount=10` 表示 **1 折**（原价的 10%），不是 9 折！折扣值直接代表折后百分比。
 
-### 2.8 video_refund — 视频退款表（68 条）
+### 2.8 video_refund — 视频退款表（75 条）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -233,7 +251,7 @@ video_list (视频目录)
 | order_id | bigint | 对应视频订单 ID |
 | wx_notify_result | varchar(1000) | 退款通知接口收到的返回内容 |
 
-### 2.9 video_source — 视频原片表
+### 2.9 video_source — 视频原片表（58 条）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -245,7 +263,7 @@ video_list (视频目录)
 
 > **⚠️ 注意**：`order_id` 字段注释写的是"视频 ID video_list 的 ID"，而非订单 ID。该表存储工控机上传的原始视频片段地址，是 App 本地制作的源头。
 
-### 2.10 video_client_status — 客户端视频状态表 🔴
+### 2.10 video_client_status — 客户端视频状态表 🔴（2768 条）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -269,12 +287,13 @@ video_list (视频目录)
 | 7 | **制作完成** | 成品视频已生成，可播放 | 制作成功，请至App内查看 |
 | 8 | 已过期 | 视频已过期 | 已过期 |
 | 9 | **重新制作** | APP端新增状态 | 未明确（小程序端无对应状态） |
+| 12 | **未知状态** | 数据库中 10 条记录，无注释定义 | — |
 
-> **⚠️ 状态体系不统一**：APP 端 `video_client_status.status` 有 10 种（0~9），小程序端 `video_list.status` 只有 3 种（0=待剪辑, 1=已购买, 2=已删除），订单端 `video_order.video_status` 只有 2 种（1=工控机已生成, 2=工控机未合成）。三套状态枚举完全不同，是 APP↔小程序状态同步问题的根源。
+> **⚠️ 状态体系不统一**：APP 端 `video_client_status.status` 有 11 种（0~9,12），小程序端 `video_list.status` 只有 3 种（0=待剪辑, 1=已购买, 2=已删除），订单端 `video_order.video_status` 只有 2 种（1=工控机已生成, 2=工控机未合成）。三套状态枚举完全不同，是 APP↔小程序状态同步问题的根源。
 
-> **⚠️ 数据库实际缺失**：status=0(待解锁)、1(已解锁等待上传)、8(已过期) 的记录在数据库中不存在，实际只有 2/3/4/5/6/7/9。
+> **️ 数据库实际缺失**：status=0(待解锁)、1(已解锁等待上传)、8(已过期) 的记录在数据库中不存在，实际只有 2/3/4/5/6/7/9/12。
 
-### 2.11 video_event — 视频播放事件表（138 条，埋点）
+### 2.11 video_event — 视频播放事件表（1820 条，埋点）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -317,7 +336,7 @@ video_list (视频目录)
 | time_expire / time_pay / time_start | datetime | 过期/支付/开始时间 |
 | name | varchar(255) | 商品名 |
 
-### 2.14 pay_cash_order — 现金支付订单表
+### 2.14 pay_cash_order — 现金支付订单表（214 条）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -335,7 +354,7 @@ video_list (视频目录)
 | open_id | varchar(255) | 用户 OpenID |
 | merchant_address_id | varchar(36) | 商户 ID |
 
-### 2.15 pay_refund — 支付退款表
+### 2.15 pay_refund — 支付退款表（0 条）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -343,7 +362,222 @@ video_list (视频目录)
 
 ---
 
-## 三、用户数据关联规则
+## 三、新增表（2026-09-02 补充）
+
+> 以下表在原始文档中未记录，本次从 information_schema 查询补充。
+
+### 3.1 aggregate_pay_order — 综合支付订单表（331 条）
+
+> 新的支付系统表，统一管理多渠道支付（微信/支付宝等）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | int | 自增主键，支付订单 ID |
+| pay_order_no | varchar(32) | 支付订单号 |
+| biz_order_no | varchar(32) | 业务订单号 |
+| src_order_no | varchar(32) | 原支付订单号（退款时） |
+| pay_order_amt | int | 支付金额（分） |
+| product_name | varchar(255) | 商品名称 |
+| **pay_channel** | varchar(255) | **支付通道**：如 COMM-通联支付 |
+| **pay_platform** | varchar(255) | **支付平台**：WECHAT=微信, ALIPAY=支付宝（当前仅 WECHAT） |
+| **pay_way** | varchar(255) | **支付方式**：WECHAT_MINI_PROG_PAY=微信小程序支付 |
+| **pay_status** | varchar(255) | **支付状态**：INIT=初始化, PROC=处理中, SUCC=成功, FAIL=失败, CLOSED=关闭 |
+| **pay_type** | varchar(255) | **支付类型**：PAY=支付, REFUND=退款 |
+| pay_start_time / pay_end_time | datetime | 支付开始/完成时间 |
+| pay_time_out | datetime | 支付超时时间 |
+| pay_info | varchar(4000) | 支付信息（支付渠道流水号、微信支付结果 JSON） |
+| pay_callback_url | varchar(255) | 支付回调 URL |
+| pay_callback_info | varchar(4000) | 回调信息（JSON 格式） |
+| wechat_app_id | varchar(255) | 微信 appid |
+| wechat_open_id | varchar(255) | 微信用户 id |
+| error_code / error_msg | varchar(255) | 错误码 / 错误信息 |
+| remark | varchar(255) | 备注 |
+| create_time / update_time | datetime | 创建/更新时间 |
+
+### 3.2 pay_user — 用户资产表（195 条）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | int | 自增主键 |
+| balance | int | 资产余额（分） |
+| frozen | int | 冻结金额（分） |
+| telephone | varchar(255) | 电话 |
+| **union_id** | varchar(255) | **unionId（关联用户）** |
+| update_time | datetime | 更新时间 |
+
+### 3.3 pay_user_balance_log — 用户资产流水（733 条）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | int | 自增主键 |
+| balance_before / balance_after | int | 变动前/后资产 |
+| amount | int | 变动金额（分） |
+| name | varchar(255) | 名称 |
+| remark | varchar(255) | 备注 |
+| **union_id** | varchar(255) | **微信 unionId** |
+| **type** | tinyint | **类型**：1=充值, 2=消费 |
+| unit_id | int | 单位（球房）ID |
+| cash_order_no | varchar(36) | 现金订单号 |
+| create_time | datetime | 创建时间 |
+
+### 3.4 video_list_found — 视频过期找回记录表（45 条）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| order_id | int | 视频 ID（video_list 的 ID） |
+| create_time | datetime | 创建时间 |
+| download_time | datetime | 找回时间 |
+| download_count | int | 找回次数 |
+
+### 3.5 video_black_club — 视频黑名单俱乐部表（99 条）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| **club_id** | int | **未通过视频审核的俱乐部 ID** |
+
+### 3.6 video_price_apply — 视频优惠价格应用记录表（0 条）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | bigint | 自增主键 |
+| dev_id | bigint | 设备 ID |
+| start_time / end_time | datetime | 优惠开始/结束时间 |
+| **status** | int | **状态**：1=正在执行, 2=已恢复 |
+| apply_times | int | 应用次数 |
+| info | varchar(1000) | 优惠信息（JSON 格式，如 `[{category:1,discount_price:10,discount:10}]`） |
+| create_time / update_time | datetime | 创建/更新时间 |
+| create_user / update_user | varchar(36) | 创建人/更新人 |
+
+### 3.7 ten_user_ext — 用户信息扩展表（209 条）
+
+> 存储用户的地理位置、隐私设置、活跃时间等扩展信息
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | bigint | 自增主键 |
+| **user_id** | varchar(36) | **用户 ID（关联 ten_user.id，唯一）** |
+| **enable_challenge** | tinyint(1) | **允许他人发起约战**：1=开启, 0=关闭 |
+| **anonymous** | tinyint(1) | **匿名显示**：1=开启, 0=关闭 |
+| location | point | 位置（经纬度点，如 POINT(0 0)） |
+| location_desc | varchar(100) | 位置描述（如 "广东省-深圳市"） |
+| province / province_code | varchar | 省份名称/编码 |
+| city / city_code | varchar | 城市名称/编码 |
+| county / county_code | varchar | 区县名称/编码 |
+| town / town_code | varchar | 乡镇名称/编码 |
+| **last_active_time** | datetime | **用户最后活跃时间** |
+| notice_read / notice_read_time | tinyint/datetime | 是否已读通知 / 已读时间 |
+| create_time / update_time | datetime | 创建/更新时间 |
+
+### 3.8 ten_user_auth — 用户授权登录表（71 条）
+
+> 支持多平台授权登录（微信/Apple/Google/Facebook）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | bigint | 自增主键 |
+| **user_id** | varchar(36) | **用户 ID（关联 ten_user.id）** |
+| **auth_type** | tinyint | **认证类型**：1=Facebook, 2=Google, 3=Apple, 4=Wechat |
+| provider_user_id | varchar(255) | 第三方平台用户唯一标识 |
+| refresh_token | varchar(64) | 刷新令牌（唯一） |
+| refresh_token_expire_time | datetime | 刷新令牌过期时间 |
+| last_login_time | datetime | 最后登录/授权时间 |
+| bind_device | varchar(255) | 绑定设备信息（设备 ID+设备标识符） |
+| email | varchar(128) | 邮箱 |
+| nickname | varchar(64) | 第三方账号昵称 |
+| avatar_url | varchar(512) | 第三方账号头像 URL |
+| extra_data | json | 额外数据 |
+| is_deleted | tinyint | 逻辑删除：0=未删除, 1=已删除 |
+| create_time / update_time | datetime | 创建/更新时间 |
+
+> **实际数据**：auth_type 分布 — Google(2)=4条, Apple(3)=10条, Wechat(4)=59条
+
+### 3.9 ten_user_favorite_event — 用户收藏视频事件表（1622 条）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | bigint unsigned | 自增主键 |
+| event_type | tinyint | 事件类型（参考 FavoriteEventTypeEnum） |
+| event_id | varchar(36) | 事件 ID（某场比赛唯一标识） |
+| shot_type | tinyint(1) | 0=未收藏, 1=已收藏 |
+| user_id | varchar(36) | 用户 ID |
+| page_id | varchar(128) | 页面唯一标识（如 review_page） |
+| event_time | datetime | 事件时间 |
+| favored_count | int | 被收藏的次数 |
+| club | varchar(64) | 俱乐部名称 |
+| sn | varchar(64) | 设备 SN |
+| create_time | datetime | 创建时间 |
+
+### 3.10 ten_user_favorite_shot — 用户收藏精彩视频片段表（350 条）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | bigint unsigned | 自增主键 |
+| **user_id** | varchar(36) | **用户 ID** |
+| speed | int | 速度 |
+| thickness | int | 薄厚度 |
+| user_a / user_b | varchar(36) | 用户 A/B 的 ID |
+| score_a / score_b | int | A/B 的得分 |
+| cue_score | int | 第一人的分数 |
+| url | varchar(256) | 视频 URL |
+| cue_uuid | varchar(100) | 视频 ID |
+| cover_url | varchar(256) | 视频封面图片 |
+| deleted | tinyint unsigned | 删除标志 |
+| create_time | datetime | 创建时间 |
+
+### 3.11 ten_user_license — 用户隐私协议同意记录表（432 条）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| **union_id** | varchar(255) | **微信 union_id** |
+| lience_version | int | 用户协议版本 |
+| agree_time | datetime | 同意时间 |
+
+### 3.12 ten_user_prompt — 用户提示表（167 条）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | bigint | 自增主键 |
+| **user_id** | varchar(36) | **用户 ID** |
+| **prompt_type** | tinyint | **提示类型枚举**：1=约战提示 |
+| create_time / update_time | datetime | 创建/更新时间 |
+
+### 3.13 ten_user_res — 用户头像资源表（12006 条）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | int | 自增主键 |
+| **user_id** | varchar(36) | **用户 ID（唯一）** |
+| headimgurl | varchar(255) | 头像 URL |
+| res_version_id | int unsigned | 资源版本 ID |
+| **status** | tinyint unsigned | **状态**：0=正常, 1=已禁用, 2=已删除 |
+| create_time / update_time | datetime | 创建/更新时间 |
+
+### 3.14 app_devinfo — 手动 APP 设备信息表（103 条）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| dev_id | int | 设备 ID |
+| enable_upload | int | 上传日志开关：1=有效 |
+| runtime | int | 运行时间（秒） |
+| matchtime | int | 今日比赛时长（秒） |
+| matchcount | int | 今日比赛场数 |
+| framecount | int | 今日比赛局数 |
+
+### 3.15 app_optlog — 手动 APP 操作日志表（6037 条）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | bigint | 自增主键 |
+| dev_id | int | 设备 ID |
+| opt_time | datetime | 操作时间 |
+| opt_type | int | 操作类型 |
+| opt_content | varchar(255) | 操作内容 |
+| opt_page | varchar(255) | 页面 |
+| focus_button | varchar(255) | 按钮 |
+
+---
+
+## 四、用户数据关联规则
 
 **查询路径**：手机号 → ten_user.id → ten_inning.left_id/right_id → 比赛数据
 
@@ -361,7 +595,7 @@ video_list (视频目录)
 - `ten_hit_info`: 击球信息表无记录（可能工控机未上传详细击球数据）
 - `ten_participants`: 参赛人表无记录（斯诺克通过 ten_inning 的 left_id/right_id 直接关联）
 
-### 3.1 关键关系图
+### 4.1 关键关系图
 
 ```
 ten_user (用户)
@@ -382,9 +616,9 @@ video_client_status (设备端状态)         ← 按 client_id(设备UDID) 区�
 
 ---
 
-## 四、国内 App 业务数据流分析
+## 五、国内 App 业务数据流分析
 
-### 4.1 视频解锁流程
+### 5.1 视频解锁流程
 
 ```
 用户点击解锁视频
@@ -406,7 +640,7 @@ video_client_status (设备端状态)         ← 按 client_id(设备UDID) 区�
                    通知工控机上传原片 → video_source 插入记录
 ```
 
-### 4.2 视频制作完整状态流转
+### 5.2 视频制作完整状态流转
 
 ```
 video_client_status.status 完整状态机:
@@ -425,9 +659,10 @@ video_client_status.status 完整状态机:
     └→ 6 (制作失败) ← 失败
   8 (已过期) ← 任何阶段超时（48h/90d/缓存清除）
   9 (重新制作) ← APP端新增状态
+  12 (未知状态) ← 数据库 10 条记录，无注释定义
 ```
 
-### 4.3 支付渠道区分
+### 5.3 支付渠道区分
 
 ```
 video_order.pay_channel:
@@ -458,7 +693,7 @@ pay_order.channel:
 - 后台筛选"购买渠道"功能依赖 `video_order.pay_channel` 字段
 - 历史数据均为 `pay_channel=0` 或 `1`（小程序）
 
-### 4.4 折扣规则
+### 5.4 折扣规则
 
 ```
 video_price.discount / video_promotion.discount:
@@ -473,9 +708,9 @@ video_price.discount / video_promotion.discount:
 
 ---
 
-## 五、关键发现与风险点总结
+## 六、关键发现与风险点总结
 
-### 5.1 🔴 折扣理解错误（已修正）
+### 6.1 🔴 折扣理解错误（已修正）
 
 | 项目 | 详情 |
 |------|------|
@@ -483,15 +718,15 @@ video_price.discount / video_promotion.discount:
 | **实际** | `discount=10` = **1 折**（原价的 10%），discount 值 = 折后百分比 |
 | **影响** | 测试用例中的价格计算逻辑需要修正 |
 
-### 5.2 🔴 video_client_status 完整状态机
+### 6.2 🔴 video_client_status 完整状态机
 
 | 项目 | 详情 |
 |------|------|
-| **发现** | `video_client_status.status` 有 10 个状态值（0~9） |
+| **发现** | `video_client_status.status` 有 11 个状态值（0~9,12） |
 | **意义** | 这是 App 本地制作的核心状态跟踪表 |
 | **建议** | 测试用例应覆盖完整状态流转：0→1→2→3→5→7（正常）、3→4（下载失败）、5→6（制作失败） |
 
-### 5.3 🟡 video_event 缺少 App 来源值
+### 6.3 🟡 video_event 缺少 App 来源值
 
 | 项目 | 详情 |
 |------|------|
@@ -499,7 +734,7 @@ video_price.discount / video_promotion.discount:
 | **影响** | App 端播放埋点无法区分来源 |
 | **建议** | 后端新增 `from_type=3` 表示 App 端 |
 
-### 5.4 🟡 video_combo_order.channel 缺少 App 值
+### 6.4 🟡 video_combo_order.channel 缺少 App 值
 
 | 项目 | 详情 |
 |------|------|
@@ -507,7 +742,7 @@ video_price.discount / video_promotion.discount:
 | **影响** | App 端购买视频券的渠道记录不准确 |
 | **建议** | 后端新增渠道值表示 App |
 
-### 5.5 🟡 视频券套餐价格数据异常
+### 6.5 🟡 视频券套餐价格数据异常
 
 | 项目 | 详情 |
 |------|------|
@@ -515,14 +750,14 @@ video_price.discount / video_promotion.discount:
 | **预期** | PRD 文档要求 9.9 元/29.9 元/118.8 元 |
 | **建议** | 确认是测试环境数据还是字段含义不同 |
 
-### 5.6 🟢 定价规则完整
+### 6.6 🟢 定价规则完整
 
 | 项目 | 详情 |
 |------|------|
 | **发现** | video_price 表包含所有单杆分数段的定价规则 |
 | **覆盖** | 局视频 + 单杆 30+~140+ 共 13 个分类，与 PRD 一致 |
 
-### 5.7  其他已知数据问题
+### 6.7  其他已知数据问题
 
 | 问题 | 详情 |
 |------|------|
@@ -530,35 +765,41 @@ video_price.discount / video_promotion.discount:
 | video_order.video_status | 大量为0，与注释（1=已生成,2=未合成）不一致；实际只有 0 和 2 两个值 |
 | video_event.from_type | 只有2，缺工控机的1和App的3（App开发中） |
 | discount=10 | 是1折非9折（折后百分比） |
-| **三套状态体系不统一** | APP端`video_client_status`有10种(0~9)，小程序端`video_list`只有3种(0/1/2)，订单端`video_order`只有2种(0/2)。同一视频在不同表状态不同，是APP↔小程序状态同步问题的根源 |
+| **三套状态体系不统一** | APP端`video_client_status`有11种(0~9,12)，小程序端`video_list`只有3种(0/1/2)，订单端`video_order`只有2种(0/2)。同一视频在不同表状态不同，是APP↔小程序状态同步问题的根源 |
 | **video_list 缺少细粒度状态** | 小程序无法区分制作中/制作失败/已过期/重新制作，所有已购买视频统一显示 status=1 |
 | **video_client_status 缺失 0/1/8** | 数据库中无 status=0(待解锁)、1(已解锁等待上传)、8(已过期) 的记录，实际只有 2/3/4/5/6/7/9 |
 | **status=9 重新制作** | 数据库有注释和10条数据，但小程序端无对应状态，APP↔小程序同步时可能丢失 |
 
 ---
 
-## 六、数据库与测试点对应关系
+## 七、数据库与测试点对应关系
 
 | 测试点模块 | 相关数据库表 | 关键验证字段 |
 |-----------|-------------|-------------|
 | 视频解锁 | video_order, video_list | pay_status, video_status, amount |
 | 视频券购买 | video_combo, video_combo_order, video_coupon_record | price, video_count, end_time, status |
-| 付费解锁 | video_order, pay_order | pay_channel, amount, pay_status |
-| 视频定价 | video_price | category, base_price, discount, is_regular |
+| 付费解锁 | video_order, pay_order, aggregate_pay_order | pay_channel, amount, pay_status |
+| 视频定价 | video_price, video_price_apply | category, base_price, discount, is_regular |
 | 退款 | video_refund, video_order | status(0~4), refund_status(0~3) |
-| 视频制作状态 | video_client_status, video_source | status(0~9), url_video |
+| 视频制作状态 | video_client_status, video_source | status(0~9,12), url_video |
+| 视频过期找回 | video_list_found | download_time, download_count |
 | 播放埋点 | video_event | type, from_type, play_count, play_ms |
+| 用户收藏 | ten_user_favorite_event, ten_user_favorite_shot | shot_type, event_type |
 | 后台渠道筛选 | video_order, video_combo_order | pay_channel, channel |
 | 促销活动 | video_promotion | discount(10=1折), status |
+| 用户资产/余额 | pay_user, pay_user_balance_log | balance, frozen, type |
+| 用户登录授权 | ten_user_auth, ten_user_license | auth_type(1~4), lience_version |
+| 用户信息 | ten_user_ext, ten_user_res | enable_challenge, anonymous, status |
+| APP日志 | app_devinfo, app_optlog | dev_id, opt_type, opt_time |
 
 ---
 
-## 七、测试用户数据速查
+## 八、测试用户数据速查
 
 > 用于排查日志及数据库，快速定位用户、场、视频的关系
 > 最后更新：2026-08-27
 
-### 7.1 用户基本信息
+### 8.1 用户基本信息
 
 | 项目 | 用户A（ice） | 用户B（Natural） | 用户C |
 |------|-------------|-----------------|-------|
@@ -566,89 +807,13 @@ video_price.discount / video_promotion.discount:
 | **user_id** | `aff7eae4-3680-4b89-9f01-819e02c3b6b5` | `57d703dc-659a-4474-898e-b75efa1f2e0a` | `1ad5d8c9-2a67-4f6b-93e9-e75f979e2e39` |
 | **union_id** | `oIp-Q5pI-MlZ2Lov0zX-cIhs4caw` | `oIp-Q5uHh1HHD4UBBSr51Y2b_0KE` | `oIp-Q5qUwi6ULEGjTchV6FRL3xhc` |
 
-### 7.2 比赛场次与视频关系
-
-#### 共同场次（两人都在场中，competition_id 相同）
-
-| competition_id | video_list 视频数 | ice 解锁 | Natural 解锁 | 备注 |
-|---------------|------------------|---------|-------------|------|
-| `fecd7c799ea5495ca23caceafaaca04b` | 3条 | ✅ 12001, 12002 | ✅ 12001 | video_id=12001 两人都买过 |
-| `db6de10dea6a4c77ae9bde2d07c428b6` | 6条 | ❌ | ✅ 12387/12388/12391/12392/12393/12394 | Natural App安卓端解锁，全部制作完成 |
-| `94acb2c4f2ac4d64b1ee641f7e1d3175` | 4条 | ❌ | ✅ 12375/12376/12377/12378 | 全部制作完成 |
-| `29af92ac85bf451cb3e4bb45f58a4560` | 4条 |  | ✅ 12323/12324/12325/12326 | 全部制作完成 |
-| `68715045f175472288c24c858b9da6e4` | 3条 | ❌ | ✅ 12180/12181(小程序) + 12182(App) | **12182 制作失败** |
-| `0b9a4e7c4c3b45cf9612c5e6c587971c` | 1条 |  | ✅ 12021 | — |
-
-#### ice 单独场次
-
-| competition_id | 视频数 | 状态 |
-|---------------|--------|------|
-| `fecd7c799ea5495ca23caceafaaca04b` | 3条 | 12001/12002 已购买（小程序），1条视频两人均解锁 |
-
-#### Natural 单独场次（小程序时期解锁）
-
-| competition_id | 视频数 | 解锁渠道 | 备注 |
-|---------------|--------|---------|------|
-| `bfda6bbee4aa42a98d061c65909e035f` | 2 | 小程序 | — |
-| `519c3a04995c41e1a7e0cece4aa18344` | 3 | 小程序 | 含单杆20+(27分) |
-| `96a58c8363f64b39ad39e725dfaeab6b` | 3 | 小程序 | — |
-| `44422073d17f41f794e672c82e13aeb1` | 5 | 小程序 | 含单杆20+(27分) |
-| `4ad73acf067045b484c5177f933e564b` | 2 | 小程序 | — |
-| `b9832083149348d9943978a68e536840` | 5 | 小程序 | — |
-| `7e6a253cf84545b08687502c8813a8d3` | 3 | 小程序 | — |
-
-#### ice 未解锁场次（video_list 有待解锁视频，但 user 无 video_order 记录）
-
-| competition_id | 视频数 | 类型 |
-|---------------|--------|------|
-| `10aaa8bd` | 8 | 局×4 + 失败×2 + 精彩×2 |
-| `d5fbeae5` | 4 | 局×4 |
-| `40157a50` | 12 | 局×8 + 失败×2 + 单杆20+×2 |
-| `b2208e66` | 6 | 局×6 |
-| `dc209a18` | 12 | 局×4 + 失败×2 + 单杆20+×4 |
-| `bee0e6ae` | 4 | 局×4 |
-| `73dc910b` | 4 | 局×4 |
-| `baad59a0` | 6 | 局×4 + 单杆20+×2 |
-
-### 7.3 App 端制作状态（video_client_status）
-
-#### Natural 设备（client_id: `2d14c8a0-66c6-4f04...`）
-
-| video_id | 状态 | 更新时间 | 所属场 |
-|----------|------|---------|-------|
-| 12391 | 制作完成 | 08-21 17:05 | db6de10d |
-| 12392 | 制作完成 | 08-21 17:01 | db6de10d |
-| 12387 | 制作完成 | 08-21 17:00 | db6de10d |
-| 12388 | 制作完成 | 08-21 17:04 | db6de10d |
-| 12393 | 制作完成 | 08-21 17:08 | db6de10d |
-| 12394 | 制作完成 | 08-21 17:07 | db6de10d |
-| 12375 | 制作完成 | 08-21 17:13 | 94acb2c4 |
-| 12376 | 制作完成 | 08-21 17:14 | 94acb2c4 |
-| 12377 | 制作完成 | 08-21 17:12 | 94acb2c4 |
-| 12378 | 制作完成 | 08-21 17:12 | 94acb2c4 |
-| 12323 | 制作完成 | 08-21 17:04 | 29af92ac |
-| 12324 | 制作完成 | 08-21 17:12 | 29af92ac |
-| 12325 | 制作完成 | 08-21 17:00 | 29af92ac |
-| 12326 | 制作完成 | 08-21 17:00 | 29af92ac |
-| **12182** | **制作失败** | 08-21 16:37 | 68715045 |
-
-#### Natural 旧设备（client_id: `2149f99f-3c66-42d7...`，08-20 使用）
-
-| video_id | 状态 | 更新时间 |
-|----------|------|---------|
-| 12323 | 制作完成 | 08-20 22:48 |
-| 12324 | 制作完成 | 08-20 22:52 |
-| 12325 | 制作完成 | 08-20 21:53 |
-| 12326 | 制作完成 | 08-20 21:52 |
-| 12182 | 制作失败 | 08-20 14:34 |
-
 ---
 
-## 八、视频业务SQL查询大全
+## 九、视频业务SQL查询大全
 
 > 所有SQL可直接在DBeaver中执行，`{user_id}` / `{video_id}` 等占位符替换为实际值
 
-### 8.1 用户维度查询
+### 9.1 用户维度查询
 
 #### 查询用户基本信息
 ```sql
@@ -683,7 +848,7 @@ WHERE u.id = '{user_id}'
 GROUP BY u.id, u.nickname;
 ```
 
-### 8.2 视频订单查询
+### 9.2 视频订单查询
 
 #### 用户所有视频订单
 ```sql
@@ -763,7 +928,7 @@ GROUP BY user_id, video_id
 HAVING COUNT(*) > 1;
 ```
 
-### 8.3 视频券查询
+### 9.3 视频券查询
 
 #### 用户所有视频券
 ```sql
@@ -820,7 +985,7 @@ WHERE vcr.user_id = '{user_id}'
 ORDER BY vcr.draw_time DESC;
 ```
 
-### 8.4 套餐订单查询
+### 9.4 套餐订单查询
 
 #### 用户套餐订单
 ```sql
@@ -869,12 +1034,12 @@ WHERE end_time IS NOT NULL
   AND pay_status = '支付成功';
 ```
 
-### 8.5 视频制作状态查询（核心）
+### 9.5 视频制作状态查询（核心）
 
 #### 完整状态机流转查询
 ```sql
 -- video_client_status: 0=待解锁, 1=已解锁等待上传, 2=原片已上传,
---   3=下载中, 4=下载失败, 5=本地制作中, 6=制作失败, 7=制作完成, 8=已过期, 9=重新制作
+--   3=下载中, 4=下载失败, 5=本地制作中, 6=制作失败, 7=制作完成, 8=已过期, 9=重新制作, 12=未知状态
 SELECT vcs.video_id,
        CASE vcs.status
            WHEN 0 THEN '待解锁'
@@ -887,6 +1052,7 @@ SELECT vcs.video_id,
            WHEN 7 THEN '制作完成'
            WHEN 8 THEN '已过期'
            WHEN 9 THEN '重新制作'
+           WHEN 12 THEN '未知状态'
        END AS status_text,
        vcs.client_id, vcs.created_at, vcs.updated_at,
        TIMESTAMPDIFF(MINUTE, vcs.created_at, vcs.updated_at) AS process_minutes
@@ -905,6 +1071,7 @@ SELECT
         WHEN 4 THEN '下载失败' WHEN 5 THEN '本地制作中'
         WHEN 6 THEN '制作失败' WHEN 7 THEN '制作完成'
         WHEN 8 THEN '已过期' WHEN 9 THEN '重新制作'
+        WHEN 12 THEN '未知状态'
     END AS status_text,
     COUNT(*) AS video_count
 FROM video_client_status vcs
@@ -966,7 +1133,7 @@ WHERE vcs.video_id IN (SELECT video_id FROM video_order WHERE user_id = '{user_i
 GROUP BY vcs.video_id;
 ```
 
-### 8.6 视频原片查询
+### 9.6 视频原片查询
 
 #### 用户视频的原片地址
 ```sql
@@ -988,7 +1155,7 @@ WHERE vo.user_id = '{user_id}'
   AND vs.id IS NULL;
 ```
 
-### 8.7 视频目录查询
+### 9.7 视频目录查询
 
 #### 视频详情（根据video_id）
 ```sql
@@ -1025,7 +1192,7 @@ WHERE vo.user_id = '{user_id}'
 ORDER BY vo.pay_time DESC;
 ```
 
-### 8.8 播放埋点查询
+### 9.8 播放埋点查询
 
 #### 用户播放事件
 ```sql
@@ -1080,7 +1247,7 @@ ORDER BY play_count DESC
 LIMIT 20;
 ```
 
-### 8.9 退款查询
+### 9.9 退款查询
 
 #### 用户退款记录
 ```sql
@@ -1120,7 +1287,7 @@ WHERE vr.status = 0  -- 待审核
 ORDER BY vr.create_time;
 ```
 
-### 8.10 定价与促销查询
+### 9.10 定价与促销查询
 
 #### 视频定价规则（固定价格）
 ```sql
@@ -1158,7 +1325,7 @@ WHERE category = {category_id}
 ORDER BY latest_begin_time DESC;
 ```
 
-### 8.11 支付订单查询
+### 9.11 支付订单查询
 
 #### 用户支付订单
 ```sql
@@ -1189,7 +1356,7 @@ WHERE po.csm_user_id = '{user_id}'
 ORDER BY po.time_start DESC;
 ```
 
-### 8.12 跨表关联查询
+### 9.12 跨表关联查询
 
 #### 用户视频完整信息（订单+目录+状态+原片）
 ```sql
@@ -1203,6 +1370,7 @@ SELECT vo.id AS order_id, vo.video_id,
            WHEN 4 THEN '下载失败' WHEN 5 THEN '本地制作中'
            WHEN 6 THEN '制作失败' WHEN 7 THEN '制作完成'
            WHEN 8 THEN '已过期' WHEN 9 THEN '重新制作'
+           WHEN 12 THEN '未知状态'
        END AS client_status_text,
        vs.url_video AS source_url,
        vo.create_time, vo.pay_time
@@ -1227,6 +1395,7 @@ SELECT
         WHEN 4 THEN '下载失败' WHEN 5 THEN '本地制作中'
         WHEN 6 THEN '制作失败' WHEN 7 THEN '制作完成'
         WHEN 8 THEN '已过期' WHEN 9 THEN '重新制作'
+        WHEN 12 THEN '未知状态'
     END AS client_status_text,
     vcs.updated_at AS last_status_time,
     vs.url_video IS NOT NULL AS has_source,
@@ -1255,7 +1424,7 @@ WHERE vco.user_id = '{user_id}'
 ORDER BY vco.create_time DESC, vcr.draw_time DESC;
 ```
 
-### 8.13 数据统计与报表
+### 9.13 数据统计与报表
 
 #### 全量视频业务数据概览
 ```sql
@@ -1322,6 +1491,7 @@ SELECT
         WHEN 4 THEN '下载失败' WHEN 5 THEN '制作中'
         WHEN 6 THEN '制作失败' WHEN 7 THEN '制作完成'
         WHEN 8 THEN '已过期' WHEN 9 THEN '重新制作'
+        WHEN 12 THEN '未知状态'
     END AS status_text,
     COUNT(*) AS count,
     ROUND(COUNT(*) / (SELECT COUNT(*) FROM video_client_status) * 100, 1) AS pct
@@ -1343,7 +1513,7 @@ ORDER BY total_plays DESC
 LIMIT 20;
 ```
 
-### 8.14 问题排查SQL
+### 9.14 问题排查SQL
 
 #### 已支付但无原片的视频
 ```sql
@@ -1402,35 +1572,198 @@ WHERE vo.pay_status = '支付成功'
   AND TIMESTAMPDIFF(HOUR, vo.create_time, NOW()) > 48;
 ```
 
+### 9.15 新增表查询（2026-09-02 补充）
+
+#### 综合支付订单查询（aggregate_pay_order）
+```sql
+-- 查询用户支付订单（新支付系统）
+-- pay_platform: WECHAT/ALIPAY, pay_status: INIT/PROC/SUCC/FAIL/CLOSED
+SELECT apo.id, apo.pay_order_no, apo.biz_order_no,
+       apo.pay_order_amt/100 AS amount_yuan,
+       apo.product_name, apo.pay_channel, apo.pay_platform, apo.pay_way,
+       apo.pay_status, apo.pay_type,
+       apo.pay_start_time, apo.pay_end_time,
+       apo.wechat_app_id, apo.wechat_open_id,
+       apo.error_code, apo.error_msg,
+       apo.create_time
+FROM aggregate_pay_order apo
+WHERE apo.wechat_open_id = '{open_id}'
+ORDER BY apo.create_time DESC;
+```
+
+#### 用户资产与余额查询（pay_user + pay_user_balance_log）
+```sql
+-- 查询用户资产余额
+SELECT pu.id, pu.union_id, pu.balance/100 AS balance_yuan,
+       pu.frozen/100 AS frozen_yuan, pu.telephone, pu.update_time
+FROM pay_user pu
+WHERE pu.union_id = '{union_id}';
+
+-- 查询用户余额流水
+-- type: 1=充值, 2=消费
+SELECT pub.id, pub.union_id,
+       CASE pub.type WHEN 1 THEN '充值' WHEN 2 THEN '消费' END AS log_type,
+       pub.amount/100 AS amount_yuan,
+       pub.balance_before/100 AS before_yuan,
+       pub.balance_after/100 AS after_yuan,
+       pub.name, pub.remark, pub.cash_order_no, pub.unit_id,
+       pub.create_time
+FROM pay_user_balance_log pub
+WHERE pub.union_id = '{union_id}'
+ORDER BY pub.create_time DESC;
+```
+
+#### 用户扩展信息查询（ten_user_ext）
+```sql
+-- 查询用户位置、隐私设置、活跃时间
+SELECT tue.id, tue.user_id,
+       tue.enable_challenge, tue.anonymous,
+       tue.location_desc, tue.province, tue.city,
+       tue.last_active_time,
+       tue.notice_read, tue.notice_read_time,
+       tue.create_time
+FROM ten_user_ext tue
+WHERE tue.user_id = '{user_id}';
+```
+
+#### 用户授权登录查询（ten_user_auth）
+```sql
+-- 查询用户多平台授权
+-- auth_type: 1=Facebook, 2=Google, 3=Apple, 4=Wechat
+SELECT tua.id, tua.user_id,
+       CASE tua.auth_type
+           WHEN 1 THEN 'Facebook'
+           WHEN 2 THEN 'Google'
+           WHEN 3 THEN 'Apple'
+           WHEN 4 THEN 'Wechat'
+       END AS auth_platform,
+       tua.provider_user_id, tua.email, tua.nickname,
+       tua.last_login_time, tua.bind_device,
+       tua.is_deleted, tua.create_time
+FROM ten_user_auth tua
+WHERE tua.user_id = '{user_id}'
+ORDER BY tua.last_login_time DESC;
+```
+
+#### 用户收藏查询（ten_user_favorite_event + ten_user_favorite_shot）
+```sql
+-- 查询用户收藏的比赛事件
+SELECT tufe.id, tufe.user_id, tufe.event_id, tufe.event_type,
+       tufe.shot_type, tufe.page_id, tufe.event_time,
+       tufe.favored_count, tufe.club, tufe.sn
+FROM ten_user_favorite_event tufe
+WHERE tufe.user_id = '{user_id}'
+ORDER BY tufe.event_time DESC;
+
+-- 查询用户收藏的精彩片段
+SELECT tufs.id, tufs.user_id, tufs.cue_uuid,
+       tufs.url, tufs.cover_url,
+       tufs.score_a, tufs.score_b, tufs.cue_score,
+       tufs.speed, tufs.thickness, tufs.deleted
+FROM ten_user_favorite_shot tufs
+WHERE tufs.user_id = '{user_id}' AND tufs.deleted = 0
+ORDER BY tufs.create_time DESC;
+```
+
+#### 视频过期找回记录查询（video_list_found）
+```sql
+SELECT vlf.order_id AS video_id, vlf.create_time,
+       vlf.download_time AS recover_time, vlf.download_count AS recover_count
+FROM video_list_found vlf
+WHERE vlf.order_id = {video_id}
+ORDER BY vlf.download_time DESC;
+```
+
+#### 视频黑名单俱乐部查询（video_black_club）
+```sql
+-- 查询所有被屏蔽的俱乐部
+SELECT vbc.club_id FROM video_black_club vbc;
+```
+
+#### APP操作日志查询（app_optlog）
+```sql
+-- 查询设备操作日志
+SELECT aol.id, aol.dev_id, aol.opt_time,
+       aol.opt_type, aol.opt_content,
+       aol.opt_page, aol.focus_button
+FROM app_optlog aol
+WHERE aol.dev_id = {dev_id}
+ORDER BY aol.opt_time DESC
+LIMIT 100;
+```
+
+#### 用户完整画像查询（跨新表关联）
+```sql
+-- 查询用户的授权方式、资产余额、扩展信息、收藏数量
+SELECT tu.id AS user_id, tu.nickname, tu.union_id,
+       tua.auth_type, tua.last_login_time,
+       pu.balance/100 AS balance_yuan, pu.frozen/100 AS frozen_yuan,
+       tue.location_desc, tue.last_active_time,
+       tue.enable_challenge, tue.anonymous,
+       (SELECT COUNT(*) FROM ten_user_favorite_event tufe WHERE tufe.user_id = tu.id) AS fav_event_count,
+       (SELECT COUNT(*) FROM ten_user_favorite_shot tufs WHERE tufs.user_id = tu.id AND tufs.deleted = 0) AS fav_shot_count
+FROM ten_user tu
+LEFT JOIN ten_user_auth tua ON tu.id = tua.user_id AND tua.is_deleted = 0
+LEFT JOIN pay_user pu ON tu.union_id = pu.union_id
+LEFT JOIN ten_user_ext tue ON tu.id = tue.user_id
+WHERE tu.id = '{user_id}';
+```
+
 ---
 
 ## 附录：表结构快速参考
 
 | 表名 | 记录数 | 核心用途 |
 |------|--------|---------|
-| video_list | 1,438 | 视频目录/元数据 |
-| video_order | 1,004 | 视频解锁订单 |
+| video_list | 2,573 | 视频目录/元数据 |
+| video_order | 1,768 | 视频解锁订单 |
 | video_combo | 3 | 套餐定义 |
-| video_combo_order | 2,484 | 套餐订单 |
-| video_coupon_record | 377 | 视频券记录 |
-| video_event | 138 | 播放事件埋点 |
-| video_price | 60+ | 定价规则 |
-| video_refund | 68 | 退款记录 |
-| video_source | - | 原片地址 |
-| video_client_status | - | 客户端状态（0~9 共 10 个状态） |
-| video_promotion | - | 促销活动 |
+| video_combo_order | 2,428 | 套餐订单 |
+| video_coupon_record | 702 | 视频券记录 |
+| video_event | 1,820 | 播放事件埋点 |
+| video_price | 59 | 定价规则 |
+| video_refund | 75 | 退款记录 |
+| video_source | 58 | 原片地址 |
+| video_client_status | 2,768 | 客户端状态（0~9,12 共 11 个状态） |
+| video_promotion | — | 促销活动 |
+| video_list_found | 45 | 视频过期找回记录 |
+| video_black_club | 99 | 视频黑名单俱乐部 |
+| video_price_apply | 0 | 优惠价格应用记录 |
 | pay_order | 535 | 支付订单 |
 | pay_refund | 0 | 支付退款 |
-| pay_cash_order | - | 现金支付订单 |
+| pay_cash_order | 214 | 现金支付订单 |
+| aggregate_pay_order | 331 | 综合支付订单（新支付系统） |
+| pay_user | 195 | 用户资产/余额 |
+| pay_user_balance_log | 733 | 用户资产流水 |
+| ten_user_ext | 209 | 用户扩展信息（位置、隐私设置） |
+| ten_user_auth | 71 | 用户授权登录（微信/Apple/Google） |
+| ten_user_favorite_event | 1,622 | 用户收藏视频事件 |
+| ten_user_favorite_shot | 350 | 用户收藏精彩片段 |
+| ten_user_license | 432 | 用户隐私协议同意记录 |
+| ten_user_prompt | 167 | 用户提示（约战提示等） |
+| ten_user_res | 12,006 | 用户头像资源 |
+| app_devinfo | 103 | APP设备信息 |
+| app_optlog | 6,037 | APP操作日志 |
 
 ### 关键字段速查
 
 | 表 | 用户关联字段 | 状态字段 | 金额单位 |
 |---|---|---|---|
-| video_order | user_id | pay_status / video_status | 分 |
+| video_order | user_id | pay_status / video_status / refund_status | 分 |
 | video_coupon_record | user_id | status (0/1/2) | — |
-| video_combo_order | user_id | pay_status | 分 |
-| video_client_status | (通过video_order关联) | status (0~9) | — |
-| video_event | from_device | from_type | — |
+| video_combo_order | user_id | pay_status / refund_status | 分 |
+| video_client_status | (通过video_order关联) | status (0~9,12) | — |
+| video_event | from_device | from_type (1工控机/2小程序) | — |
 | video_refund | user_id | status (0~4) | 分 |
 | pay_order | csm_user_id | status (0~7) | 分 |
+| pay_cash_order | user_id(union_id) | status / audit | 分 |
+| aggregate_pay_order | wechat_open_id | pay_status / pay_type | 分 |
+| pay_user | union_id | — | 分 |
+| pay_user_balance_log | union_id | type (1充值/2消费) | 分 |
+| ten_user_ext | user_id | enable_challenge / anonymous | — |
+| ten_user_auth | user_id | auth_type (1~4) | — |
+| ten_user_favorite_event | user_id | shot_type (0/1) | — |
+| ten_user_favorite_shot | user_id | deleted | — |
+| ten_user_license | union_id | — | — |
+| ten_user_prompt | user_id | prompt_type (1) | — |
+| ten_user_res | user_id | status (0/1/2) | — |
