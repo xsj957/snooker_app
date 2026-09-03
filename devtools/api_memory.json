@@ -1,54 +1,59 @@
 {
-  "POST /video/videoOrder/appPostVideoRefund": {
+  "POST [测试] /video/videoOrder/appPostVideoRefund": {
     "url": "https://test.supervisions.cn/video/videoOrder/appPostVideoRefund",
     "method": "POST",
     "path": "/video/videoOrder/appPostVideoRefund",
+    "env": "test",
     "data": {
       "orderId": 2494,
       "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "视频退款",
     "discovered_at": "2026-08-28 15:46:04"
   },
-  "POST /mp/video/addVideoEventFromMobile": {
+  "POST [测试] /mp/video/addVideoEventFromMobile": {
     "url": "https://test.supervisions.cn/mp/video/addVideoEventFromMobile",
     "method": "POST",
     "path": "/mp/video/addVideoEventFromMobile",
+    "env": "test",
     "data": {
       "clientId": "8757315d-c83b-4448-8898-9f8d0e79880b",
       "eventDataList": "[{videoId: 12772, eventTime: 2026-08-28 15:47:44, playCount: 1, playMs: 1}]",
       "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "App播放事件上报",
     "discovered_at": "2026-08-28 15:47:47"
   },
-  "POST /mp/app/domestic/version/check": {
+  "POST [测试] /mp/app/domestic/version/check": {
     "url": "https://test.supervisions.cn/mp/app/domestic/version/check",
     "method": "POST",
     "path": "/mp/app/domestic/version/check",
+    "env": "test",
     "data": {
       "platform": 1,
       "currentVersion": "1.0.0",
       "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "国内版版本检查",
     "discovered_at": "2026-08-28 18:02:16"
   },
-  "POST /mp/user/deleteAccount": {
+  "POST [测试] /mp/user/deleteAccount": {
     "url": "https://test.supervisions.cn/mp/user/deleteAccount",
     "method": "POST",
     "path": "/mp/user/deleteAccount",
+    "env": "test",
     "data": null,
-    "description": "",
+    "description": "注销账号",
     "discovered_at": "2026-08-31 20:21:28"
   },
-  "POST https://app.supervisions.cn/mp/coupon/queryCouponList": {
+  "POST [生产] /mp/coupon/queryCouponList": {
     "url": "https://app.supervisions.cn/mp/coupon/queryCouponList",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/coupon/queryCouponList",
+    "path": "/mp/coupon/queryCouponList",
+    "env": "prod",
     "data": {
       "pageNo": 1,
       "pageSize": 1000,
@@ -56,13 +61,14 @@
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "我的视频券",
     "discovered_at": "2026-09-01 10:48:33"
   },
-  "POST https://app.supervisions.cn/mp/event/track": {
+  "POST [生产] /mp/event/track": {
     "url": "https://app.supervisions.cn/mp/event/track",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/event/track",
+    "path": "/mp/event/track",
+    "env": "prod",
     "data": {
       "modelType": 1,
       "eventType": 5,
@@ -71,13 +77,14 @@
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "埋点上报",
     "discovered_at": "2026-09-01 10:48:33"
   },
-  "POST https://app.supervisions.cn/mp/record/competitionListWithVideos": {
+  "POST [生产] /mp/record/competitionListWithVideos": {
     "url": "https://app.supervisions.cn/mp/record/competitionListWithVideos",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/record/competitionListWithVideos",
+    "path": "/mp/record/competitionListWithVideos",
+    "env": "prod",
     "data": {
       "userA": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "userB": "45db0d14-cc1a-4ea4-9dee-faac1d870fc0",
@@ -89,13 +96,14 @@
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "比赛场次列表",
     "discovered_at": "2026-09-01 10:48:37"
   },
-  "POST https://app.supervisions.cn/mp/record/opponentListWithVideos": {
+  "POST [生产] /mp/record/opponentListWithVideos": {
     "url": "https://app.supervisions.cn/mp/record/opponentListWithVideos",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/record/opponentListWithVideos",
+    "path": "/mp/record/opponentListWithVideos",
+    "env": "prod",
     "data": {
       "startTime": "2026-08-31 00:00:00",
       "endTime": "2026-09-06 23:59:59",
@@ -105,76 +113,82 @@
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "交手卡片列表",
     "discovered_at": "2026-09-01 10:48:51"
   },
-  "POST https://app.supervisions.cn/mp/record/inningList": {
+  "POST [生产] /mp/record/inningList": {
     "url": "https://app.supervisions.cn/mp/record/inningList",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/record/inningList",
+    "path": "/mp/record/inningList",
+    "env": "prod",
     "data": {
       "competitionId": "a62a10738043443a86915a30dce907f8",
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "局列表",
     "discovered_at": "2026-09-01 10:54:01"
   },
-  "POST https://app.supervisions.cn/video/videoinfo/competitionVideos": {
+  "POST [生产] /video/videoinfo/competitionVideos": {
     "url": "https://app.supervisions.cn/video/videoinfo/competitionVideos",
     "method": "POST",
-    "path": "https://app.supervisions.cn/video/videoinfo/competitionVideos",
+    "path": "/video/videoinfo/competitionVideos",
+    "env": "prod",
     "data": {
       "competitionId": "a62a10738043443a86915a30dce907f8",
       "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "比赛场详情",
     "discovered_at": "2026-09-01 10:54:03"
   },
-  "POST https://app.supervisions.cn/mp/record/inningStatistics": {
+  "POST [生产] /mp/record/inningStatistics": {
     "url": "https://app.supervisions.cn/mp/record/inningStatistics",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/record/inningStatistics",
+    "path": "/mp/record/inningStatistics",
+    "env": "prod",
     "data": {
       "competitionId": "a62a10738043443a86915a30dce907f8",
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "场次统计",
     "discovered_at": "2026-09-01 10:54:38"
   },
-  "POST https://app.supervisions.cn/mp/record/barchart": {
+  "POST [生产] /mp/record/barchart": {
     "url": "https://app.supervisions.cn/mp/record/barchart",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/record/barchart",
+    "path": "/mp/record/barchart",
+    "env": "prod",
     "data": {
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "startTime": "2026-08-31 00:00:00",
       "endTime": "2026-09-06 23:59:59",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "柱状图数据",
     "discovered_at": "2026-09-01 10:55:02"
   },
-  "POST https://app.supervisions.cn/mp/record/statics": {
+  "POST [生产] /mp/record/statics": {
     "url": "https://app.supervisions.cn/mp/record/statics",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/record/statics",
+    "path": "/mp/record/statics",
+    "env": "prod",
     "data": {
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "startTime": "2026-08-31 00:00:00",
       "endTime": "2026-09-06 23:59:59",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "个人统计数据",
     "discovered_at": "2026-09-01 10:55:02"
   },
-  "POST https://app.supervisions.cn/mp/rank/ratingList": {
+  "POST [生产] /mp/rank/ratingList": {
     "url": "https://app.supervisions.cn/mp/rank/ratingList",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/rank/ratingList",
+    "path": "/mp/rank/ratingList",
+    "env": "prod",
     "data": {
       "type": 3,
       "merchantAddressId": 3150,
@@ -182,13 +196,14 @@
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "评级排行",
     "discovered_at": "2026-09-01 10:55:52"
   },
-  "POST https://app.supervisions.cn/mp/rank/breakList": {
+  "POST [生产] /mp/rank/breakList": {
     "url": "https://app.supervisions.cn/mp/rank/breakList",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/rank/breakList",
+    "path": "/mp/rank/breakList",
+    "env": "prod",
     "data": {
       "type": 0,
       "merchantAddressId": 3150,
@@ -198,13 +213,14 @@
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "进球排行",
     "discovered_at": "2026-09-01 10:56:10"
   },
-  "POST https://app.supervisions.cn/mp/rank/winRateList": {
+  "POST [生产] /mp/rank/winRateList": {
     "url": "https://app.supervisions.cn/mp/rank/winRateList",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/rank/winRateList",
+    "path": "/mp/rank/winRateList",
+    "env": "prod",
     "data": {
       "type": 2,
       "merchantAddressId": 3150,
@@ -214,25 +230,27 @@
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "胜率排行",
     "discovered_at": "2026-09-01 10:56:15"
   },
-  "POST https://app.supervisions.cn/video/videoClient/getVideoStatistics": {
+  "POST [生产] /video/videoClient/getVideoStatistics": {
     "url": "https://app.supervisions.cn/video/videoClient/getVideoStatistics",
     "method": "POST",
-    "path": "https://app.supervisions.cn/video/videoClient/getVideoStatistics",
+    "path": "/video/videoClient/getVideoStatistics",
+    "env": "prod",
     "data": {
       "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "视频统计概览",
     "discovered_at": "2026-09-01 10:57:16"
   },
-  "POST https://app.supervisions.cn/video/videoClient/myVideos/readyV2": {
+  "POST [生产] /video/videoClient/myVideos/readyV2": {
     "url": "https://app.supervisions.cn/video/videoClient/myVideos/readyV2",
     "method": "POST",
-    "path": "https://app.supervisions.cn/video/videoClient/myVideos/readyV2",
+    "path": "/video/videoClient/myVideos/readyV2",
+    "env": "prod",
     "data": {
       "pageNo": 1,
       "pageSize": 10,
@@ -240,13 +258,14 @@
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "有效视频列表",
     "discovered_at": "2026-09-01 10:57:18"
   },
-  "POST https://app.supervisions.cn/video/videoClient/myVideos/processingV2": {
+  "POST [生产] /video/videoClient/myVideos/processingV2": {
     "url": "https://app.supervisions.cn/video/videoClient/myVideos/processingV2",
     "method": "POST",
-    "path": "https://app.supervisions.cn/video/videoClient/myVideos/processingV2",
+    "path": "/video/videoClient/myVideos/processingV2",
+    "env": "prod",
     "data": {
       "pageNo": 1,
       "pageSize": 10,
@@ -254,13 +273,14 @@
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "制作中视频",
     "discovered_at": "2026-09-01 10:57:38"
   },
-  "POST https://app.supervisions.cn/video/videoClient/myVideos/failedV2": {
+  "POST [生产] /video/videoClient/myVideos/failedV2": {
     "url": "https://app.supervisions.cn/video/videoClient/myVideos/failedV2",
     "method": "POST",
-    "path": "https://app.supervisions.cn/video/videoClient/myVideos/failedV2",
+    "path": "/video/videoClient/myVideos/failedV2",
+    "env": "prod",
     "data": {
       "pageNo": 1,
       "pageSize": 10,
@@ -268,37 +288,40 @@
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "失效视频列表",
     "discovered_at": "2026-09-01 10:57:48"
   },
-  "POST https://app.supervisions.cn/mp/user/myClubs": {
+  "POST [生产] /mp/user/myClubs": {
     "url": "https://app.supervisions.cn/mp/user/myClubs",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/user/myClubs",
+    "path": "/mp/user/myClubs",
+    "env": "prod",
     "data": {
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "我的俱乐部",
     "discovered_at": "2026-09-01 10:59:28"
   },
-  "POST https://app.supervisions.cn/mp/app/domestic/version/check": {
+  "POST [生产] /mp/app/domestic/version/check": {
     "url": "https://app.supervisions.cn/mp/app/domestic/version/check",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/app/domestic/version/check",
+    "path": "/mp/app/domestic/version/check",
+    "env": "prod",
     "data": {
       "platform": 1,
       "currentVersion": "1.0.0",
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "国内版版本检查",
     "discovered_at": "2026-09-01 10:59:33"
   },
-  "POST https://app.supervisions.cn/video/videoClient/updateClientInfo": {
+  "POST [生产] /video/videoClient/updateClientInfo": {
     "url": "https://app.supervisions.cn/video/videoClient/updateClientInfo",
     "method": "POST",
-    "path": "https://app.supervisions.cn/video/videoClient/updateClientInfo",
+    "path": "/video/videoClient/updateClientInfo",
+    "env": "prod",
     "data": {
       "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
       "attributeType": 1,
@@ -306,18 +329,19 @@
       "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
       "lang": "zh_CN"
     },
-    "description": "",
+    "description": "更新设备信息",
     "discovered_at": "2026-09-01 10:59:33"
   },
-  "POST https://app.supervisions.cn/mp/oauth/wechatLogin": {
+  "POST [生产] /mp/oauth/wechatLogin": {
     "url": "https://app.supervisions.cn/mp/oauth/wechatLogin",
     "method": "POST",
-    "path": "https://app.supervisions.cn/mp/oauth/wechatLogin",
+    "path": "/mp/oauth/wechatLogin",
+    "env": "prod",
     "data": {
       "appType": 5,
       "code": "091E2F000UeI0X1pIH200RP0tt2E2F0t"
     },
-    "description": "",
+    "description": "微信登录",
     "discovered_at": "2026-09-01 10:59:33"
   }
 }

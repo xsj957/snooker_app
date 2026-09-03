@@ -53,6 +53,7 @@ from devtools.server import (
     start_html_server,
     format_time, format_size, short_device_id,
     next_log_id,
+    extract_path, detect_env, get_env_label,
 )
 
 # ============== ADB 设备检测 ==============
@@ -196,7 +197,9 @@ def cmd_auto(args):
                 request_count[0] += 1
                 is_known = uri in known_urls
 
-            path = uri.replace(BASE_URL, "")
+            path = extract_path(uri)
+            env = detect_env(uri)
+            env_label = get_env_label(env)
             prefix = f"[{tag}] "
             is_error = error is not None
 
@@ -243,6 +246,8 @@ def cmd_auto(args):
                 'method': method,
                 'path': path,
                 'full_url': uri,
+                'env': env,
+                'env_label': env_label,
                 'status': status_code,
                 'size': resp_size,
                 'time_ms': time_ms,
@@ -295,7 +300,7 @@ def cmd_auto(args):
         data_str = " ".join(buf["data_lines"])
         req_headers = dict(buf["req_headers"]) if buf["req_headers"] else {}
 
-        safe_print(f"\n[{tag}] ⟳ {buf['method']} {buf['uri'].replace(BASE_URL, '')} → Python 获取完整响应...", Colors.YELLOW)
+        safe_print(f"\n[{tag}] ⟳ {buf['method']} {extract_path(buf['uri'])} → Python 获取完整响应...", Colors.YELLOW)
         request_q.put((buf["seq"], device_id, buf["uri"], buf["method"],
                        data_str, req_headers))
 
@@ -376,7 +381,7 @@ def cmd_auto(args):
                 if re.search(r'\.mp4(\?|$)', buf["uri"]):
                     buf["uri"] = None
                     return
-                path = buf["uri"].replace(BASE_URL, "")
+                path = extract_path(buf["uri"])
                 if any(h in path for h in hide_list):
                     buf["uri"] = None
             return
@@ -756,7 +761,7 @@ def cmd_auto(args):
             key = f"{api['method']} {api['uri']}"
             if key not in seen_set:
                 seen_set.add(key)
-                cprint(f"  {api['method']} {api['uri'].replace(BASE_URL, '')}", Colors.WHITE)
+                cprint(f"  {api['method']} {extract_path(api['uri'])}", Colors.WHITE)
 
 
 # ============== CLI ==============

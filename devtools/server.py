@@ -20,6 +20,95 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 BASE_URL = "https://test.supervisions.cn"
 
+# 环境域名映射
+ENV_DOMAINS = {
+    "test.supervisions.cn": "test",
+    "app.supervisions.cn": "prod",
+}
+ENV_LABELS = {"test": "测试", "prod": "生产"}
+
+# API 中文注释表（路径 → 中文名）
+API_DESC = {
+    # 用户
+    "/mp/user/info": "用户信息",
+    "/mp/user/myClubs": "我的俱乐部",
+    "/mp/user/saveDefaultClub": "设置默认俱乐部",
+    "/mp/user/rating": "我的评级",
+    "/mp/user/breakScoreList": "单杆分列表",
+    "/mp/user/deleteAccount": "注销账号",
+    # 登录
+    "/mp/oauth/wechatLogin": "微信登录",
+    # 版本
+    "/mp/app/version/check": "版本检查",
+    "/mp/app/domestic/version/check": "国内版版本检查",
+    # 视频券
+    "/mp/coupon/checkEligibility": "视频券资格检查",
+    "/mp/coupon/trialList": "体验券列表",
+    "/mp/coupon/queryCouponList": "我的视频券",
+    # 交手记录
+    "/mp/record/opponentListWithVideos": "交手卡片列表",
+    "/mp/record/opponentStatistics": "对手统计",
+    "/mp/record/competitionListWithVideos": "比赛场次列表",
+    "/mp/record/competitionStatistics": "交手统计(双人)",
+    "/mp/record/inningList": "局列表",
+    "/mp/record/inningStatistics": "场次统计",
+    "/mp/record/markVideoViewed": "标记视频已观看",
+    "/mp/record/deviceOnlineInfo": "设备在线信息",
+    "/mp/record/barchart": "柱状图数据",
+    "/mp/record/statics": "个人统计数据",
+    # 排行
+    "/mp/rank/clubList": "俱乐部排行",
+    "/mp/rank/userBreakRank": "单杆排行",
+    "/mp/rank/ratingList": "评级排行",
+    "/mp/rank/breakList": "进球排行",
+    "/mp/rank/winRateList": "胜率排行",
+    # 埋点
+    "/mp/event/track": "埋点上报",
+    "/mp/video/addVideoEventFromMobile": "App播放事件上报",
+    # 盒子/工控机
+    "/mobile/getUserBoxStatus": "盒子状态",
+    "/mobile/loginBoxAfterScanningQrCode": "扫码登录盒子",
+    # 我的视频
+    "/video/videoClient/getVideoStatistics": "视频统计概览",
+    "/video/videoClient/myVideos/processingV2": "制作中视频",
+    "/video/videoClient/myVideos/readyV2": "有效视频列表",
+    "/video/videoClient/myVideos/failedV2": "失效视频列表",
+    "/video/videoClient/updateClientInfo": "更新设备信息",
+    "/video/videoClient/updateStatus": "更新视频状态",
+    # 视频详情/解锁
+    "/video/videoinfo/competitionVideos": "比赛场详情",
+    "/video/videoinfo/buyitUseComboV3": "视频券解锁",
+    # 退款
+    "/video/videoOrder/appPostVideoRefund": "视频退款",
+}
+
+
+def detect_env(uri):
+    """从 URL 检测环境（test/prod）"""
+    try:
+        parsed = urllib.parse.urlparse(uri)
+        host = parsed.hostname or ""
+        return ENV_DOMAINS.get(host, "unknown")
+    except Exception:
+        return "unknown"
+
+
+def extract_path(uri):
+    """从 URL 提取纯路径（不含域名），兼容测试/生产环境"""
+    try:
+        parsed = urllib.parse.urlparse(uri)
+        path = parsed.path or "/"
+        if parsed.query:
+            path += "?" + parsed.query
+        return path
+    except Exception:
+        return uri
+
+
+def get_env_label(env):
+    """获取环境中文标签"""
+    return ENV_LABELS.get(env, "未知")
+
 HEADERS = {
     "Content-Type": "application/json",
     "Accept": "application/json",
@@ -361,14 +450,19 @@ class MemoryManager:
             return dict(self._cache)
 
     def get_key(self, uri, method):
-        path = uri.replace(BASE_URL, "")
-        return f"{method} {path}"
+        path = extract_path(uri)
+        env = detect_env(uri)
+        env_label = get_env_label(env)
+        return f"{method} [{env_label}] {path}"
 
     def add(self, uri, method, data_str, description=""):
         # 跳过 CDN 视频原片（.mp4），不写入记忆库
         if re.search(r'\.mp4(\?|$)', uri):
             return False
-        key = self.get_key(uri, method)
+        path = extract_path(uri)
+        env = detect_env(uri)
+        env_label = get_env_label(env)
+        key = f"{method} [{env_label}] {path}"
         should_save = False
         with self._lock:
             if key in self._cache:
@@ -378,10 +472,14 @@ class MemoryManager:
                 data = json.loads(data_str)
             except (json.JSONDecodeError, ValueError):
                 data = _dart_to_json(data_str)
+            # 自动填充中文描述
+            if not description:
+                description = API_DESC.get(path, "")
             self._cache[key] = {
                 "url": uri,
                 "method": method,
-                "path": uri.replace(BASE_URL, ""),
+                "path": path,
+                "env": env,
                 "data": data,
                 "description": description,
                 "discovered_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")

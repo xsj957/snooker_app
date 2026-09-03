@@ -101,6 +101,11 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
 .method-PUT{color:#cca700}
 .method-DELETE{color:#f48771}
 
+/* Environment badges */
+.env-tag{display:inline-block;font-size:9px;font-weight:700;padding:1px 4px;border-radius:3px;margin-right:4px;vertical-align:middle;letter-spacing:.3px}
+.env-test{background:#1b3a1b;color:#6ccb5f;border:1px solid #2d5a2d}
+.env-prod{background:#3a2a1b;color:#f0a050;border:1px solid #5a4020}
+
 /* Path & URL */
 .req-path{color:#ce9178;max-width:100%}
 .req-name{color:#d4d4d4;max-width:100%}
@@ -219,6 +224,9 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
             <button class="pill" data-filter="3xx">3xx</button>
             <button class="pill" data-filter="4xx">4xx</button>
             <button class="pill" data-filter="5xx">5xx</button>
+            <span style="width:1px;height:16px;background:#444;margin:0 2px"></span>
+            <button class="pill" data-filter="env:test" title="测试环境"><span class="env-tag env-test" style="margin:0">测试</span></button>
+            <button class="pill" data-filter="env:prod" title="生产环境"><span class="env-tag env-prod" style="margin:0">生产</span></button>
         </div>
         <div class="search-box">
             <span class="search-icon">🔍</span>
@@ -366,12 +374,14 @@ const API_NAMES = {
     '/mp/user/saveDefaultClub': '设置默认俱乐部',
     '/mp/user/rating': '我的评级',
     '/mp/user/breakScoreList': '单杆分列表',
+    '/mp/user/deleteAccount': '注销账号',
 
     // ===== 登录 =====
     '/mp/oauth/wechatLogin': '微信登录',
 
     // ===== 版本 =====
     '/mp/app/version/check': '版本检查',
+    '/mp/app/domestic/version/check': '国内版版本检查',
 
     // ===== 视频券 =====
     '/mp/coupon/checkEligibility': '视频券资格',
@@ -381,10 +391,10 @@ const API_NAMES = {
     // ===== 交手记录 =====
     '/mp/record/opponentListWithVideos': '交手卡片',
     '/mp/record/opponentStatistics': '对手统计',
-    '/mp/record/competitionListWithVideos': '场卡片',
+    '/mp/record/competitionListWithVideos': '比赛场次',
     '/mp/record/competitionStatistics': '交手统计(双人)',
     '/mp/record/inningList': '局列表',
-    '/mp/record/inningStatistics': '场统计',
+    '/mp/record/inningStatistics': '场次统计',
     '/mp/record/markVideoViewed': '标记视频已观看',
     '/mp/record/deviceOnlineInfo': '设备在线信息',
     '/mp/record/barchart': '柱状图数据',
@@ -414,12 +424,34 @@ const API_NAMES = {
     '/video/videoClient/updateStatus': '更新视频状态',
 
     // ===== 视频详情/解锁 =====
-    '/video/videoinfo/competitionVideos': '场详情',
+    '/video/videoinfo/competitionVideos': '比赛场详情',
     '/video/videoinfo/buyitUseComboV3': '视频券解锁',
+
+    // ===== 退款 =====
+    '/video/videoOrder/appPostVideoRefund': '视频退款',
 };
 
 function getApiName(path) {
     return API_NAMES[path] || '';
+}
+
+// 从 full_url 提取纯路径（兼容测试/生产环境）
+function extractPathFromUrl(url) {
+    if (!url) return '';
+    try {
+        var u = new URL(url);
+        return u.pathname + (u.search || '');
+    } catch(e) {
+        return url;
+    }
+}
+
+// 检测环境（从 full_url 的域名判断）
+function detectEnv(url) {
+    if (!url) return {env: 'unknown', label: '未知', cls: ''};
+    if (url.indexOf('app.supervisions.cn') !== -1) return {env: 'prod', label: '生产', cls: 'env-prod'};
+    if (url.indexOf('test.supervisions.cn') !== -1) return {env: 'test', label: '测试', cls: 'env-test'};
+    return {env: 'unknown', label: '未知', cls: ''};
 }
 
 function getShortPath(path) {
@@ -826,7 +858,10 @@ function updateVirtualScroll() {
         row.style.height = state.rowHeight + 'px';
 
         const sc = req.status || 0;
-        const path = req.path || '';
+        const rawPath = req.path || '';
+        // 兼容生产环境 path 可能是完整 URL 的情况
+        const path = rawPath.startsWith('http') ? extractPathFromUrl(rawPath) : rawPath;
+        const envInfo = detectEnv(req.full_url || rawPath);
         const apiName = getApiName(path);
         const tc = timeClass(req.time_ms);
         const sel = req.id === state.selectedId;
@@ -839,6 +874,7 @@ function updateVirtualScroll() {
             '<div class="vs-cell"><span class="status-dot ' + statusClass(sc) + '"></span></div>' +
             '<div class="vs-cell"><span class="method method-' + req.method + '">' + req.method + '</span></div>' +
             '<div class="vs-cell"><span class="req-name">' +
+                '<span class="env-tag ' + envInfo.cls + '">' + envInfo.label + '</span>' +
                 (apiName ? '<span style="color:#888;margin-right:4px">' + escapeHtml(apiName) + '</span>' : '') +
                 '<span class="api-path">' + escapeHtml(getShortPath(path)) + '</span>' +
             '</span>' + (req.is_new ? '<span class="tag-new">NEW</span>' : '') + '</div>' +
@@ -938,11 +974,19 @@ function applyFilter() {
             else if (f === '3xx') { if (!(sc >= 300 && sc < 400)) return false; }
             else if (f === '4xx') { if (!(sc >= 400 && sc < 500)) return false; }
             else if (f === '5xx') { if (!(sc >= 500)) return false; }
+            else if (f === 'env:test' || f === 'env:prod') {
+                const targetEnv = f.split(':')[1];
+                const envInfo = detectEnv(req.full_url || req.path || '');
+                if (envInfo.env !== targetEnv) return false;
+            }
         }
         if (state.search) {
             const s = state.search.toLowerCase();
-            const apiName = getApiName(req.path || '');
-            const haystack = (req.path + ' ' + apiName + ' ' + req.method + ' ' +
+            const rawPath = req.path || '';
+            const resolvedPath = rawPath.startsWith('http') ? extractPathFromUrl(rawPath) : rawPath;
+            const apiName = getApiName(resolvedPath);
+            const envLabel = detectEnv(req.full_url || rawPath).label;
+            const haystack = (resolvedPath + ' ' + apiName + ' ' + req.method + ' ' + envLabel + ' ' +
                 JSON.stringify(req.request_data || '') + ' ' +
                 JSON.stringify(req.response_body || '')).toLowerCase();
             if (!haystack.includes(s)) return false;
@@ -960,6 +1004,18 @@ function updateStats(stats) {
     document.getElementById('cnt2xx').textContent = by['2xx'] || 0;
 
     document.getElementById('footerCount').textContent = total + ' 个请求';
+    // 环境分布
+    var testCnt = 0, prodCnt = 0;
+    state.requests.forEach(function(r) {
+        var e = detectEnv(r.full_url || r.path || '');
+        if (e.env === 'test') testCnt++;
+        else if (e.env === 'prod') prodCnt++;
+    });
+    var envParts = [];
+    if (testCnt) envParts.push('<span class="env-tag env-test">测试 ' + testCnt + '</span>');
+    if (prodCnt) envParts.push('<span class="env-tag env-prod">生产 ' + prodCnt + '</span>');
+    var footerEl = document.getElementById('footerCount');
+    footerEl.innerHTML = total + ' 个请求' + (envParts.length ? ' ' + envParts.join('') : '');
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
 }
 
@@ -986,9 +1042,15 @@ function selectRequest(id) {
 // ==================== Render Detail ====================
 function renderDetail(req) {
     const info = document.getElementById('tabDetailInfo');
+    const rawPath = req.path || '';
+    const resolvedPath = rawPath.startsWith('http') ? extractPathFromUrl(rawPath) : rawPath;
+    const envInfo = detectEnv(req.full_url || rawPath);
+    const apiName = getApiName(resolvedPath);
     info.innerHTML =
+        '<span class="env-tag ' + envInfo.cls + '">' + envInfo.label + '</span>' +
         '<span class="method method-' + req.method + '">' + req.method + '</span>' +
-        '<span style="color:#ce9178">' + escapeHtml(req.path) + '</span>' +
+        (apiName ? '<span style="color:#888;margin-right:6px">' + escapeHtml(apiName) + '</span>' : '') +
+        '<span style="color:#ce9178">' + escapeHtml(resolvedPath) + '</span>' +
         '<span class="sep">|</span>' +
         '<span style="color:' + (((req.status||0)>=200&&(req.status||0)<300) ? '#4ec9b0' : '#f48771') + '">' + (req.status || '...') + '</span>' +
         '<span class="sep">|</span>' +
