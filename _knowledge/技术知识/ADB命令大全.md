@@ -2,7 +2,7 @@
 
 > 包名：`com.supervisions.snookermastercn`
 > 设备型号：V2405A（vivo）
-> 更新时间：2026-08-20
+> 更新时间：2026-09-04
 
 ---
 
@@ -493,11 +493,18 @@ adb shell pm grant com.supervisions.snookermastercn android.permission.READ_MEDI
 adb shell pm grant com.supervisions.snookermastercn android.permission.READ_MEDIA_VISUAL_USER_SELECTED
 adb shell pm grant com.supervisions.snookermastercn android.permission.POST_NOTIFICATIONS
 
-# 撤销权限
+# 撤销单个权限
 adb shell pm revoke com.supervisions.snookermastercn android.permission.CAMERA
 
 # 查看所有已授予的权限
 adb shell dumpsys package com.supervisions.snookermastercn | grep "granted=true"
+
+#  重置所有权限（不卸载 App 即可重新触发权限弹窗）
+# 适用场景：反复测试相册/相机/通知等权限弹窗，无需卸载重装
+adb shell pm reset-permissions com.supervisions.snookermastercn
+
+# ⭐ 重置权限 + 强制停止 App（推荐，确保下次启动权限状态生效）
+adb shell pm reset-permissions com.supervisions.snookermastercn && adb shell am force-stop com.supervisions.snookermastercn
 ```
 
 ---
