@@ -95,6 +95,57 @@ video_list (视频目录)
 | **refund_status** | tinyint | **退款状态**：0=未退款, 1=已申请退款, 2=已退款, 3=退款失败 |
 | bin_url | varchar(128) | 视频 bin 文件的 URL |
 | **make_by** | tinyint | **制作方式**：0=未确定, 1=工控机制作, 2=手机端制作 |
+| **combo_order_id** | bigint | **视频解锁方式区分字段（核心）**：`IS NULL 或 = 0` → **现金解锁**（直接用微信/IAP支付，不产生视频券）；`IS NOT NULL 且 > 0` → **视频券解锁**（用券抵扣，关联 `video_combo_order.id`，退款只能退券不能退现金）|
+
+#### 视频解锁方式区分（核心业务规则 🔴）
+
+> 两种解锁方式**互斥**，同一笔订单只能选其中一种。现金解锁**不会**产生视频券，视频券必须先购买套餐才能获得。
+
+| 解锁方式 | `combo_order_id` 值 | `amount` 含义 | 退款规则 | 券账户影响 |
+|---------|---------------------|--------------|---------|-----------|
+| **现金解锁** | `IS NULL OR = 0` | 用户实际支付的现金金额（分） | ✅ 支持**现金退款**（原路退回微信/IAP） | 无影响 |
+| **视频券解锁** | `IS NOT NULL AND > 0` | 视频原价（非实际支付，因为是用券抵扣） | ✅ 仅支持**退券**（将已使用的券退回账户），❌ 不支持现金退款，❌ 不支持退套餐金额 | 消耗/退回 1 张视频券 |
+
+**视频券来源**（只能通过以下三种方式获得，**不能**通过直接现金购买单个券）：
+1. **购买视频券套餐**（`video_combo` + `video_combo_order`）— 主要来源
+2. **每日免费券**（每天完成第一场比赛后系统自动发放，`coupon_id=2`）
+3. **运营发放活动券**（运营手动发放，`coupon_id=52`）
+
+**当前数据分布**：
+
+| 解锁方式 | combo_order_id 条件 | 记录数 | 说明 |
+|---------|---------------------|--------|------|
+| 视频券解锁 | `IS NOT NULL AND > 0` | 1,341 | 用券解锁，amount 为视频原价 |
+| 现金解锁 | `IS NULL OR = 0` | 517 | 现金支付，amount 为实际支付金额 |
+
+**常用查询 SQL**：
+```sql
+-- 查询用户所有现金解锁视频（支持现金退款）
+SELECT * FROM video_order
+WHERE user_id = '{user_id}'
+  AND pay_status = '支付成功'
+  AND (combo_order_id IS NULL OR combo_order_id = 0);
+
+-- 查询用户所有券解锁视频（仅支持退券）
+SELECT * FROM video_order
+WHERE user_id = '{user_id}'
+  AND pay_status = '支付成功'
+  AND combo_order_id IS NOT NULL AND combo_order_id > 0;
+
+-- 追溯券解锁视频的套餐订单来源
+SELECT vo.id AS order_id, vo.video_id, vo.amount AS video_price,
+       vco.combo_id, vco.video_count, vco.end_time AS combo_expire_time,
+       vcr.coupon_id AS coupon_type, vcr.status AS coupon_status
+FROM video_order vo
+JOIN video_combo_order vco ON vo.combo_order_id = vco.id
+LEFT JOIN video_coupon_record vcr ON vcr.order_id = vo.id
+WHERE vo.user_id = '{user_id}';
+```
+
+**测试注意**：
+- 退款用例**必须**按解锁方式区分，不能按支付方式（微信/IAP）区分
+- "视频券解锁"的视频退款时，预期结果必须是"退券"而非"退现金"
+- `combo_order_id` 是判断解锁方式的**唯一依据**，`pay_channel` 字段只区分平台（安卓/iOS/小程序）
 
 **当前数据分布**：
 
@@ -176,9 +227,9 @@ video_list (视频目录)
 
 > **⚠️ coupon_id 实际数据分布**：coupon_id=1 套餐券（36条），coupon_id=2 每日免费券（665条），coupon_id=52 特殊活动券（1条）。coupon_id=2 占绝大多数，说明大部分用户通过每日免费券解锁视频。
 
-> **🔴 视频解锁方式区分**：通过 `video_order.combo_order_id` 判断：
-> - `combo_order_id IS NOT NULL AND > 0` → **用券解锁**（1,341条），amount 为视频原价（非实际支付）
-> - `combo_order_id IS NULL OR = 0` → **现金解锁**（517条），amount 为实际支付金额
+> **⚠️ 视频解锁方式区分**（详见 2.3 节"视频解锁方式区分"）：通过 `video_order.combo_order_id` 判断：
+> - `combo_order_id IS NOT NULL AND > 0` → **视频券解锁**（1,341条），amount 为视频原价（非实际支付），退款仅退券
+> - `combo_order_id IS NULL OR = 0` → **现金解锁**（517条），amount 为实际支付金额，退款退现金
 >
 > **⚠️ 现金支付现状**：现金解锁目前只有小程序渠道（pay_channel=0/1）的数据，App端（pay_channel=2/3）的现金支付尚未产生记录。而用券解锁已有大量 App 端数据（680条），说明 App 端用券解锁已上线使用。
 
@@ -623,21 +674,31 @@ video_client_status (设备端状态)         ← 按 client_id(设备UDID) 区�
 ```
 用户点击解锁视频
     │
-    ├── 用券解锁 → video_coupon_record.status 更新 (0→1)
+    ├── 视频券解锁 (combo_order_id IS NOT NULL AND > 0)
+    │                  ↓
+    │              video_coupon_record.status 更新 (0→1，使用1张券)
     │                  ↓
     │              video_order 创建记录 (pay_status=支付成功)
+    │              combo_order_id 关联 video_combo_order.id（券套餐来源）
+    │              amount = 视频原价（非实际现金支付）
     │                  ↓
     │              通知工控机上传原片 → video_source 插入记录
     │              video_client_status 更新 (0→1→2)
+    │              ⚠️ 退款：仅支持退券（将券退回账户），不支持现金退款
     │
-    └── 付费解锁 → pay_order 创建支付订单 (status=0 预创建)
+    └── 现金解锁 (combo_order_id IS NULL OR = 0)
+                       ↓
+                   pay_order 创建支付订单 (status=0 预创建)
                        ↓
                    微信支付/IAP 支付
                        ↓
                    pay_order 更新 (status=1 已支付)
                    video_order 更新 (pay_status=支付成功)
+                   combo_order_id 为 NULL 或 0
+                   amount = 实际支付现金金额
                        ↓
                    通知工控机上传原片 → video_source 插入记录
+                   ⚠️ 退款：支持现金退款（原路退回微信/IAP）
 ```
 
 ### 5.2 视频制作完整状态流转
