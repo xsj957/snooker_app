@@ -343,5 +343,36 @@
     },
     "description": "微信登录",
     "discovered_at": "2026-09-01 10:59:33"
+  },
+  "POST [生产] /video/videoinfo/buyitUseComboV3": {
+    "url": "https://app.supervisions.cn/video/videoinfo/buyitUseComboV3",
+    "method": "POST",
+    "path": "/video/videoinfo/buyitUseComboV3",
+    "env": "prod",
+    "data": {
+      "videoId": 115995592,
+      "payChannel": 2,
+      "clientId": "8774434f-b8f9-4a2b-ac70-d47c5a4ee045",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "视频券解锁",
+    "discovered_at": "2026-09-11 10:47:30"
+  },
+  "POST [生产] /video/videoClient/updateStatus": {
+    "url": "https://app.supervisions.cn/video/videoClient/updateStatus",
+    "method": "POST",
+    "path": "/video/videoClient/updateStatus",
+    "env": "prod",
+    "data": {
+      "clientId": "8774434f-b8f9-4a2b-ac70-d47c5a4ee045",
+      "status": 2,
+      "videoId": 115995592,
+      "videoOrderId": 792822,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "更新视频状态",
+    "discovered_at": "2026-09-11 10:47:32"
   }
 }
