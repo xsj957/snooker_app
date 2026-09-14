@@ -374,5 +374,17 @@
     },
     "description": "更新视频状态",
     "discovered_at": "2026-09-11 10:47:32"
+  },
+  "POST [测试] /mp/record/simpleStatics?userId=57d703dc-659a-4474-898e-b75efa1f2e0a&lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/simpleStatics?userId=57d703dc-659a-4474-898e-b75efa1f2e0a&lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/simpleStatics?userId=57d703dc-659a-4474-898e-b75efa1f2e0a&lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-14 11:02:36"
   }
 }
