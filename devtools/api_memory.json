@@ -386,5 +386,37 @@
     },
     "description": "",
     "discovered_at": "2026-09-14 11:02:36"
+  },
+  "POST [测试] /video/mobilePay/createVideoUnlockOrder": {
+    "url": "https://test.supervisions.cn/video/mobilePay/createVideoUnlockOrder",
+    "method": "POST",
+    "path": "/video/mobilePay/createVideoUnlockOrder",
+    "env": "test",
+    "data": {
+      "videoId": 13513,
+      "code": null,
+      "amountTotal": 500.0,
+      "clientId": "b2d620ee-80ce-4f2b-a832-01d06e57e309",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-15 11:41:01"
+  },
+  "releaseEngine [测试] /video/mobilePay/doAfterVideoUnlockOrderPaid": {
+    "url": "https://test.supervisions.cn/video/mobilePay/doAfterVideoUnlockOrderPaid",
+    "method": "releaseEngine",
+    "path": "/video/mobilePay/doAfterVideoUnlockOrderPaid",
+    "env": "test",
+    "data": {
+      "amountTotal": 500.0,
+      "transactionId": 202609151140580602,
+      "wxOrderId": 202609151140580602,
+      "clientId": "b2d620ee-80ce-4f2b-a832-01d06e57e309",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-15 11:41:10"
   }
 }

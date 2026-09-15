@@ -788,6 +788,7 @@ def main():
         "/mp/rank/userBreakRank",
         "/mp/record/deviceOnlineInfo",
         "/mp/record/opponentStatistics",
+        "/mp/record/simpleStatics",
         "/mp/coupon/checkEligibility",
     ], help="隐藏接口（默认7个轮询接口；--hide 不跟值=全部显示；--hide /path=自定义）")
     auto_parser.add_argument("--restart", action="store_true", default=False, help="抓包前强制重启 App（确保产生新的请求日志）")
