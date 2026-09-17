@@ -418,5 +418,62 @@
     },
     "description": "",
     "discovered_at": "2026-09-15 11:41:10"
+  },
+  "onPauseView [测试] /video/mobilePay/createVideoCombolOrder": {
+    "url": "https://test.supervisions.cn/video/mobilePay/createVideoCombolOrder",
+    "method": "onPauseView",
+    "path": "/video/mobilePay/createVideoCombolOrder",
+    "env": "test",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-09-17 11:23:30"
+  },
+  "releaseEngine [测试] /video/videoOrder/cancelPay": {
+    "url": "https://test.supervisions.cn/video/videoOrder/cancelPay",
+    "method": "releaseEngine",
+    "path": "/video/videoOrder/cancelPay",
+    "env": "test",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-09-17 11:23:45"
+  },
+  "POST [测试] /video/mobilePay/createVideoCombolOrder": {
+    "url": "https://test.supervisions.cn/video/mobilePay/createVideoCombolOrder",
+    "method": "POST",
+    "path": "/video/mobilePay/createVideoCombolOrder",
+    "env": "test",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-09-17 11:36:32"
+  },
+  "POST [测试] /video/mobilePay/createRefund": {
+    "url": "https://test.supervisions.cn/video/mobilePay/createRefund",
+    "method": "POST",
+    "path": "/video/mobilePay/createRefund",
+    "env": "test",
+    "data": {
+      "refundAmount": 300.0,
+      "orderType": 1,
+      "orderId": 3015,
+      "clientId": "d9609472-6510-4b74-a324-6a296bf36d24",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-17 16:10:35"
+  },
+  "POST [测试] /mp/record/goalRateLineChart": {
+    "url": "https://test.supervisions.cn/mp/record/goalRateLineChart",
+    "method": "POST",
+    "path": "/mp/record/goalRateLineChart",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "startTime": "2026-07-01 00:00:00",
+      "endTime": "2026-09-30 23:59:59",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-17 19:17:10"
   }
 }

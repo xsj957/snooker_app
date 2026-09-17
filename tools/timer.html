@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>计时器</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #1a1a2e;
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    color: #eee;
+  }
+  .timer {
+    font-size: 120px;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 4px;
+    color: #e0e0e0;
+    text-shadow: 0 0 20px rgba(255,255,255,0.1);
+    margin-bottom: 40px;
+    user-select: none;
+  }
+  .timer.running { color: #00e676; text-shadow: 0 0 30px rgba(0,230,118,0.2); }
+  .timer.paused  { color: #ff9800; text-shadow: 0 0 30px rgba(255,152,0,0.2); }
+  .controls {
+    display: flex;
+    gap: 16px;
+  }
+  .btn {
+    padding: 14px 36px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    min-width: 120px;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+  .btn:active { transform: translateY(0); }
+  .btn-start   { background: #00e676; color: #1a1a2e; font-weight: 600; }
+  .btn-pause   { background: #ff9800; color: #1a1a2e; font-weight: 600; }
+  .btn-reset   { background: #e53935; color: #fff; font-weight: 600; }
+  .btn-lap     { background: #2196f3; color: #fff; font-weight: 600; }
+  .laps {
+    margin-top: 40px;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 320px;
+    font-size: 14px;
+    color: #aaa;
+  }
+  .laps div {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #333;
+  }
+  .laps div span:last-child { color: #00e676; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<div class="timer" id="display">00:00.00</div>
+
+<div class="controls">
+  <button class="btn btn-start" id="startBtn" onclick="startTimer()">开始</button>
+  <button class="btn btn-pause" id="pauseBtn" onclick="pauseTimer()" style="display:none">暂停</button>
+  <button class="btn btn-reset" onclick="resetTimer()">重置</button>
+  <button class="btn btn-lap"   onclick="lapTimer()">计次</button>
+</div>
+
+<div class="laps" id="laps"></div>
+
+<script>
+let startTime = 0, elapsed = 0, interval = null, running = false, lapCount = 0, lastLap = 0;
+
+function fmt(ms) {
+  const m = Math.floor(ms / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const cs = Math.floor((ms % 1000) / 10);
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
+}
+
+function tick() {
+  elapsed = Date.now() - startTime;
+  document.getElementById('display').textContent = fmt(elapsed);
+}
+
+function startTimer() {
+  if (running) return;
+  running = true;
+  startTime = Date.now() - elapsed;
+  interval = setInterval(tick, 10);
+  document.getElementById('display').className = 'timer running';
+  document.getElementById('startBtn').style.display = 'none';
+  document.getElementById('pauseBtn').style.display = '';
+}
+
+function pauseTimer() {
+  if (!running) return;
+  running = false;
+  clearInterval(interval);
+  document.getElementById('display').className = 'timer paused';
+  document.getElementById('startBtn').style.display = '';
+  document.getElementById('startBtn').textContent = '继续';
+  document.getElementById('pauseBtn').style.display = 'none';
+}
+
+function resetTimer() {
+  running = false;
+  clearInterval(interval);
+  elapsed = 0; lapCount = 0; lastLap = 0;
+  document.getElementById('display').textContent = '00:00.00';
+  document.getElementById('display').className = 'timer';
+  document.getElementById('startBtn').style.display = '';
+  document.getElementById('startBtn').textContent = '开始';
+  document.getElementById('pauseBtn').style.display = 'none';
+  document.getElementById('laps').innerHTML = '';
+}
+
+function lapTimer() {
+  if (!running) return;
+  lapCount++;
+  const lapTime = elapsed - lastLap;
+  lastLap = elapsed;
+  const div = document.createElement('div');
+  div.innerHTML = `<span>计次 ${lapCount}</span><span>+${fmt(lapTime)}</span>`;
+  document.getElementById('laps').prepend(div);
+}
+
+// 空格键控制开始/暂停
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); running ? pauseTimer() : startTimer(); }
+  if (e.code === 'KeyR') { resetTimer(); }
+  if (e.code === 'KeyL') { lapTimer(); }
+});
+</script>
+</body>
+</html>
