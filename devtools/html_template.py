@@ -1129,7 +1129,8 @@ function renderPayloadTab(req) {
     const bodyDiv = document.getElementById('requestBody');
     const reqData = req.request_data;
     if (reqData && Object.keys(reqData).length > 0) {
-        bodyDiv.innerHTML = buildJsonTree(reqData, null);
+        var jsonText = JSON.stringify(reqData, null, 2);
+        bodyDiv.innerHTML = '<div class="raw-view payload-json">' + escapeHtml(jsonText) + '</div>';
     } else {
         bodyDiv.innerHTML = '<span style="color:#555">No request body</span>';
     }
