@@ -475,5 +475,61 @@
     },
     "description": "",
     "discovered_at": "2026-09-17 19:17:10"
+  },
+  "POST [测试] /mp/rank/userWinRateRank": {
+    "url": "https://test.supervisions.cn/mp/rank/userWinRateRank",
+    "method": "POST",
+    "path": "/mp/rank/userWinRateRank",
+    "env": "test",
+    "data": {
+      "rankRange": 0,
+      "timeRange": 0,
+      "merchantAddressId": 45376,
+      "clientType": 0,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-21 14:52:36"
+  },
+  "POST [测试] /mp/record/simpleStatics?userId=948c894e-cac2-4f7f-a7a1-31425e8fd8e5&lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/simpleStatics?userId=948c894e-cac2-4f7f-a7a1-31425e8fd8e5&lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/simpleStatics?userId=948c894e-cac2-4f7f-a7a1-31425e8fd8e5&lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "948c894e-cac2-4f7f-a7a1-31425e8fd8e5",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-22 11:52:35"
+  },
+  "POST [测试] /mp/record/simpleStatics?userId=948c894e-cac2-4f7f-a7a1-31425e8fd8e5&lang=en_US": {
+    "url": "https://test.supervisions.cn/mp/record/simpleStatics?userId=948c894e-cac2-4f7f-a7a1-31425e8fd8e5&lang=en_US",
+    "method": "POST",
+    "path": "/mp/record/simpleStatics?userId=948c894e-cac2-4f7f-a7a1-31425e8fd8e5&lang=en_US",
+    "env": "test",
+    "data": {
+      "userId": "948c894e-cac2-4f7f-a7a1-31425e8fd8e5",
+      "lang": "en_US"
+    },
+    "description": "",
+    "discovered_at": "2026-09-22 12:01:56"
+  },
+  "POST [测试] /mp/rank/star": {
+    "url": "https://test.supervisions.cn/mp/rank/star",
+    "method": "POST",
+    "path": "/mp/rank/star",
+    "env": "test",
+    "data": {
+      "destUserId": "006cf162-2061-477f-943e-a31d29d81da7",
+      "rankType": 2,
+      "score": 129,
+      "starCount": 1,
+      "userId": "948c894e-cac2-4f7f-a7a1-31425e8fd8e5",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-22 16:45:32"
   }
 }
