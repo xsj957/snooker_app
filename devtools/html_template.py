@@ -432,7 +432,9 @@ const API_NAMES = {
 };
 
 function getApiName(path) {
-    return API_NAMES[path] || '';
+    // 去掉查询参数后再匹配（API_NAMES 的 key 不含 query string）
+    var basePath = path.split('?')[0];
+    return API_NAMES[basePath] || '';
 }
 
 // 从 full_url 提取纯路径（兼容测试/生产环境）

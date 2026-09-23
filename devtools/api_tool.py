@@ -294,6 +294,9 @@ def cmd_auto(args):
         完成一个请求 — 始终走 Python HTTP worker 获取完整响应（含 status/headers/size/timing）
         """
         if not buf["uri"] or not buf["method"]:
+            # URI 或 method 缺失时，清除残留字段，防止脏数据泄漏到下一条请求
+            buf["uri"] = None
+            buf["method"] = None
             return
 
         tag = short_device_id(device_id)
@@ -308,7 +311,11 @@ def cmd_auto(args):
         """处理 logcat 行 — 解析 Dio 日志协议"""
         tag = short_device_id(device_id)
 
-        if "*** Request ***" in content:
+        # 统一剥离 Dio 拦截器的 [DIO] 前缀（logcat 每行都带此前缀）
+        # 必须在所有模式匹配之前执行，否则 *** Request *** / uri: 等全部匹配失败
+        cleaned = content.split("[DIO]")[-1].strip() if "[DIO]" in content else content
+
+        if "*** Request ***" in cleaned:
             _complete_request(buf, device_id, reason="next_request")
             buf["seq"] += 1
             buf["uri"] = None
@@ -324,13 +331,13 @@ def cmd_auto(args):
             buf["captured_refresh"] = False
             return
 
-        elif "*** Response ***" in content:
+        elif "*** Response ***" in cleaned:
             buf["in_response"] = "headers"
             buf["response_lines"] = []
             buf["resp_headers"] = {}
             return
 
-        elif "*** DioException ***" in content:
+        elif "*** DioException ***" in cleaned:
             _complete_request(buf, device_id, reason="exception")
             # 完整重置 buf，防止脏数据泄漏到下一个请求
             buf["uri"] = None
@@ -346,35 +353,30 @@ def cmd_auto(args):
             return
 
         elif buf["in_response"] == "headers":
-            if "Response Text:" in content:
+            if "Response Text:" in cleaned:
                 buf["in_response"] = "body"
-                after_marker = content.split("Response Text:")[-1].strip()
-                # 总是尝试捕获 Response Text: 后面的内容，即使包含 [DIO]
+                after_marker = cleaned.split("Response Text:")[-1].strip()
+                # 捕获 Response Text: 后面的内容（已去除 [DIO] 前缀）
                 if after_marker:
-                    # 去除 [DIO] 标记
-                    clean = after_marker
-                    if "[DIO]" in clean:
-                        clean = clean.split("[DIO]")[-1].strip()
-                    if clean and not clean.startswith("***"):
-                        buf["response_lines"].append(clean)
-            elif content.strip():
-                m = re.match(r'^([\w\-]+)\s*:\s*(.+)$', content)
+                    if not after_marker.startswith("***"):
+                        buf["response_lines"].append(after_marker)
+            elif cleaned.strip():
+                m = re.match(r'^([\w\-]+)\s*:\s*(.+)$', cleaned)
                 if m:
                     buf["resp_headers"][m.group(1).strip()] = m.group(2).strip()
             return
 
         elif buf["in_response"] == "body":
-            if content:
-                if "[DIO]" in content:
-                    after_dio = content.split("[DIO]")[-1].strip()
-                    if after_dio and not after_dio.startswith("***"):
-                        buf["response_lines"].append(after_dio)
-                else:
-                    buf["in_response"] = False
+            if cleaned:
+                if not cleaned.startswith("***"):
+                    buf["response_lines"].append(cleaned)
+            else:
+                # 空行 = 响应体结束
+                buf["in_response"] = False
             return
 
-        elif "uri:" in content and "https://" in content:
-            m = re.search(r'uri:\s*(https?://\S+)', content)
+        elif "uri:" in cleaned and "https://" in cleaned:
+            m = re.search(r'uri:\s*(https?://\S+)', cleaned)
             if m:
                 buf["uri"] = m.group(1).strip()
                 # 过滤 CDN 视频原片（.mp4），不抓不存
@@ -386,14 +388,14 @@ def cmd_auto(args):
                     buf["uri"] = None
             return
 
-        elif "method:" in content:
-            m = re.search(r'method:\s*(\w+)', content)
+        elif "method:" in cleaned:
+            m = re.search(r'method:\s*(\w+)', cleaned)
             if m:
                 buf["method"] = m.group(1).strip()
             return
 
-        elif "Authorization:" in content and buf.get("req_headers") is not None:
-            m = re.search(r'Authorization:\s*(\S+)', content)
+        elif "Authorization:" in cleaned and buf.get("req_headers") is not None:
+            m = re.search(r'Authorization:\s*(\S+)', cleaned)
             if m:
                 token = m.group(1).strip()
                 buf["req_headers"]["Authorization"] = token
@@ -411,8 +413,8 @@ def cmd_auto(args):
                     _try_auto_auth(tag)
             return
 
-        elif "refresh_token:" in content and buf.get("req_headers") is not None:
-            m = re.search(r'refresh_token:\s*(\S+)', content)
+        elif "refresh_token:" in cleaned and buf.get("req_headers") is not None:
+            m = re.search(r'refresh_token:\s*(\S+)', cleaned)
             if m:
                 rt = m.group(1).strip()
                 buf["req_headers"]["refresh_token"] = rt
@@ -427,20 +429,19 @@ def cmd_auto(args):
                     _try_auto_auth(tag)
             return
 
-        elif "data:" in content:
+        elif "data:" in cleaned:
             buf["in_data"] = True
             buf["data_lines"] = []
-            after_dio = content.split("[DIO]")[-1].strip() if "[DIO]" in content else content.strip()
-            if "{" in after_dio and after_dio != "data:":
-                buf["data_lines"].append(after_dio.replace("data:", "").strip())
+            after_data = cleaned.split("data:")[-1].strip() if "data:" in cleaned else ""
+            if "{" in after_data and after_data != "":
+                buf["data_lines"].append(after_data)
             return
 
         elif buf["in_data"]:
-            after_dio = content.split("[DIO]")[-1].strip() if "[DIO]" in content else content.strip()
-            if "*** " in after_dio or after_dio == "":
+            if "*** " in cleaned or cleaned == "":
                 buf["in_data"] = False
-            elif after_dio and ("{" in after_dio or after_dio.startswith('"') or ":" in after_dio):
-                buf["data_lines"].append(after_dio)
+            elif cleaned and ("{" in cleaned or cleaned.startswith('"') or ":" in cleaned):
+                buf["data_lines"].append(cleaned)
                 # 自动认证：从请求体中提取 userId
                 if not _auto_auth['detected'] and not _auto_auth['user_id']:
                     data_str = " ".join(buf["data_lines"])

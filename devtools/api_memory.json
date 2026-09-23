@@ -531,5 +531,290 @@
     },
     "description": "",
     "discovered_at": "2026-09-22 16:45:32"
+  },
+  "POST [测试] /mp/coupon/queryCouponList?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/coupon/queryCouponList?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/coupon/queryCouponList?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 1000,
+      "status": 0,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:54:24"
+  },
+  "POST [测试] /mp/record/inningList?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/inningList?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/inningList?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "competitionId": "5d25ec30fcc946aebe51b7f8971ffdd2",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:54:24"
+  },
+  "POST [测试] /mp/event/track?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/event/track?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/event/track?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "modelType": 1,
+      "eventType": 5,
+      "attrName": "frame_detail",
+      "attrValue": "frames",
+      "clientType": 1,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:54:24"
+  },
+  "POST [测试] /video/videoClient/myVideos/processingV2?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoClient/myVideos/processingV2?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoClient/myVideos/processingV2?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 1000,
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:54:24"
+  },
+  "POST [测试] /video/videoinfo/competitionVideos?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoinfo/competitionVideos?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoinfo/competitionVideos?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "competitionId": "5d25ec30fcc946aebe51b7f8971ffdd2",
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:54:27"
+  },
+  "POST [测试] /mp/record/competitionListWithVideos?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/competitionListWithVideos?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/competitionListWithVideos?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userA": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "userB": "12ce872c-b2ad-4537-8b37-38d399fbfa83",
+      "startTime": "2026-09-21 00:00:00",
+      "endTime": "2026-09-27 23:59:59",
+      "page": 1,
+      "pageSize": 10,
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:54:57"
+  },
+  "POST [测试] /video/videoClient/updateStatus?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoClient/updateStatus?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoClient/updateStatus?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "status": 3,
+      "videoId": 14101,
+      "videoOrderId": 3573,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:58:26"
+  },
+  "onReceiveNotification [测试] /video/videoClient/updateStatus?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoClient/updateStatus?lang=zh_CN",
+    "method": "onReceiveNotification",
+    "path": "/video/videoClient/updateStatus?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "status": 5,
+      "videoId": 14101,
+      "videoOrderId": 3573,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:58:42"
+  },
+  "POST [测试] /mp/record/opponentListWithVideos?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/opponentListWithVideos?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/opponentListWithVideos?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "startTime": "2026-09-21 00:00:00",
+      "endTime": "2026-09-27 23:59:59",
+      "page": 1,
+      "pageSize": 20,
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "order": 0,
+      "withVideos": true,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 12:00:00"
+  },
+  "POST [测试] /video/mobilePay/createVideoUnlockOrder?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/mobilePay/createVideoUnlockOrder?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/mobilePay/createVideoUnlockOrder?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "videoId": 14098,
+      "code": null,
+      "amountTotal": 1.0,
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 12:00:12"
+  },
+  "POST [测试] /video/mobilePay/doAfterVideoUnlockOrderPaid?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/mobilePay/doAfterVideoUnlockOrderPaid?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/mobilePay/doAfterVideoUnlockOrderPaid?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "amountTotal": 1.0,
+      "transactionId": 202609231200110497,
+      "wxOrderId": 202609231200110497,
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 12:00:20"
+  },
+  "POST [测试] /video/videoinfo/buyitUseComboV3?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoinfo/buyitUseComboV3?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoinfo/buyitUseComboV3?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "videoId": 14108,
+      "payChannel": 2,
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 14:06:05"
+  },
+  "POST [测试] /mp/app/domestic/version/check?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/app/domestic/version/check?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/app/domestic/version/check?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "platform": 1,
+      "currentVersion": "1.0.1",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 14:07:11"
+  },
+  "POST [测试] /video/videoClient/updateClientInfo?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoClient/updateClientInfo?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoClient/updateClientInfo?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "attributeType": 1,
+      "attributeValue": 1,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 14:07:11"
+  },
+  "POST [测试] /mp/oauth/wechatLogin?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/oauth/wechatLogin?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/oauth/wechatLogin?lang=zh_CN",
+    "env": "test",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-09-23 14:19:53"
+  },
+  "POST [测试] /video/mobilePay/createRefund?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/mobilePay/createRefund?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/mobilePay/createRefund?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "refundAmount": 1.0,
+      "orderType": 1,
+      "orderId": 3591,
+      "clientId": "f3328396-66fb-4ff1-86c0-89083f8d9009",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 14:22:12"
+  },
+  "POST [测试] /video/videoClient/getVideoStatistics?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoClient/getVideoStatistics?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoClient/getVideoStatistics?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "clientId": "1c87b165-6c4c-436e-843a-19d6d0680dc8",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 15:33:10"
+  },
+  "POST [测试] /video/videoClient/myVideos/readyV2?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoClient/myVideos/readyV2?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoClient/myVideos/readyV2?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 10,
+      "clientId": "1c87b165-6c4c-436e-843a-19d6d0680dc8",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 15:33:10"
+  },
+  "POST [测试] /mp/user/myClubs?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/user/myClubs?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/user/myClubs?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 17:51:07"
   }
 }
