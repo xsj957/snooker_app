@@ -271,8 +271,15 @@ def _parse_request_data(data_lines):
         return {"raw": data_str[:200]}, data_str
 
 
-def _fetch_full_response(uri, method, data_str):
-    """用 Python requests 获取完整响应（包含 status/headers/size/timing）"""
+def _fetch_full_response(uri, method, data_str, req_headers=None):
+    """用 Python requests 获取完整响应（包含 status/headers/size/timing）
+
+    Args:
+        uri: 请求 URL
+        method: HTTP 方法
+        data_str: 请求体 JSON 字符串
+        req_headers: App 原始请求的完整 headers（从 logcat 捕获）
+    """
     data = None
     try:
         data = json.loads(data_str)
@@ -295,13 +302,28 @@ def _fetch_full_response(uri, method, data_str):
         else:
             conn = http.client.HTTPConnection(host, port, timeout=10)
 
-        body_bytes = json.dumps(data).encode('utf-8')
+        # 构建 headers：以全局 HEADERS 为基础，用 App 原始 headers 覆盖/补充
         hdrs = dict(HEADERS)
-        hdrs['Content-Type'] = 'application/json'
-        hdrs['Content-Length'] = str(len(body_bytes))
+        if req_headers:
+            for k, v in req_headers.items():
+                # 跳过 Dio 元数据字段，只保留实际 HTTP headers
+                if k.lower() not in ("contenttype",):
+                    hdrs[k] = v
+
+        # GET/HEAD 请求不发送 body（很多服务器拒绝 GET+body）
+        body_bytes = None
+        upper_method = method.upper()
+        if upper_method not in ("GET", "HEAD") and data_str:
+            body_bytes = json.dumps(data).encode('utf-8')
+            hdrs['Content-Type'] = 'application/json'
+            hdrs['Content-Length'] = str(len(body_bytes))
+        elif upper_method in ("GET", "HEAD"):
+            # GET/HEAD 移除 Content-Type/Content-Length（无 body）
+            hdrs.pop('Content-Type', None)
+            hdrs.pop('Content-Length', None)
 
         t_start = time.time()
-        conn.request(method.upper(), path, body=body_bytes, headers=hdrs)
+        conn.request(upper_method, path, body=body_bytes, headers=hdrs)
 
         resp = conn.getresponse()
         t_first_byte = time.time()
@@ -708,28 +730,70 @@ class ReusableHTTPServer(HTTPServer):
     allow_reuse_port = True
 
 
-def start_html_server(port):
-    """启动 HTML DevTools 服务，自动尝试备用端口"""
-    server = None
-    ports_to_try = [port, port + 1, port + 2, 8888, 9999]
-    actual_port = None
+def _kill_port_process(port):
+    """强制释放被占用的端口（Windows 平台）"""
+    import subprocess
+    try:
+        # Windows netstat 输出是 GBK 编码
+        result = subprocess.run(
+            ["netstat", "-ano"],
+            capture_output=True, timeout=5
+        )
+        output = result.stdout.decode("gbk", errors="replace")
+        current_pid = str(os.getpid())
+        killed = []
+        for line in output.splitlines():
+            # 匹配 :port LISTENING（只杀监听进程）
+            if f":{port} " in line and "LISTENING" in line:
+                parts = line.split()
+                if len(parts) >= 5:
+                    pid = parts[-1].strip()
+                    if pid.isdigit() and pid != "0" and pid != current_pid:
+                        try:
+                            subprocess.run(
+                                ["taskkill", "/F", "/PID", pid],
+                                capture_output=True, timeout=5
+                            )
+                            killed.append(pid)
+                        except Exception:
+                            pass
+        if killed:
+            cprint(f"  已强制释放端口 {port} (PID: {', '.join(killed)})", Colors.DIM)
+            return True
+        return False
+    except Exception as e:
+        safe_print(f"  端口释放失败: {e}", Colors.DIM)
+        return False
 
-    for p in ports_to_try:
+
+def start_html_server(port):
+    """启动 HTML DevTools 服务，强制使用指定端口"""
+    server = None
+    actual_port = port
+    max_attempts = 3
+
+    for attempt in range(max_attempts):
         try:
-            server = ReusableHTTPServer(('127.0.0.1', p), HTMLRequestHandler)
-            actual_port = p
-            if p != port:
-                cprint(f"  端口 {port} 被占用，使用备用端口 {p}", Colors.YELLOW)
+            server = ReusableHTTPServer(('127.0.0.1', port), HTMLRequestHandler)
+            actual_port = port
             break
-        except PermissionError:
-            continue
-        except OSError as e:
-            if "already in use" in str(e).lower() or "10048" in str(e):
-                continue
-            raise
+        except (PermissionError, OSError) as e:
+            if attempt < max_attempts - 1:
+                # 尝试强制释放端口
+                cprint(f"  端口 {port} 被占用，尝试强制释放 (第{attempt+1}次)...", Colors.YELLOW)
+                if _kill_port_process(port):
+                    time.sleep(1.5)  # 等待端口完全释放
+                    continue
+                else:
+                    # 没找到占用进程，可能是 Windows 保留端口范围
+                    time.sleep(1.0)
+                    continue
+            else:
+                cprint(f"  端口 {port} 被占用，无法释放", Colors.RED)
+                raise
 
     if server is None:
-        raise RuntimeError(f"无法绑定端口 {port} 及其备用端口，请手动指定 --port")
+        raise RuntimeError(f"无法绑定端口 {port}，请手动检查端口占用情况")
 
     def _run_server():
         try:

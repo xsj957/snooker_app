@@ -816,5 +816,181 @@
     },
     "description": "",
     "discovered_at": "2026-09-23 17:51:07"
+  },
+  "POST [测试] /mobile/getUserBoxStatus?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mobile/getUserBoxStatus?lang=zh_CN",
+    "method": "POST",
+    "path": "/mobile/getUserBoxStatus?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 10:33:42"
+  },
+  "POST [测试] /mp/record/simpleStatics?lang=zh_CN&userId=57d703dc-659a-4474-898e-b75efa1f2e0a&lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/simpleStatics?lang=zh_CN&userId=57d703dc-659a-4474-898e-b75efa1f2e0a&lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/simpleStatics?lang=zh_CN&userId=57d703dc-659a-4474-898e-b75efa1f2e0a&lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 10:33:42"
+  },
+  "onReceiveNotificationAuthorization [测试] /mp/user/info?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/user/info?lang=zh_CN",
+    "method": "onReceiveNotificationAuthorization",
+    "path": "/mp/user/info?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 10:33:42"
+  },
+  "POST [测试] /mp/user/info?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/user/info?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/user/info?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "success": true,
+      "eventId": "60509}, count: 0, msg: success} 09-24 10:33:43.486  2688  2820 E BLASTBufferQueue: [554b9f6 SurfaceView[com.supervisions.snookermastercn/com.supervisions.snookermastercn.MainActivity]#1](f:1,a:5) acquireNextBufferLocked: Can't acquire next buffer. Already acquired max frames 5 max:3 + 2 09-24 10:33:43.487 22351 22351 D VASJNI-PAPManager: set data inst 0x0 metadata 0x7fd887c5e0 cmd BackgroundStatusChangedInform provider 0xb4000078580232d0 has set cb 1 09-24 10:33:43.488  2688  3736 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 10:33:43.493  2688  2820 E BLASTBufferQueue: [554b9f6 SurfaceView[com.supervisions.snookermastercn/com.supervisions.snookermastercn.MainActivity]#1](f:1,a:5) acquireNextBufferLocked: Can't acquire next buffer. Already acquired max frames 5 max:3 + 2 09-24 10:33:43.496  2688  3736 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 10:33:43.501  2688  2820 E BLASTBufferQueue: [554b9f6 SurfaceView[com.supervisions.snookermastercn/com.supervisions.snookermastercn.MainActivity]#1](f:1,a:5) acquireNextBufferLocked: Can't acquire next buffer. Already acquired max frames 5 max:3 + 2 09-24 10:33:43.504  2688  3736 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 10:33:43.509  2688  2820 E BLASTBufferQueue: [554b9f6 SurfaceView[com.supervisions.snookermastercn/com.supervisions.snookermastercn.MainActivity]#1](f:1,a:5) acquireNextBufferLocked: Can't acquire next buffer. Already acquired max frames 5 max:3 + 2 09-24 10:33:43.519  2688  2820 E BLASTBufferQueue: [554b9f6 SurfaceView[com.supervisions.snookermastercn/com.supervisions.snookermastercn.MainActivity]#1](f:1,a:5) acquireNextBufferLocked: Can't acquire next buffer. Already acquired max frames 5 max:3 + 2"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 10:33:42"
+  },
+  "POST [测试] /mp/record/deviceOnlineInfo?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/deviceOnlineInfo?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/deviceOnlineInfo?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "competitionId": "14049788623c449f91eafdeac84f8ae2",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 10:33:52"
+  },
+  "POST [测试] /mp/rank/ratingList?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/rank/ratingList?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/rank/ratingList?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "type": 3,
+      "merchantAddressId": 45376,
+      "areaId": null,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 11:07:24"
+  },
+  "POST [测试] /mp/record/barchart?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/barchart?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/barchart?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "startTime": "2018-01-01 00:00:00",
+      "endTime": "2026-09-24 11:17:37",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 11:17:36"
+  },
+  "POST [测试] /mp/record/statics?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/statics?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/statics?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "startTime": "2018-01-01 00:00:00",
+      "endTime": "2026-09-24 11:17:37",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 11:17:36"
+  },
+  "POST [测试] /mp/video/addVideoEventFromMobile?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/video/addVideoEventFromMobile?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/video/addVideoEventFromMobile?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "clientId": "2557bf88-3dca-4e6e-aed4-6240f7caff78",
+      "eventDataList": "[{videoId: 13934, eventTime: 2026-09-24 11:19:11, playCount: 1, playMs: 1}]",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 11:19:10"
+  },
+  "POST [测试] /mp/record/markVideoViewedFromMobile?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/markVideoViewedFromMobile?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/markVideoViewedFromMobile?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "success": true,
+      "eventId": "60707}, count: 0, msg: success} 09-24 11:19:11.473 31456 31558 D HWUI    : VulkanManager::finishFrame,duration=0.1219 ms,mRtCacheCount=67 09-24 11:19:11.473 31456 31558 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.474 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.481 31456 31456 D InsetsAnimationCtrlImpl: notify control request finished for types: 3 09-24 11:19:11.481 31456 31456 I ANDR-VIVO-PERF: vivo inside perf_lock_rel of client 09-24 11:19:11.482 31456 31558 D HWUI    : VulkanManager::finishFrame,duration=0.1078 ms,mRtCacheCount=68 09-24 11:19:11.482 31456 31558 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.483 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.490 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.499 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.507 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.515 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.524 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.532 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.540 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.550 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.557 31456  8664 D AudioTrack: getTimestamp_l(2921): device stall time corrected using current time 750028318685627 09-24 11:19:11.557 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.565 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.573 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.579 31456  8664 W AudioTrack: getTimestamp_l(2921): retrograde timestamp time corrected, 750028316771474 < 750028329343166 09-24 11:19:11.582 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.590 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.599 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.606 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.615 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.619 31456  8741 D VivoSpatializer: checkGoogleApiEnabled, mGoogleApiEnabled: true, originalArdVersion: 35, deniedPkg: false, clientPkg: com.supervisions.snookermastercn 09-24 11:19:11.621 31456  8741 I DMCodecAdapterFactory: Creating an asynchronous MediaCodec adapter for track type video 09-24 11:19:11.621 31456  8741 D MediaCodec: CreateByComponentName: name c2.mtk.avc.decoder 09-24 11:19:11.621 31456  8741 W libc    : Access denied finding property \"vendor.debug.stagefright.mediacodec.trace\" 09-24 11:19:11.621 31456  8741 W libc    : Access denied finding property \"vendor.media.c2.frameworks.debug.log\" 09-24 11:19:11.623 31456  8741 W libc    : Access denied finding property \"vendor.debug.stagefright.BufferCount\" 09-24 11:19:11.623 31456  8741 W libc    : Access denied finding property \"vendor.media.c2.frameworks.debug.log\" 09-24 11:19:11.623 31456  8741 W libc    : Access denied finding property \"vendor.media.c2.frameworks.buffercount.trace\" 09-24 11:19:11.623 31456  8741 D CCodecBufferChannel: mBufferCountTrace=0 mIsUserLoad=1 09-24 11:19:11.623 31456  8741 I CCodecBufferChannel: Constructor 0xb4000077a8137300 09-24 11:19:11.623 31456  8741 I CCodecBufferChannel: mIsVivoLogEnable = 0 09-24 11:19:11.623 31456  8741 I CCodecBufferChannel: CCodecBufferChannel[0xb4000077a8137300], mNumOutputsSlotAdd: 0 09-24 11:19:11.623 31456  8741 W libc    : Access denied finding property \"vendor.media.c2.frameworks.debug.log\" 09-24 11:19:11.623 31456  8741 D MediaCodec: [0xb400007808677f10] init: CCodec 0xb40000778818f310, CCodecBufferChannel 0xb4000077a8137300 09-24 11:19:11.623 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.623 31456  8749 D MediaCodec: [0xb400007808677f10] setState: 1 09-24 11:19:11.623 31456  8750 D CCodec  : allocate(c2.mtk.avc.decoder) 09-24 11:19:11.624 31456  8750 I CCodec  : setting up 'default' as default (vendor) store 09-24 11:19:11.628 31456  8750 W snookermastercn: AIBinder_linkToDeath is being called with a non-null cookie and no onUnlink callback set. This might not be intended. AIBinder_DeathRecipient_setOnUnlinked should be called first. 09-24 11:19:11.628 31456  8750 I CCodec  : Created component [c2.mtk.avc.decoder] for [c2.mtk.avc.decoder] 09-24 11:19:11.628 31456  8750 D CCodecBufferChannel: [0xb4000077a8137300] setComponent: mName c2.mtk.avc.decoder#825, mPipelineWatcher 0xb4000077a8137800 09-24 11:19:11.628 31456  8750 I CCodecBufferChannel: is C2 video Decoder,enable buffermanager timeOut. 09-24 11:19:11.628 31456  8750 D CCodecBufferChannel: PipelineWatcher debug info [c2.mtk.avc.decoder#825] enable=0 09-24 11:19:11.628 31456  8750 D CCodecConfig: read media type: video/avc 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: ignored struct field coded.color-format.locations 09-24 11:19:11.630 31456  8750 D CCodecConfig: ignoring local param raw.size (0xd2001800) as it is already supported 09-24 11:19:11.630 31456  8750 D CCodecConfig: ignoring local param raw.crop (0xd2001801) as it is already supported 09-24 11:19:11.630 31456  8750 D CCodecConfig: ignoring local param default.color (0x5200180b) as it is already supported 09-24 11:19:11.630 31456  8750 D CCodecConfig: ignoring local param raw.hdr-static-info (0xd200180a) as it is already supported 09-24 11:19:11.630 31456  8750 I CCodecConfig: query failed after returning 18 values (BAD_INDEX) 09-24 11:19:11.630 31456  8750 D CCodecConfig: c2 config diff is Dict { 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 algo.low-latency.value = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::i32 algo.priority.value = 1 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::float algo.rate.value = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::float coded.frame-rate.value = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 coded.pl.level = 20498 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 coded.pl.profile = 20481 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 coded.vui.color.matrix = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 coded.vui.color.primaries = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 coded.vui.color.range = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 coded.vui.color.transfer = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 default.color.matrix = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 default.color.primaries = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 default.color.range = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 default.color.transfer = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 input.buffers.max-size.value = 2097152 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 input.delay.value = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   string input.media-type.value = \"video/avc\" 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 output.delay.value = 12 09-24 11:19:11.630 31456  8750 D CCodecConfig:   string output.media-type.value = \"video/raw\" 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.color.matrix = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.color.primaries = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.color.range = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.color.transfer = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.crop.height = 239 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.crop.left = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.crop.top = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.crop.width = 319 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::float raw.hdr-static-info.master 09-24 11:19:11.630 31456  8750 W ColorUtils: expected specified color aspects (0:0:0:0) 09-24 11:19:11.630 31456  8749 D MediaCodec: [0xb400007808677f10] setState: 2 09-24 11:19:11.631 31456  8741 D MediaCodec: mInitName[c2.mtk.avc.decoder], mMediacodec[0xb400007808677f10], mCodec[0xb40000778818f310], mBufferChannel[0xb4000077a8137300] 09-24 11:19:11.631 31456  8741 D MediaCodec: createbyComponent:pid:-1 31456 tid=8741 09-24 11:19:11.631 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.632 31456  8749 I MediaCodec: MediaCodec will operate in async mode 09-24 11:19:11.632 31456  8741 D MediaCodec: [0xb400007808677f10] [c2.mtk.avc.decoder] configure 09-24 11:19:11.632 31456  8741 D VivoCodecProcessSdk: get client pid:31456 09-24 11:19:11.632 31456  8741 E MediaCodec: Media Quality Service not found. 09-24 11:19:11.633 31456  8741 D UtilsExt: getpackName client name com.supervisions.snookermastercn(31456) 09-24 11:19:11.634 31456  8749 D MediaCodec: [0xb400007808677f10] [c2.mtk.avc.decoder] connectToSurface: surface 0xb4000077a812c530, mSurface 0x0 09-24 11:19:11.634 31456  8749 D SurfaceUtils: connecting to surface 0xb4000077a812c540, reason connectToSurface 09-24 11:19:11.634 31456  8749 I MediaCodec: [c2.mtk.avc.decoder] setting surface generation to 32210946 09-24 11:19:11.634 31456  8749 D SurfaceUtils: disconnecting from surface 0xb4000077a812c540, reason connectToSurface(reconnect) 09-24 11:19:11.634 31456  8749 D SurfaceUtils: connecting to surface 0xb4000077a812c530, reason connectToSurface(reconnect-with-listener) 09-24 11:19:11.634 31456  8749 D MediaCodec: [0xb400007808677f10] setState: 3 09-24 11:19:11.634 31456  8749 D MediaCodec: [c2.mtk.avc.decoder] config set c2 sleep timeout 1500 kC2SleepTimeoutMs=1500 09-24 11:19:11.634 31456  8750 D CCodec  : [c2.mtk.avc.decoder] buffers are bound to CCodec for this session 09-24 11:19:11.634 31456  8750 D CCodecConfig: no c2 equivalents for log-session-id 09-24 11:19:11.634 31456  8750 D CCodecConfig: no c2 equivalents for importance 09-24 11:19:11.634 31456  8750 D CCodecConfig: no c2 equivalents for csd-1 09-24 11:19:11.634 31456  8750 D CCodecConfig: no c2 equivalents for native-window 09-24 11:19:11.634 31456  8750 D CCodecConfig: no c2 equivalents for native-window-generation 09-24 11:19:11.634 31456  8750 D CCodecConfig: no c2 equivalents for flags 09-24 11:19:11.635 31456  8750 D CCodecConfig: c2 config diff is   c2::i32 algo.priority.value = 0 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::float coded.frame-rate.value = 25 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 input.buffers.max-size.value = 2094080 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 raw.max-size.height = 540 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 raw.max-size.width = 960 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 raw.pixel-format.value = 34 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 raw.size.height = 540 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 raw.size.width = 960 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 vendor.mtk.vdec.buffer.fetch.timeout.ms.value = 1500 09-24 11:19:11.635 31456  8750 D CCodec  : client requested max input size 182437, which is smaller than what component recommended (2094080); overriding with component recommendation. 09-24 11:19:11.635 31456  8750 W CCodec  : This behavior is subject to change. It is recommended that app developers double check whether the requested max input size is in reasonable range. 09-24 11:19:11.635 31456  8750 D CCodec  : encoding statistics level = 0 09-24 11:19:11.635 31456  8750 D CCodec  : setup formats input: AMessage(what = 0x00000000) = { 09-24 11:19:11.635 31456  8750 D CCodec  :   string mime = \"video/avc\" 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t width = 960 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t profile = 65536 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t priority = 0 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t frame-rate = 25 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t height = 540 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t level = 262144 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t max-input-size = 2094080 09-24 11:19:11.635 31456  8750 D CCodec  :   Rect crop(0"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 11:19:16"
+  },
+  "POST [测试] /mp/user/rating?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/user/rating?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/user/rating?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "startTime": "2026-09-21 00:00:00",
+      "endTime": "2026-09-27 23:59:59",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 14:09:54"
+  },
+  "POST [测试] /mp/record/goalRateLineChart?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/goalRateLineChart?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/goalRateLineChart?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "startTime": "2026-09-21 00:00:00",
+      "endTime": "2026-09-27 23:59:59",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 14:09:55"
+  },
+  "POST [测试] /mp/rank/breakList?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/rank/breakList?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/rank/breakList?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "type": 0,
+      "merchantAddressId": 45376,
+      "areaId": null,
+      "rankRange": 0,
+      "timeRange": 0,
+      "clientType": 0,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 14:17:20"
   }
 }

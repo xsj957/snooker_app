@@ -49,6 +49,7 @@ from devtools.server import (
     Colors, cprint, safe_print,
     _memory_mgr, _parse_request_data, _fetch_full_response,
     _decode_jwt_payload, _auto_auth, _auto_auth_lock,
+    _dart_to_json,
     log_buffer, configure,
     start_html_server,
     format_time, format_size, short_device_id,
@@ -147,17 +148,60 @@ def cmd_auto(args):
     # request_q / display_q / stop_event 在重连循环内每次重建
     # 防止旧 worker 线程在新会话中复活（stop_event.clear() 不会唤醒它们）
 
+    def _parse_captured_response(resp_lines, resp_headers):
+        """
+        解析 logcat 中捕获的真实响应
+        返回格式与 _fetch_full_response 一致，以便 display_worker 统一处理
+        """
+        if not resp_lines:
+            return None
+
+        # 合并响应行
+        response_text = "\n".join(resp_lines).strip()
+        if not response_text:
+            return None
+
+        # 尝试解析 JSON 响应体
+        body = None
+        try:
+            body = json.loads(response_text)
+        except (json.JSONDecodeError, ValueError):
+            # 非 JSON 响应，保留原始文本
+            body = response_text[:5000]
+
+        size = len(response_text.encode('utf-8'))
+
+        return {
+            'status': 200,  # logcat 中无法直接获取 HTTP 状态码，默认为 200
+            'headers': resp_headers or {},
+            'body': body,
+            'size': size,
+            'time_ms': 0,  # logcat 中无法获取精确耗时
+            'timing': {},
+            'error': None
+        }
+
     def http_worker():
-        """异步 HTTP Worker：获取完整响应 + 状态码/headers/size/timing"""
+        """异步 HTTP Worker：优先使用 logcat 真实响应，仅在缺失时回退 Python HTTP"""
         while not stop_event.is_set():
             try:
                 item = request_q.get(timeout=0.5)
             except queue.Empty:
                 continue
 
-            req_id, device_id, uri, method, data_str, req_headers = item
+            req_id, device_id, uri, method, data_str, req_headers, resp_lines, resp_headers = item
 
-            full_resp = _fetch_full_response(uri, method, data_str)
+            # 尝试从 logcat 捕获的响应中解析真实响应体
+            real_response = _parse_captured_response(resp_lines, resp_headers)
+
+            if real_response and real_response.get('body') is not None:
+                # logcat 中有真实响应，直接使用
+                full_resp = real_response
+            else:
+                # logcat 中无响应（可能还未捕获到），回退到 Python HTTP 请求
+                # 传递完整的 req_headers 确保 Python 请求与 App 原始请求一致
+                safe_print(f"  [{short_device_id(device_id)}]  logcat 响应缺失，回退 Python HTTP...", Colors.DIM)
+                full_resp = _fetch_full_response(uri, method, data_str, req_headers=req_headers)
 
             display_q.put((
                 req_id, device_id, uri, method, data_str,
@@ -291,7 +335,8 @@ def cmd_auto(args):
 
     def _complete_request(buf, device_id, reason="next_request"):
         """
-        完成一个请求 — 始终走 Python HTTP worker 获取完整响应（含 status/headers/size/timing）
+        完成一个请求 — 优先使用 logcat 中捕获的真实响应，
+        仅在无响应时才回退到 Python HTTP 请求。
         """
         if not buf["uri"] or not buf["method"]:
             # URI 或 method 缺失时，清除残留字段，防止脏数据泄漏到下一条请求
@@ -303,9 +348,21 @@ def cmd_auto(args):
         data_str = " ".join(buf["data_lines"])
         req_headers = dict(buf["req_headers"]) if buf["req_headers"] else {}
 
-        safe_print(f"\n[{tag}] ⟳ {buf['method']} {extract_path(buf['uri'])} → Python 获取完整响应...", Colors.YELLOW)
+        # 从 buf 中提取 logcat 捕获的真实响应
+        resp_lines = list(buf["response_lines"])
+        resp_headers = dict(buf["resp_headers"]) if buf["resp_headers"] else {}
+
+        safe_print(f"\n[{tag}] ⟳ {buf['method']} {extract_path(buf['uri'])}", Colors.YELLOW)
+
+        # 如果响应体还在捕获中（in_response == "body"），说明响应还没结束
+        # 短暂等待让响应体完成传输（Dio 日志是逐行输出的）
+        if buf["in_response"] == "body":
+            time.sleep(0.3)
+            # 重新获取（等待后可能有更多行）
+            resp_lines = list(buf["response_lines"])
+
         request_q.put((buf["seq"], device_id, buf["uri"], buf["method"],
-                       data_str, req_headers))
+                       data_str, req_headers, resp_lines, resp_headers))
 
     def process_line(content, device_id, buf):
         """处理 logcat 行 — 解析 Dio 日志协议"""
@@ -394,6 +451,19 @@ def cmd_auto(args):
                 buf["method"] = m.group(1).strip()
             return
 
+        elif "headers:" in cleaned and buf.get("req_headers") is not None:
+            # 捕获 Dio 请求中的完整 headers（Dio 格式: headers: {key1: val1, key2: val2}）
+            after_headers = cleaned.split("headers:")[-1].strip()
+            if after_headers.startswith("{"):
+                parsed = _dart_to_json(after_headers)
+                if parsed:
+                    # 合并到 req_headers，保留后续单独捕获的 Authorization/refresh_token
+                    for k, v in parsed.items():
+                        # 跳过 Dio 元数据字段（contentType 等），只保留实际 HTTP headers
+                        if k.lower() not in ("contenttype", "content-length"):
+                            buf["req_headers"][k] = str(v)
+            return
+
         elif "Authorization:" in cleaned and buf.get("req_headers") is not None:
             m = re.search(r'Authorization:\s*(\S+)', cleaned)
             if m:
@@ -462,16 +532,18 @@ def cmd_auto(args):
 
         # 启动流式读取前，先排空设备端 logcat 环形缓冲区中的残留历史条目
         # adb logcat -c 清空后，USB 管道可能仍残留旧数据；-d 模式一次性读走这些残留
-        try:
-            for _ in range(3):
-                drain = subprocess.run(
-                    ["adb", "-s", device_id, "logcat", "-d", "-v", "brief"],
-                    capture_output=True, text=True, timeout=3
-                )
-                if not drain.stdout or not drain.stdout.strip():
-                    break
-        except Exception as e:
-            safe_print(f"  [{tag}] logcat缓冲区排空失败(不影响使用): {e}", Colors.DIM)
+        # --restart 模式下跳过排空（已手动清空 logcat，需要保留 App 启动时的新日志）
+        if not restart_app:
+            try:
+                for _ in range(3):
+                    drain = subprocess.run(
+                        ["adb", "-s", device_id, "logcat", "-d", "-v", "brief"],
+                        capture_output=True, text=True, timeout=3
+                    )
+                    if not drain.stdout or not drain.stdout.strip():
+                        break
+            except Exception as e:
+                safe_print(f"  [{tag}] logcat缓冲区排空失败(不影响使用): {e}", Colors.DIM)
 
         buf = {
             "seq": 0,
@@ -609,50 +681,37 @@ def cmd_auto(args):
                 html_server.shutdown()
             except Exception:
                 pass
-            time.sleep(0.5)
+            html_server = None
+            time.sleep(1.0)  # 等待端口完全释放
         try:
             html_server, actual_port = start_html_server(html_port)
             cprint(f"  DevTools 界面: http://localhost:{actual_port}", Colors.GREEN, bold=True)
         except Exception as e:
             cprint(f"  HTML 服务启动失败: {e}", Colors.RED)
 
-        # 重启 App / 清空 logcat
+        # ============== 启动顺序：先开 logcat 流，再启动 App ==============
+        # 确保 App 启动时的所有请求都被捕获（adb logcat 只读取新产生的日志）
+
+        # 第一步：清空 logcat 缓冲区（--restart 模式下同时停止 App）
         if restart_app:
             for device_id in devices:
                 tag = short_device_id(device_id)
                 pkg = _detect_pkg(device_id)
                 if not pkg:
+                    safe_print(f"  [{tag}] 未检测到 App 包名，跳过重启", Colors.YELLOW)
                     continue
                 try:
-                    r = subprocess.run(
-                        ["adb", "-s", device_id, "shell", "pm", "dump", pkg],
-                        capture_output=True, text=True, timeout=10,
-                    )
-                    activity = None
-                    for line in r.stdout.splitlines():
-                        if "MAIN" in line and "LAUNCHER" in line:
-                            m = re.search(r'(\S+\.MainActivity|\S+\.SplashActivity|\S+\/\S+Activity)', line)
-                            if m:
-                                activity = m.group(1)
-                                break
-                    if not activity:
-                        activity = f"{pkg}/.MainActivity"
                     subprocess.run(
                         ["adb", "-s", device_id, "shell", "am", "force-stop", pkg],
                         capture_output=True, timeout=5,
                     )
+                    safe_print(f"  [{tag}] 已停止 App", Colors.DIM)
                     subprocess.run(
-                        ["adb", "-s", device_id, "logcat", "-c"],
+                        ["adb", "-s", device_id, "shell", "logcat", "-c"],
                         capture_output=True, timeout=5,
                     )
-                    subprocess.run(
-                        ["adb", "-s", device_id, "shell", "am", "start", "-n", activity],
-                        capture_output=True, timeout=5,
-                    )
-                    safe_print(f"  [{tag}] 已重启 App，等待 3 秒...", Colors.CYAN)
-                    time.sleep(3)
-                except Exception:
-                    pass
+                except Exception as e:
+                    safe_print(f"  [{tag}] 停止 App 失败: {e}", Colors.RED)
         else:
             for device_id in devices:
                 tag = short_device_id(device_id)
@@ -663,12 +722,37 @@ def cmd_auto(args):
                 except Exception:
                     pass
 
-        # 重新启动 logcat 线程
+        # 第二步：启动 logcat 流式读取（此时缓冲区已清空，开始监听新日志）
         logcat_threads = []
         for device_id in devices:
             t = threading.Thread(target=logcat_reader, args=(device_id,), daemon=True)
             t.start()
             logcat_threads.append(t)
+
+        # 第三步：--restart 模式下启动 App（logcat 已在监听，不会漏掉启动请求）
+        if restart_app:
+            time.sleep(0.5)  # 等待 logcat 流稳定
+            for device_id in devices:
+                tag = short_device_id(device_id)
+                pkg = _detect_pkg(device_id)
+                if not pkg:
+                    continue
+                try:
+                    result = subprocess.run(
+                        ["adb", "-s", device_id, "shell", "monkey", "-p", pkg,
+                         "-c", "android.intent.category.LAUNCHER", "1"],
+                        capture_output=True, text=True, timeout=5,
+                    )
+                    if "No activities found" in (result.stdout or ""):
+                        subprocess.run(
+                            ["adb", "-s", device_id, "shell", "am", "start",
+                             "-n", f"{pkg}/.MainActivity"],
+                            capture_output=True, timeout=5,
+                        )
+                    safe_print(f"  [{tag}] 已启动 App，等待 3 秒...", Colors.CYAN)
+                    time.sleep(3)
+                except Exception as e:
+                    safe_print(f"  [{tag}] 启动 App 失败: {e}", Colors.RED)
 
         # 重新启动 HTTP worker（始终启动，所有接口均走 Python HTTP 获取完整响应）
         http_pool = ThreadPoolExecutor(max_workers=4, thread_name_prefix="http-worker")
