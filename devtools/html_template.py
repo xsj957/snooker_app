@@ -109,6 +109,10 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
 /* Path & URL */
 .req-path{color:#ce9178;max-width:100%}
 .req-name{color:#d4d4d4;max-width:100%}
+/* v3.2: 接口名列改为 flex，徽章不换行不被裁，路径省略号收缩 */
+.vs-row .vs-cell:nth-child(3){display:flex;align-items:center;gap:4px}
+.vs-row .vs-cell:nth-child(3) .req-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vs-row .vs-cell:nth-child(3) .tag-new{flex:0 0 auto}
 .req-name .api-path{color:#ce9178}
 .req-device{color:#dcdcaa;font-size:11px}
 .req-size,.req-time{color:#b5b5b5;text-align:right;font-variant-numeric:tabular-nums}
@@ -224,6 +228,7 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
             <button class="pill" data-filter="3xx">3xx</button>
             <button class="pill" data-filter="4xx">4xx</button>
             <button class="pill" data-filter="5xx">5xx</button>
+            <button class="pill" data-filter="py" title="只看 Python 二次请求解析到完整响应的接口">PY完整</button>
             <span style="width:1px;height:16px;background:#444;margin:0 2px"></span>
             <button class="pill" data-filter="env:test" title="测试环境"><span class="env-tag env-test" style="margin:0">测试</span></button>
             <button class="pill" data-filter="env:prod" title="生产环境"><span class="env-tag env-prod" style="margin:0">生产</span></button>
@@ -297,6 +302,10 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
 
             <!-- Payload tab -->
             <div class="tab-content hidden" id="tabPayload">
+                <div class="detail-section" id="payloadWarnSection" style="display:none">
+                    <div class="section-label" style="color:#f48771">&#9888; 数据质量告警</div>
+                    <div class="json-view" id="payloadWarn" style="color:#f48771"></div>
+                </div>
                 <div class="detail-section">
                     <div class="section-label">Query String Parameters</div>
                     <div class="json-view" id="queryParams"></div>
@@ -304,6 +313,10 @@ html,body{height:100%;overflow:hidden;font-family:'SF Mono','Cascadia Code','Con
                 <div class="detail-section">
                     <div class="section-label">Request Body</div>
                     <div class="json-view" id="requestBody"></div>
+                </div>
+                <div class="detail-section" id="requestRawSection" style="display:none">
+                    <div class="section-label">Request Raw（logcat 捕获原文）</div>
+                    <div class="raw-view" id="requestRaw"></div>
                 </div>
             </div>
 
@@ -540,6 +553,24 @@ window.copyBugReport = function() {
         } else {
             lines.push(String(rb));
         }
+    }
+    // v3.2: 附来源元信息与两侧原文，开发可据此判断数据可信度
+    lines.push('');
+    lines.push('--- Meta ---');
+    lines.push('source: ' + (req.source || '-') + (req.replay_note ? ' | ' + req.replay_note : '') + (req.replay_diff ? ' | 重放≠抓包(以抓包为准)' : ''));
+    // v3.2: Raw 段设 20000 字符上限，避免大响应使报告体积翻倍
+    function capRaw(s) {
+        return s.length > 20000 ? s.slice(0, 20000) + '\n... [truncated ' + (s.length - 20000) + ' chars]' : s;
+    }
+    if (req.request_raw) {
+        lines.push('');
+        lines.push('--- Request Raw (logcat) ---');
+        lines.push(capRaw(req.request_raw));
+    }
+    if (req.response_raw) {
+        lines.push('');
+        lines.push('--- Response Raw ---');
+        lines.push(capRaw(req.response_raw));
     }
     var text = lines.join('\n');
     navigator.clipboard.writeText(text).then(function() {
@@ -816,6 +847,35 @@ function navigateMatch(direction) {
 // ==================== Virtual Scroll ====================
 const vsContainer = document.getElementById('vsContainer');
 
+// v3.2 行内来源/质量徽章: 让"抓包值 vs 重放值 vs 推断值"一眼可辨
+function srcBadges(req) {
+    var out = '';
+    var s = req.source || '';
+    if (s === 'replay') {
+        out += '<span class="tag-new" style="background:#5a4a00;color:#ffd479;margin-left:4px" title="响应来自 Python 二次请求重放">REPLAY</span>';
+    } else if (s === 'merged') {
+        out += '<span class="tag-new" style="background:#14432a;color:#7ee2a8;margin-left:4px" title="响应体=抓包原文，status/耗时=重放实测">CAP+REPLAY</span>';
+    } else if (s === 'logcat-truncated' || req.captured_truncated) {
+        out += '<span class="tag-new" style="background:#5a1a1a;color:#ff9d9d;margin-left:4px" title="logcat 捕获被截断（响应体以重放/原文为准）">TRUNC</span>';
+    }
+    if (req.replay_diff) {
+        out += '<span class="tag-new" style="background:#5a1a1a;color:#ff9d9d;margin-left:4px" title="重放响应与抓包响应不一致（服务端状态已变化），以抓包为准">DIFF</span>';
+    }
+    if (req.request_polluted) {
+        out += '<span class="tag-new" style="background:#5a1a1a;color:#ff9d9d;margin-left:4px" title="请求体混入系统日志">POLLUTED</span>';
+    }
+    if (req.status && req.status_authoritative === false) {
+        out += '<span class="tag-new" style="background:#3a3a3a;color:#bbb;margin-left:4px" title="状态码为 logcat 推断值（恒200），非实测">200?</span>';
+    }
+    if (req.profile && req.profile.class && req.profile.class !== 'small') {
+        out += '<span class="tag-new" style="background:#0e3a5a;color:#7cc7ff;margin-left:4px" title="历史画像: ' +
+            escapeHtml(req.profile.class) + ' (p95 ' + formatSize(req.profile.size_p95 || 0) + ', ' +
+            (req.profile.samples || 0) + ' 样本, 截断 ' + (req.profile.trunc_count || 0) + ')">' +
+            (req.profile.class === 'large' ? 'LG' : 'UNST') + '</span>';
+    }
+    return out;
+}
+
 function updateVirtualScroll() {
     const listEl = document.getElementById('requestList');
     const wrapper = document.getElementById('vsWrapper');
@@ -879,7 +939,7 @@ function updateVirtualScroll() {
                 '<span class="env-tag ' + envInfo.cls + '">' + envInfo.label + '</span>' +
                 (apiName ? '<span style="color:#888;margin-right:4px">' + escapeHtml(apiName) + '</span>' : '') +
                 '<span class="api-path">' + escapeHtml(getShortPath(path)) + '</span>' +
-            '</span>' + (req.is_new ? '<span class="tag-new">NEW</span>' : '') + '</div>' +
+            '</span>' + (req.is_new ? '<span class="tag-new">NEW</span>' : '') + srcBadges(req) + '</div>' +
             '<div class="vs-cell"><span class="req-device">' + escapeHtml(req.device || '-') + '</span></div>' +
             '<div class="vs-cell"><span class="req-size">' + formatSize(req.size) + '</span></div>' +
             '<div class="vs-cell"><span class="req-time ' + tc + '">' + formatTime(req.time_ms) + '</span></div>';
@@ -976,6 +1036,7 @@ function applyFilter() {
             else if (f === '3xx') { if (!(sc >= 300 && sc < 400)) return false; }
             else if (f === '4xx') { if (!(sc >= 400 && sc < 500)) return false; }
             else if (f === '5xx') { if (!(sc >= 500)) return false; }
+            else if (f === 'py') { if (!req.py_complete) return false; }
             else if (f === 'env:test' || f === 'env:prod') {
                 const targetEnv = f.split(':')[1];
                 const envInfo = detectEnv(req.full_url || req.path || '');
@@ -990,7 +1051,8 @@ function applyFilter() {
             const envLabel = detectEnv(req.full_url || rawPath).label;
             const haystack = (resolvedPath + ' ' + apiName + ' ' + req.method + ' ' + envLabel + ' ' +
                 JSON.stringify(req.request_data || '') + ' ' +
-                JSON.stringify(req.response_body || '')).toLowerCase();
+                JSON.stringify(req.response_body || '') + ' ' +
+                (req.request_raw || '') + ' ' + (req.response_raw || '')).toLowerCase();
             if (!haystack.includes(s)) return false;
         }
         return true;
@@ -1073,7 +1135,12 @@ function renderHeadersTab(req) {
         '<table class="headers-table">' +
         '<tr><td class="hk">Request URL</td><td class="hv">' + escapeHtml(req.full_url || req.path) + '</td></tr>' +
         '<tr><td class="hk">Request Method</td><td class="hv">' + req.method + '</td></tr>' +
-        '<tr><td class="hk">Status Code</td><td class="hv" style="color:' + (((req.status||0)>=200&&(req.status||0)<300) ? '#4ec9b0' : '#f48771') + '">' + (req.status || 'pending') + (req.is_error ? ' (Error)' : '') + '</td></tr>' +
+        '<tr><td class="hk">Status Code</td><td class="hv" style="color:' + (((req.status||0)>=200&&(req.status||0)<300) ? '#4ec9b0' : '#f48771') + '">' + (req.status || 'pending') + (req.is_error ? ' (Error)' : '') + (req.status && req.status_authoritative === false ? ' (logcat 推断)' : '') + '</td></tr>' +
+        '<tr><td class="hk">Response Source</td><td class="hv">' + escapeHtml(req.source || '-') + (req.replay_note ? ' (' + escapeHtml(req.replay_note) + ')' : '') + (req.replay_diff ? ' | <span style="color:#f48771">重放≠抓包，以抓包为准</span>' : '') + '</td></tr>' +
+        (req.error ? '<tr><td class="hk">Error</td><td class="hv" style="color:#f48771">' + escapeHtml(req.error) + '</td></tr>' : '') +
+        (req.profile ? '<tr><td class="hk">History Profile</td><td class="hv">' + escapeHtml(req.profile.class || '-') +
+            ' (p95 ' + formatSize(req.profile.size_p95 || 0) + ', ' + (req.profile.samples || 0) + ' 样本, 截断 ' +
+            (req.profile.trunc_count || 0) + ', 重放 ' + (req.profile.replay_count || 0) + ')</td></tr>' : '') +
         '<tr><td class="hk">Timestamp</td><td class="hv">' + (req.timestamp || '-') + '</td></tr>' +
         '<tr><td class="hk">Device</td><td class="hv">' + escapeHtml(req.device || '-') + '</td></tr>' +
         (req.time_ms ? '<tr><td class="hk">Duration</td><td class="hv">' + formatTime(req.time_ms) + '</td></tr>' : '') +
@@ -1128,13 +1195,40 @@ function renderPayloadTab(req) {
         qpDiv.innerHTML = '<span style="color:#555">No query parameters</span>';
     }
 
+    // v3.2 数据质量告警（污染体/不可解析体）
+    const warnSec = document.getElementById('payloadWarnSection');
+    const warns = [];
+    if (req.request_polluted) {
+        warns.push('请求体混入了 logcat 系统日志行（历史污染数据），下方解析结果仅供参考，真实发出内容见 Request Raw');
+    }
+    if (req.request_raw && req.request_parse_ok === false) {
+        warns.push('请求体原文不可解析为 JSON/Dart 字面量，下方展示原文');
+    }
+    if (warns.length) {
+        warnSec.style.display = '';
+        document.getElementById('payloadWarn').textContent = warns.join('；');
+    } else {
+        warnSec.style.display = 'none';
+    }
+
     const bodyDiv = document.getElementById('requestBody');
     const reqData = req.request_data;
     if (reqData && Object.keys(reqData).length > 0) {
         var jsonText = JSON.stringify(reqData, null, 2);
         bodyDiv.innerHTML = '<div class="raw-view payload-json">' + escapeHtml(jsonText) + '</div>';
+    } else if (req.request_raw) {
+        bodyDiv.innerHTML = '<div class="raw-view payload-json">' + escapeHtml(req.request_raw) + '</div>';
     } else {
         bodyDiv.innerHTML = '<span style="color:#555">No request body</span>';
+    }
+
+    // v3.2 请求原文（logcat 捕获字节，未做任何重序列化）
+    const rawSec = document.getElementById('requestRawSection');
+    if (req.request_raw) {
+        rawSec.style.display = '';
+        document.getElementById('requestRaw').textContent = req.request_raw;
+    } else {
+        rawSec.style.display = 'none';
     }
 }
 
@@ -1177,8 +1271,8 @@ function renderPreviewTab(req) {
         }
     }
 
-    if (!body || (typeof body === 'object' && Object.keys(body).length === 0 && !Array.isArray(body))) {
-        div.innerHTML = '<span style="color:#555">No response data' + (!req.status ? ' (pending...)' : '') + '</span>';
+    if (body === null || body === undefined || body === '') {
+        div.innerHTML = '<span style="color:#555">No response data' + (!req.status ? ' (pending...)' : '') + (req.error ? ' — ' + escapeHtml(req.error) : '') + '</span>';
         return;
     }
 

@@ -1,0 +1,984 @@
+{
+  "POST [测试] /mp/user/deleteAccount": {
+    "url": "https://test.supervisions.cn/mp/user/deleteAccount",
+    "method": "POST",
+    "path": "/mp/user/deleteAccount",
+    "env": "test",
+    "data": null,
+    "description": "注销账号",
+    "discovered_at": "2026-08-31 20:21:28"
+  },
+  "POST [生产] /mp/coupon/queryCouponList": {
+    "url": "https://app.supervisions.cn/mp/coupon/queryCouponList",
+    "method": "POST",
+    "path": "/mp/coupon/queryCouponList",
+    "env": "prod",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 1000,
+      "status": 0,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "我的视频券",
+    "discovered_at": "2026-09-01 10:48:33"
+  },
+  "POST [生产] /mp/event/track": {
+    "url": "https://app.supervisions.cn/mp/event/track",
+    "method": "POST",
+    "path": "/mp/event/track",
+    "env": "prod",
+    "data": {
+      "modelType": 1,
+      "eventType": 5,
+      "attrName": "matches_detail",
+      "clientType": 1,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "埋点上报",
+    "discovered_at": "2026-09-01 10:48:33"
+  },
+  "POST [生产] /mp/record/competitionListWithVideos": {
+    "url": "https://app.supervisions.cn/mp/record/competitionListWithVideos",
+    "method": "POST",
+    "path": "/mp/record/competitionListWithVideos",
+    "env": "prod",
+    "data": {
+      "userA": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "userB": "45db0d14-cc1a-4ea4-9dee-faac1d870fc0",
+      "startTime": "2026-08-31 00:00:00",
+      "endTime": "2026-09-06 23:59:59",
+      "page": 1,
+      "pageSize": 10,
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "比赛场次列表",
+    "discovered_at": "2026-09-01 10:48:37"
+  },
+  "POST [生产] /mp/record/opponentListWithVideos": {
+    "url": "https://app.supervisions.cn/mp/record/opponentListWithVideos",
+    "method": "POST",
+    "path": "/mp/record/opponentListWithVideos",
+    "env": "prod",
+    "data": {
+      "startTime": "2026-08-31 00:00:00",
+      "endTime": "2026-09-06 23:59:59",
+      "page": 1,
+      "pageSize": 20,
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "交手卡片列表",
+    "discovered_at": "2026-09-01 10:48:51"
+  },
+  "POST [生产] /mp/record/inningList": {
+    "url": "https://app.supervisions.cn/mp/record/inningList",
+    "method": "POST",
+    "path": "/mp/record/inningList",
+    "env": "prod",
+    "data": {
+      "competitionId": "a62a10738043443a86915a30dce907f8",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "局列表",
+    "discovered_at": "2026-09-01 10:54:01"
+  },
+  "POST [生产] /video/videoinfo/competitionVideos": {
+    "url": "https://app.supervisions.cn/video/videoinfo/competitionVideos",
+    "method": "POST",
+    "path": "/video/videoinfo/competitionVideos",
+    "env": "prod",
+    "data": {
+      "competitionId": "a62a10738043443a86915a30dce907f8",
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "比赛场详情",
+    "discovered_at": "2026-09-01 10:54:03"
+  },
+  "POST [生产] /mp/record/inningStatistics": {
+    "url": "https://app.supervisions.cn/mp/record/inningStatistics",
+    "method": "POST",
+    "path": "/mp/record/inningStatistics",
+    "env": "prod",
+    "data": {
+      "competitionId": "a62a10738043443a86915a30dce907f8",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "场次统计",
+    "discovered_at": "2026-09-01 10:54:38"
+  },
+  "POST [生产] /mp/record/barchart": {
+    "url": "https://app.supervisions.cn/mp/record/barchart",
+    "method": "POST",
+    "path": "/mp/record/barchart",
+    "env": "prod",
+    "data": {
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "startTime": "2026-08-31 00:00:00",
+      "endTime": "2026-09-06 23:59:59",
+      "lang": "zh_CN"
+    },
+    "description": "柱状图数据",
+    "discovered_at": "2026-09-01 10:55:02"
+  },
+  "POST [生产] /mp/record/statics": {
+    "url": "https://app.supervisions.cn/mp/record/statics",
+    "method": "POST",
+    "path": "/mp/record/statics",
+    "env": "prod",
+    "data": {
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "startTime": "2026-08-31 00:00:00",
+      "endTime": "2026-09-06 23:59:59",
+      "lang": "zh_CN"
+    },
+    "description": "个人统计数据",
+    "discovered_at": "2026-09-01 10:55:02"
+  },
+  "POST [生产] /mp/rank/ratingList": {
+    "url": "https://app.supervisions.cn/mp/rank/ratingList",
+    "method": "POST",
+    "path": "/mp/rank/ratingList",
+    "env": "prod",
+    "data": {
+      "type": 3,
+      "merchantAddressId": 3150,
+      "areaId": null,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "评级排行",
+    "discovered_at": "2026-09-01 10:55:52"
+  },
+  "POST [生产] /mp/rank/breakList": {
+    "url": "https://app.supervisions.cn/mp/rank/breakList",
+    "method": "POST",
+    "path": "/mp/rank/breakList",
+    "env": "prod",
+    "data": {
+      "type": 0,
+      "merchantAddressId": 3150,
+      "areaId": null,
+      "rankRange": 0,
+      "timeRange": 0,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "进球排行",
+    "discovered_at": "2026-09-01 10:56:10"
+  },
+  "POST [生产] /mp/rank/winRateList": {
+    "url": "https://app.supervisions.cn/mp/rank/winRateList",
+    "method": "POST",
+    "path": "/mp/rank/winRateList",
+    "env": "prod",
+    "data": {
+      "type": 2,
+      "merchantAddressId": 3150,
+      "areaId": null,
+      "rankRange": 0,
+      "timeRange": 0,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "胜率排行",
+    "discovered_at": "2026-09-01 10:56:15"
+  },
+  "POST [生产] /video/videoClient/getVideoStatistics": {
+    "url": "https://app.supervisions.cn/video/videoClient/getVideoStatistics",
+    "method": "POST",
+    "path": "/video/videoClient/getVideoStatistics",
+    "env": "prod",
+    "data": {
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "视频统计概览",
+    "discovered_at": "2026-09-01 10:57:16"
+  },
+  "POST [生产] /video/videoClient/myVideos/readyV2": {
+    "url": "https://app.supervisions.cn/video/videoClient/myVideos/readyV2",
+    "method": "POST",
+    "path": "/video/videoClient/myVideos/readyV2",
+    "env": "prod",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 10,
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "有效视频列表",
+    "discovered_at": "2026-09-01 10:57:18"
+  },
+  "POST [生产] /video/videoClient/myVideos/processingV2": {
+    "url": "https://app.supervisions.cn/video/videoClient/myVideos/processingV2",
+    "method": "POST",
+    "path": "/video/videoClient/myVideos/processingV2",
+    "env": "prod",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 10,
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "制作中视频",
+    "discovered_at": "2026-09-01 10:57:38"
+  },
+  "POST [生产] /video/videoClient/myVideos/failedV2": {
+    "url": "https://app.supervisions.cn/video/videoClient/myVideos/failedV2",
+    "method": "POST",
+    "path": "/video/videoClient/myVideos/failedV2",
+    "env": "prod",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 10,
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "失效视频列表",
+    "discovered_at": "2026-09-01 10:57:48"
+  },
+  "POST [生产] /mp/user/myClubs": {
+    "url": "https://app.supervisions.cn/mp/user/myClubs",
+    "method": "POST",
+    "path": "/mp/user/myClubs",
+    "env": "prod",
+    "data": {
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "我的俱乐部",
+    "discovered_at": "2026-09-01 10:59:28"
+  },
+  "POST [生产] /mp/app/domestic/version/check": {
+    "url": "https://app.supervisions.cn/mp/app/domestic/version/check",
+    "method": "POST",
+    "path": "/mp/app/domestic/version/check",
+    "env": "prod",
+    "data": {
+      "platform": 1,
+      "currentVersion": "1.0.0",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "国内版版本检查",
+    "discovered_at": "2026-09-01 10:59:33"
+  },
+  "POST [生产] /video/videoClient/updateClientInfo": {
+    "url": "https://app.supervisions.cn/video/videoClient/updateClientInfo",
+    "method": "POST",
+    "path": "/video/videoClient/updateClientInfo",
+    "env": "prod",
+    "data": {
+      "clientId": "8b67bb0c-372f-4401-b731-1a8547a93cc4",
+      "attributeType": 1,
+      "attributeValue": 1,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "更新设备信息",
+    "discovered_at": "2026-09-01 10:59:33"
+  },
+  "POST [生产] /mp/oauth/wechatLogin": {
+    "url": "https://app.supervisions.cn/mp/oauth/wechatLogin",
+    "method": "POST",
+    "path": "/mp/oauth/wechatLogin",
+    "env": "prod",
+    "data": {
+      "appType": 5,
+      "code": "091E2F000UeI0X1pIH200RP0tt2E2F0t"
+    },
+    "description": "微信登录",
+    "discovered_at": "2026-09-01 10:59:33"
+  },
+  "POST [生产] /video/videoinfo/buyitUseComboV3": {
+    "url": "https://app.supervisions.cn/video/videoinfo/buyitUseComboV3",
+    "method": "POST",
+    "path": "/video/videoinfo/buyitUseComboV3",
+    "env": "prod",
+    "data": {
+      "videoId": 115995592,
+      "payChannel": 2,
+      "clientId": "8774434f-b8f9-4a2b-ac70-d47c5a4ee045",
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "视频券解锁",
+    "discovered_at": "2026-09-11 10:47:30"
+  },
+  "POST [生产] /video/videoClient/updateStatus": {
+    "url": "https://app.supervisions.cn/video/videoClient/updateStatus",
+    "method": "POST",
+    "path": "/video/videoClient/updateStatus",
+    "env": "prod",
+    "data": {
+      "clientId": "8774434f-b8f9-4a2b-ac70-d47c5a4ee045",
+      "status": 2,
+      "videoId": 115995592,
+      "videoOrderId": 792822,
+      "userId": "85301b24-306b-49e7-bb7c-6eca3db03fe9",
+      "lang": "zh_CN"
+    },
+    "description": "更新视频状态",
+    "discovered_at": "2026-09-11 10:47:32"
+  },
+  "POST [测试] /mp/record/simpleStatics?userId=57d703dc-659a-4474-898e-b75efa1f2e0a&lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/simpleStatics?userId=57d703dc-659a-4474-898e-b75efa1f2e0a&lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/simpleStatics?userId=57d703dc-659a-4474-898e-b75efa1f2e0a&lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-14 11:02:36"
+  },
+  "POST [测试] /video/mobilePay/createVideoUnlockOrder": {
+    "url": "https://test.supervisions.cn/video/mobilePay/createVideoUnlockOrder",
+    "method": "POST",
+    "path": "/video/mobilePay/createVideoUnlockOrder",
+    "env": "test",
+    "data": {
+      "videoId": 13513,
+      "code": null,
+      "amountTotal": 500.0,
+      "clientId": "b2d620ee-80ce-4f2b-a832-01d06e57e309",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-15 11:41:01"
+  },
+  "releaseEngine [测试] /video/mobilePay/doAfterVideoUnlockOrderPaid": {
+    "url": "https://test.supervisions.cn/video/mobilePay/doAfterVideoUnlockOrderPaid",
+    "method": "releaseEngine",
+    "path": "/video/mobilePay/doAfterVideoUnlockOrderPaid",
+    "env": "test",
+    "data": {
+      "amountTotal": 500.0,
+      "transactionId": 202609151140580602,
+      "wxOrderId": 202609151140580602,
+      "clientId": "b2d620ee-80ce-4f2b-a832-01d06e57e309",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-15 11:41:10"
+  },
+  "onPauseView [测试] /video/mobilePay/createVideoCombolOrder": {
+    "url": "https://test.supervisions.cn/video/mobilePay/createVideoCombolOrder",
+    "method": "onPauseView",
+    "path": "/video/mobilePay/createVideoCombolOrder",
+    "env": "test",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-09-17 11:23:30"
+  },
+  "releaseEngine [测试] /video/videoOrder/cancelPay": {
+    "url": "https://test.supervisions.cn/video/videoOrder/cancelPay",
+    "method": "releaseEngine",
+    "path": "/video/videoOrder/cancelPay",
+    "env": "test",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-09-17 11:23:45"
+  },
+  "POST [测试] /video/mobilePay/createVideoCombolOrder": {
+    "url": "https://test.supervisions.cn/video/mobilePay/createVideoCombolOrder",
+    "method": "POST",
+    "path": "/video/mobilePay/createVideoCombolOrder",
+    "env": "test",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-09-17 11:36:32"
+  },
+  "POST [测试] /video/mobilePay/createRefund": {
+    "url": "https://test.supervisions.cn/video/mobilePay/createRefund",
+    "method": "POST",
+    "path": "/video/mobilePay/createRefund",
+    "env": "test",
+    "data": {
+      "refundAmount": 300.0,
+      "orderType": 1,
+      "orderId": 3015,
+      "clientId": "d9609472-6510-4b74-a324-6a296bf36d24",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-17 16:10:35"
+  },
+  "POST [测试] /mp/record/goalRateLineChart": {
+    "url": "https://test.supervisions.cn/mp/record/goalRateLineChart",
+    "method": "POST",
+    "path": "/mp/record/goalRateLineChart",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "startTime": "2026-07-01 00:00:00",
+      "endTime": "2026-09-30 23:59:59",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-17 19:17:10"
+  },
+  "POST [测试] /mp/rank/userWinRateRank": {
+    "url": "https://test.supervisions.cn/mp/rank/userWinRateRank",
+    "method": "POST",
+    "path": "/mp/rank/userWinRateRank",
+    "env": "test",
+    "data": {
+      "rankRange": 0,
+      "timeRange": 0,
+      "merchantAddressId": 45376,
+      "clientType": 0,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-21 14:52:36"
+  },
+  "POST [测试] /mp/record/simpleStatics?userId=948c894e-cac2-4f7f-a7a1-31425e8fd8e5&lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/simpleStatics?userId=948c894e-cac2-4f7f-a7a1-31425e8fd8e5&lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/simpleStatics?userId=948c894e-cac2-4f7f-a7a1-31425e8fd8e5&lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "948c894e-cac2-4f7f-a7a1-31425e8fd8e5",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-22 11:52:35"
+  },
+  "POST [测试] /mp/record/simpleStatics?userId=948c894e-cac2-4f7f-a7a1-31425e8fd8e5&lang=en_US": {
+    "url": "https://test.supervisions.cn/mp/record/simpleStatics?userId=948c894e-cac2-4f7f-a7a1-31425e8fd8e5&lang=en_US",
+    "method": "POST",
+    "path": "/mp/record/simpleStatics?userId=948c894e-cac2-4f7f-a7a1-31425e8fd8e5&lang=en_US",
+    "env": "test",
+    "data": {
+      "userId": "948c894e-cac2-4f7f-a7a1-31425e8fd8e5",
+      "lang": "en_US"
+    },
+    "description": "",
+    "discovered_at": "2026-09-22 12:01:56"
+  },
+  "POST [测试] /mp/rank/star": {
+    "url": "https://test.supervisions.cn/mp/rank/star",
+    "method": "POST",
+    "path": "/mp/rank/star",
+    "env": "test",
+    "data": {
+      "destUserId": "006cf162-2061-477f-943e-a31d29d81da7",
+      "rankType": 2,
+      "score": 129,
+      "starCount": 1,
+      "userId": "948c894e-cac2-4f7f-a7a1-31425e8fd8e5",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-22 16:45:32"
+  },
+  "POST [测试] /mp/coupon/queryCouponList?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/coupon/queryCouponList?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/coupon/queryCouponList?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 1000,
+      "status": 0,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:54:24"
+  },
+  "POST [测试] /mp/record/inningList?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/inningList?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/inningList?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "competitionId": "5d25ec30fcc946aebe51b7f8971ffdd2",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:54:24"
+  },
+  "POST [测试] /mp/event/track?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/event/track?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/event/track?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "modelType": 1,
+      "eventType": 5,
+      "attrName": "frame_detail",
+      "attrValue": "frames",
+      "clientType": 1,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:54:24"
+  },
+  "POST [测试] /video/videoClient/myVideos/processingV2?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoClient/myVideos/processingV2?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoClient/myVideos/processingV2?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 1000,
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:54:24"
+  },
+  "POST [测试] /video/videoinfo/competitionVideos?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoinfo/competitionVideos?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoinfo/competitionVideos?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "competitionId": "5d25ec30fcc946aebe51b7f8971ffdd2",
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:54:27"
+  },
+  "POST [测试] /mp/record/competitionListWithVideos?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/competitionListWithVideos?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/competitionListWithVideos?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userA": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "userB": "12ce872c-b2ad-4537-8b37-38d399fbfa83",
+      "startTime": "2026-09-21 00:00:00",
+      "endTime": "2026-09-27 23:59:59",
+      "page": 1,
+      "pageSize": 10,
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:54:57"
+  },
+  "POST [测试] /video/videoClient/updateStatus?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoClient/updateStatus?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoClient/updateStatus?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "status": 3,
+      "videoId": 14101,
+      "videoOrderId": 3573,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:58:26"
+  },
+  "onReceiveNotification [测试] /video/videoClient/updateStatus?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoClient/updateStatus?lang=zh_CN",
+    "method": "onReceiveNotification",
+    "path": "/video/videoClient/updateStatus?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "status": 5,
+      "videoId": 14101,
+      "videoOrderId": 3573,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 11:58:42"
+  },
+  "POST [测试] /mp/record/opponentListWithVideos?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/opponentListWithVideos?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/opponentListWithVideos?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "startTime": "2026-09-21 00:00:00",
+      "endTime": "2026-09-27 23:59:59",
+      "page": 1,
+      "pageSize": 20,
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "order": 0,
+      "withVideos": true,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 12:00:00"
+  },
+  "POST [测试] /video/mobilePay/createVideoUnlockOrder?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/mobilePay/createVideoUnlockOrder?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/mobilePay/createVideoUnlockOrder?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "videoId": 14098,
+      "code": null,
+      "amountTotal": 1.0,
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 12:00:12"
+  },
+  "POST [测试] /video/mobilePay/doAfterVideoUnlockOrderPaid?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/mobilePay/doAfterVideoUnlockOrderPaid?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/mobilePay/doAfterVideoUnlockOrderPaid?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "amountTotal": 1.0,
+      "transactionId": 202609231200110497,
+      "wxOrderId": 202609231200110497,
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 12:00:20"
+  },
+  "POST [测试] /video/videoinfo/buyitUseComboV3?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoinfo/buyitUseComboV3?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoinfo/buyitUseComboV3?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "videoId": 14108,
+      "payChannel": 2,
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 14:06:05"
+  },
+  "POST [测试] /mp/app/domestic/version/check?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/app/domestic/version/check?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/app/domestic/version/check?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "platform": 1,
+      "currentVersion": "1.0.1",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 14:07:11"
+  },
+  "POST [测试] /video/videoClient/updateClientInfo?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoClient/updateClientInfo?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoClient/updateClientInfo?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "clientId": "4cc4d67e-386b-4f12-baa7-5efc1c7c68f9",
+      "attributeType": 1,
+      "attributeValue": 1,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 14:07:11"
+  },
+  "POST [测试] /mp/oauth/wechatLogin?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/oauth/wechatLogin?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/oauth/wechatLogin?lang=zh_CN",
+    "env": "test",
+    "data": null,
+    "description": "",
+    "discovered_at": "2026-09-23 14:19:53"
+  },
+  "POST [测试] /video/mobilePay/createRefund?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/mobilePay/createRefund?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/mobilePay/createRefund?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "refundAmount": 1.0,
+      "orderType": 1,
+      "orderId": 3591,
+      "clientId": "f3328396-66fb-4ff1-86c0-89083f8d9009",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 14:22:12"
+  },
+  "POST [测试] /video/videoClient/getVideoStatistics?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoClient/getVideoStatistics?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoClient/getVideoStatistics?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "clientId": "1c87b165-6c4c-436e-843a-19d6d0680dc8",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 15:33:10"
+  },
+  "POST [测试] /video/videoClient/myVideos/readyV2?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoClient/myVideos/readyV2?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoClient/myVideos/readyV2?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 10,
+      "clientId": "1c87b165-6c4c-436e-843a-19d6d0680dc8",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 15:33:10"
+  },
+  "POST [测试] /mp/user/myClubs?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/user/myClubs?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/user/myClubs?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-23 17:51:07"
+  },
+  "POST [测试] /mobile/getUserBoxStatus?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mobile/getUserBoxStatus?lang=zh_CN",
+    "method": "POST",
+    "path": "/mobile/getUserBoxStatus?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 10:33:42"
+  },
+  "POST [测试] /mp/record/simpleStatics?lang=zh_CN&userId=57d703dc-659a-4474-898e-b75efa1f2e0a&lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/simpleStatics?lang=zh_CN&userId=57d703dc-659a-4474-898e-b75efa1f2e0a&lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/simpleStatics?lang=zh_CN&userId=57d703dc-659a-4474-898e-b75efa1f2e0a&lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 10:33:42"
+  },
+  "onReceiveNotificationAuthorization [测试] /mp/user/info?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/user/info?lang=zh_CN",
+    "method": "onReceiveNotificationAuthorization",
+    "path": "/mp/user/info?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 10:33:42"
+  },
+  "POST [测试] /mp/user/info?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/user/info?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/user/info?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "success": true,
+      "eventId": "60509}, count: 0, msg: success} 09-24 10:33:43.486  2688  2820 E BLASTBufferQueue: [554b9f6 SurfaceView[com.supervisions.snookermastercn/com.supervisions.snookermastercn.MainActivity]#1](f:1,a:5) acquireNextBufferLocked: Can't acquire next buffer. Already acquired max frames 5 max:3 + 2 09-24 10:33:43.487 22351 22351 D VASJNI-PAPManager: set data inst 0x0 metadata 0x7fd887c5e0 cmd BackgroundStatusChangedInform provider 0xb4000078580232d0 has set cb 1 09-24 10:33:43.488  2688  3736 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 10:33:43.493  2688  2820 E BLASTBufferQueue: [554b9f6 SurfaceView[com.supervisions.snookermastercn/com.supervisions.snookermastercn.MainActivity]#1](f:1,a:5) acquireNextBufferLocked: Can't acquire next buffer. Already acquired max frames 5 max:3 + 2 09-24 10:33:43.496  2688  3736 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 10:33:43.501  2688  2820 E BLASTBufferQueue: [554b9f6 SurfaceView[com.supervisions.snookermastercn/com.supervisions.snookermastercn.MainActivity]#1](f:1,a:5) acquireNextBufferLocked: Can't acquire next buffer. Already acquired max frames 5 max:3 + 2 09-24 10:33:43.504  2688  3736 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 10:33:43.509  2688  2820 E BLASTBufferQueue: [554b9f6 SurfaceView[com.supervisions.snookermastercn/com.supervisions.snookermastercn.MainActivity]#1](f:1,a:5) acquireNextBufferLocked: Can't acquire next buffer. Already acquired max frames 5 max:3 + 2 09-24 10:33:43.519  2688  2820 E BLASTBufferQueue: [554b9f6 SurfaceView[com.supervisions.snookermastercn/com.supervisions.snookermastercn.MainActivity]#1](f:1,a:5) acquireNextBufferLocked: Can't acquire next buffer. Already acquired max frames 5 max:3 + 2"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 10:33:42"
+  },
+  "POST [测试] /mp/record/deviceOnlineInfo?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/deviceOnlineInfo?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/deviceOnlineInfo?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "competitionId": "14049788623c449f91eafdeac84f8ae2",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 10:33:52"
+  },
+  "POST [测试] /mp/rank/ratingList?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/rank/ratingList?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/rank/ratingList?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "type": 3,
+      "merchantAddressId": 45376,
+      "areaId": null,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 11:07:24"
+  },
+  "POST [测试] /mp/record/barchart?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/barchart?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/barchart?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "startTime": "2018-01-01 00:00:00",
+      "endTime": "2026-09-24 11:17:37",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 11:17:36"
+  },
+  "POST [测试] /mp/record/statics?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/statics?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/statics?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "startTime": "2018-01-01 00:00:00",
+      "endTime": "2026-09-24 11:17:37",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 11:17:36"
+  },
+  "POST [测试] /mp/video/addVideoEventFromMobile?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/video/addVideoEventFromMobile?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/video/addVideoEventFromMobile?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "clientId": "2557bf88-3dca-4e6e-aed4-6240f7caff78",
+      "eventDataList": "[{videoId: 13934, eventTime: 2026-09-24 11:19:11, playCount: 1, playMs: 1}]",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 11:19:10"
+  },
+  "POST [测试] /mp/record/markVideoViewedFromMobile?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/markVideoViewedFromMobile?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/markVideoViewedFromMobile?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "success": true,
+      "eventId": "60707}, count: 0, msg: success} 09-24 11:19:11.473 31456 31558 D HWUI    : VulkanManager::finishFrame,duration=0.1219 ms,mRtCacheCount=67 09-24 11:19:11.473 31456 31558 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.474 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.481 31456 31456 D InsetsAnimationCtrlImpl: notify control request finished for types: 3 09-24 11:19:11.481 31456 31456 I ANDR-VIVO-PERF: vivo inside perf_lock_rel of client 09-24 11:19:11.482 31456 31558 D HWUI    : VulkanManager::finishFrame,duration=0.1078 ms,mRtCacheCount=68 09-24 11:19:11.482 31456 31558 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.483 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.490 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.499 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.507 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.515 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.524 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.532 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.540 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.550 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.557 31456  8664 D AudioTrack: getTimestamp_l(2921): device stall time corrected using current time 750028318685627 09-24 11:19:11.557 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.565 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.573 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.579 31456  8664 W AudioTrack: getTimestamp_l(2921): retrograde timestamp time corrected, 750028316771474 < 750028329343166 09-24 11:19:11.582 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.590 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.599 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.606 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.615 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.619 31456  8741 D VivoSpatializer: checkGoogleApiEnabled, mGoogleApiEnabled: true, originalArdVersion: 35, deniedPkg: false, clientPkg: com.supervisions.snookermastercn 09-24 11:19:11.621 31456  8741 I DMCodecAdapterFactory: Creating an asynchronous MediaCodec adapter for track type video 09-24 11:19:11.621 31456  8741 D MediaCodec: CreateByComponentName: name c2.mtk.avc.decoder 09-24 11:19:11.621 31456  8741 W libc    : Access denied finding property \"vendor.debug.stagefright.mediacodec.trace\" 09-24 11:19:11.621 31456  8741 W libc    : Access denied finding property \"vendor.media.c2.frameworks.debug.log\" 09-24 11:19:11.623 31456  8741 W libc    : Access denied finding property \"vendor.debug.stagefright.BufferCount\" 09-24 11:19:11.623 31456  8741 W libc    : Access denied finding property \"vendor.media.c2.frameworks.debug.log\" 09-24 11:19:11.623 31456  8741 W libc    : Access denied finding property \"vendor.media.c2.frameworks.buffercount.trace\" 09-24 11:19:11.623 31456  8741 D CCodecBufferChannel: mBufferCountTrace=0 mIsUserLoad=1 09-24 11:19:11.623 31456  8741 I CCodecBufferChannel: Constructor 0xb4000077a8137300 09-24 11:19:11.623 31456  8741 I CCodecBufferChannel: mIsVivoLogEnable = 0 09-24 11:19:11.623 31456  8741 I CCodecBufferChannel: CCodecBufferChannel[0xb4000077a8137300], mNumOutputsSlotAdd: 0 09-24 11:19:11.623 31456  8741 W libc    : Access denied finding property \"vendor.media.c2.frameworks.debug.log\" 09-24 11:19:11.623 31456  8741 D MediaCodec: [0xb400007808677f10] init: CCodec 0xb40000778818f310, CCodecBufferChannel 0xb4000077a8137300 09-24 11:19:11.623 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.623 31456  8749 D MediaCodec: [0xb400007808677f10] setState: 1 09-24 11:19:11.623 31456  8750 D CCodec  : allocate(c2.mtk.avc.decoder) 09-24 11:19:11.624 31456  8750 I CCodec  : setting up 'default' as default (vendor) store 09-24 11:19:11.628 31456  8750 W snookermastercn: AIBinder_linkToDeath is being called with a non-null cookie and no onUnlink callback set. This might not be intended. AIBinder_DeathRecipient_setOnUnlinked should be called first. 09-24 11:19:11.628 31456  8750 I CCodec  : Created component [c2.mtk.avc.decoder] for [c2.mtk.avc.decoder] 09-24 11:19:11.628 31456  8750 D CCodecBufferChannel: [0xb4000077a8137300] setComponent: mName c2.mtk.avc.decoder#825, mPipelineWatcher 0xb4000077a8137800 09-24 11:19:11.628 31456  8750 I CCodecBufferChannel: is C2 video Decoder,enable buffermanager timeOut. 09-24 11:19:11.628 31456  8750 D CCodecBufferChannel: PipelineWatcher debug info [c2.mtk.avc.decoder#825] enable=0 09-24 11:19:11.628 31456  8750 D CCodecConfig: read media type: video/avc 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values 09-24 11:19:11.629 31456  8750 D ReflectedParamUpdater: ignored struct field coded.color-format.locations 09-24 11:19:11.630 31456  8750 D CCodecConfig: ignoring local param raw.size (0xd2001800) as it is already supported 09-24 11:19:11.630 31456  8750 D CCodecConfig: ignoring local param raw.crop (0xd2001801) as it is already supported 09-24 11:19:11.630 31456  8750 D CCodecConfig: ignoring local param default.color (0x5200180b) as it is already supported 09-24 11:19:11.630 31456  8750 D CCodecConfig: ignoring local param raw.hdr-static-info (0xd200180a) as it is already supported 09-24 11:19:11.630 31456  8750 I CCodecConfig: query failed after returning 18 values (BAD_INDEX) 09-24 11:19:11.630 31456  8750 D CCodecConfig: c2 config diff is Dict { 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 algo.low-latency.value = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::i32 algo.priority.value = 1 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::float algo.rate.value = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::float coded.frame-rate.value = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 coded.pl.level = 20498 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 coded.pl.profile = 20481 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 coded.vui.color.matrix = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 coded.vui.color.primaries = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 coded.vui.color.range = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 coded.vui.color.transfer = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 default.color.matrix = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 default.color.primaries = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 default.color.range = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 default.color.transfer = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 input.buffers.max-size.value = 2097152 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 input.delay.value = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   string input.media-type.value = \"video/avc\" 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 output.delay.value = 12 09-24 11:19:11.630 31456  8750 D CCodecConfig:   string output.media-type.value = \"video/raw\" 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.color.matrix = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.color.primaries = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.color.range = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.color.transfer = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.crop.height = 239 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.crop.left = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.crop.top = 0 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::u32 raw.crop.width = 319 09-24 11:19:11.630 31456  8750 D CCodecConfig:   c2::float raw.hdr-static-info.master 09-24 11:19:11.630 31456  8750 W ColorUtils: expected specified color aspects (0:0:0:0) 09-24 11:19:11.630 31456  8749 D MediaCodec: [0xb400007808677f10] setState: 2 09-24 11:19:11.631 31456  8741 D MediaCodec: mInitName[c2.mtk.avc.decoder], mMediacodec[0xb400007808677f10], mCodec[0xb40000778818f310], mBufferChannel[0xb4000077a8137300] 09-24 11:19:11.631 31456  8741 D MediaCodec: createbyComponent:pid:-1 31456 tid=8741 09-24 11:19:11.631 31456 31582 D SurfaceComposerClient: Transaction::setDataspace: 142671872 09-24 11:19:11.632 31456  8749 I MediaCodec: MediaCodec will operate in async mode 09-24 11:19:11.632 31456  8741 D MediaCodec: [0xb400007808677f10] [c2.mtk.avc.decoder] configure 09-24 11:19:11.632 31456  8741 D VivoCodecProcessSdk: get client pid:31456 09-24 11:19:11.632 31456  8741 E MediaCodec: Media Quality Service not found. 09-24 11:19:11.633 31456  8741 D UtilsExt: getpackName client name com.supervisions.snookermastercn(31456) 09-24 11:19:11.634 31456  8749 D MediaCodec: [0xb400007808677f10] [c2.mtk.avc.decoder] connectToSurface: surface 0xb4000077a812c530, mSurface 0x0 09-24 11:19:11.634 31456  8749 D SurfaceUtils: connecting to surface 0xb4000077a812c540, reason connectToSurface 09-24 11:19:11.634 31456  8749 I MediaCodec: [c2.mtk.avc.decoder] setting surface generation to 32210946 09-24 11:19:11.634 31456  8749 D SurfaceUtils: disconnecting from surface 0xb4000077a812c540, reason connectToSurface(reconnect) 09-24 11:19:11.634 31456  8749 D SurfaceUtils: connecting to surface 0xb4000077a812c530, reason connectToSurface(reconnect-with-listener) 09-24 11:19:11.634 31456  8749 D MediaCodec: [0xb400007808677f10] setState: 3 09-24 11:19:11.634 31456  8749 D MediaCodec: [c2.mtk.avc.decoder] config set c2 sleep timeout 1500 kC2SleepTimeoutMs=1500 09-24 11:19:11.634 31456  8750 D CCodec  : [c2.mtk.avc.decoder] buffers are bound to CCodec for this session 09-24 11:19:11.634 31456  8750 D CCodecConfig: no c2 equivalents for log-session-id 09-24 11:19:11.634 31456  8750 D CCodecConfig: no c2 equivalents for importance 09-24 11:19:11.634 31456  8750 D CCodecConfig: no c2 equivalents for csd-1 09-24 11:19:11.634 31456  8750 D CCodecConfig: no c2 equivalents for native-window 09-24 11:19:11.634 31456  8750 D CCodecConfig: no c2 equivalents for native-window-generation 09-24 11:19:11.634 31456  8750 D CCodecConfig: no c2 equivalents for flags 09-24 11:19:11.635 31456  8750 D CCodecConfig: c2 config diff is   c2::i32 algo.priority.value = 0 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::float coded.frame-rate.value = 25 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 input.buffers.max-size.value = 2094080 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 raw.max-size.height = 540 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 raw.max-size.width = 960 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 raw.pixel-format.value = 34 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 raw.size.height = 540 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 raw.size.width = 960 09-24 11:19:11.635 31456  8750 D CCodecConfig:   c2::u32 vendor.mtk.vdec.buffer.fetch.timeout.ms.value = 1500 09-24 11:19:11.635 31456  8750 D CCodec  : client requested max input size 182437, which is smaller than what component recommended (2094080); overriding with component recommendation. 09-24 11:19:11.635 31456  8750 W CCodec  : This behavior is subject to change. It is recommended that app developers double check whether the requested max input size is in reasonable range. 09-24 11:19:11.635 31456  8750 D CCodec  : encoding statistics level = 0 09-24 11:19:11.635 31456  8750 D CCodec  : setup formats input: AMessage(what = 0x00000000) = { 09-24 11:19:11.635 31456  8750 D CCodec  :   string mime = \"video/avc\" 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t width = 960 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t profile = 65536 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t priority = 0 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t frame-rate = 25 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t height = 540 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t level = 262144 09-24 11:19:11.635 31456  8750 D CCodec  :   int32_t max-input-size = 2094080 09-24 11:19:11.635 31456  8750 D CCodec  :   Rect crop(0"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 11:19:16"
+  },
+  "POST [测试] /mp/user/rating?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/user/rating?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/user/rating?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "startTime": "2026-09-21 00:00:00",
+      "endTime": "2026-09-27 23:59:59",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 14:09:54"
+  },
+  "POST [测试] /mp/record/goalRateLineChart?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/goalRateLineChart?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/goalRateLineChart?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "startTime": "2026-09-21 00:00:00",
+      "endTime": "2026-09-27 23:59:59",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 14:09:55"
+  },
+  "POST [测试] /mp/rank/breakList?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/rank/breakList?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/rank/breakList?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "type": 0,
+      "merchantAddressId": 45376,
+      "areaId": null,
+      "rankRange": 0,
+      "timeRange": 0,
+      "clientType": 0,
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-24 14:17:20"
+  },
+  "POST [测试] /mp/record/markVideoViewed?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/mp/record/markVideoViewed?lang=zh_CN",
+    "method": "POST",
+    "path": "/mp/record/markVideoViewed?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "videoOrderId": 3793,
+      "clientId": "472beb6e-1135-4674-b950-15ba95341931",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-28 11:27:28"
+  },
+  "POST [测试] /video/videoClient/myVideos/failedV2?lang=zh_CN": {
+    "url": "https://test.supervisions.cn/video/videoClient/myVideos/failedV2?lang=zh_CN",
+    "method": "POST",
+    "path": "/video/videoClient/myVideos/failedV2?lang=zh_CN",
+    "env": "test",
+    "data": {
+      "pageNo": 1,
+      "pageSize": 10,
+      "clientId": "472beb6e-1135-4674-b950-15ba95341931",
+      "userId": "57d703dc-659a-4474-898e-b75efa1f2e0a",
+      "lang": "zh_CN"
+    },
+    "description": "",
+    "discovered_at": "2026-09-28 15:40:17"
+  }
+}

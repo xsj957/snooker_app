@@ -8,6 +8,7 @@ import os
 import re
 import json
 import time
+import math
 import base64
 import gzip
 import threading
@@ -109,6 +110,106 @@ def get_env_label(env):
     """获取环境中文标签"""
     return ENV_LABELS.get(env, "未知")
 
+# ============== logcat 系统行识别 ==============
+
+# 完整 logcat 行头: 日期 时间 PID TID 级别 (如 "09-28 14:33:22.006 18894 18960 D SurfaceComposerClient: ")
+# Dio 协议行带 [DIO] 标记、多行消息续行无任何行头，因此本正则只命中真正的系统日志行
+SYS_LOG_LINE_RE = re.compile(r'^\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d+\s+\d+\s+\d+\s+[VDIWEF]\s')
+# 无锚定版: 污染检测用（污染串中系统行头出现在行中，以空格/无分隔拼接）
+SYS_LOG_SIG_RE = re.compile(r'\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d+\s+\d+\s+\d+\s+[VDIWEF]\s')
+# 行头时间戳（capture 路径计算真实耗时用）
+SYS_LOG_TS_RE = re.compile(r'^(\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d+)')
+
+
+def is_sys_log_line(content):
+    """是否为 logcat 系统日志行（无 [DIO] 标记且带完整行头）"""
+    if not content or '[DIO]' in content:
+        return False
+    return bool(SYS_LOG_LINE_RE.match(content.strip()))
+
+
+def is_polluted_text(text):
+    """文本中是否混入了 logcat 系统行（污染签名，行中亦命中）"""
+    return bool(text) and bool(SYS_LOG_SIG_RE.search(text))
+
+
+# ============== 二次请求重放策略 ==============
+# DENY: 有副作用接口，重放会改变服务端状态（解锁/退款/标记已看/上报/设备信息/登录），绝对禁止重放
+# ALLOW: 已知纯查询接口（POST 但只读）
+# 其余未知接口: 测试环境允许重放（UI 标注），生产环境禁止重放（防误操作生产数据）
+# 绝对禁放: 非幂等/消耗性/破坏性操作，重放一次就多一次真实副作用
+REPLAY_DENY_PATHS = {
+    "/video/videoinfo/buyitUseComboV3",     # 视频券解锁/购买（真实扣券）
+    "/video/videoOrder/appPostVideoRefund", # 视频退款（真实退款）
+    "/mp/user/deleteAccount",               # 注销账号
+    "/mp/oauth/wechatLogin",                # 登录（消耗授权码）
+    "/mobile/loginBoxAfterScanningQrCode",  # 扫码登录盒子
+}
+# 测试环境放行 / 生产禁止: 幂等写(重发捕获体=重设同一状态)与埋点上报(测试对象);
+# 生产环境重放会写脏线上数据/统计
+REPLAY_TEST_ONLY_PATHS = {
+    "/mp/event/track",                      # 埋点上报
+    "/mp/video/addVideoEventFromMobile",    # App 播放事件上报
+    "/video/videoClient/updateStatus",      # 视频状态变更（幂等写）
+    "/video/videoClient/updateClientInfo",  # 设备信息写入（幂等写）
+    "/mp/record/markVideoViewed",           # 标记视频已观看（幂等写）
+    "/mp/record/markVideoViewedFromMobile",
+    "/mp/user/saveDefaultClub",             # 默认俱乐部写入（幂等写）
+}
+REPLAY_ALLOW_PATHS = {
+    "/mp/user/info", "/mp/user/myClubs", "/mp/user/rating", "/mp/user/breakScoreList",
+    "/mp/app/version/check", "/mp/app/domestic/version/check",
+    "/mp/coupon/checkEligibility", "/mp/coupon/trialList", "/mp/coupon/queryCouponList",
+    "/mp/record/opponentListWithVideos", "/mp/record/opponentStatistics",
+    "/mp/record/competitionListWithVideos", "/mp/record/competitionStatistics",
+    "/mp/record/inningList", "/mp/record/inningStatistics",
+    "/mp/record/deviceOnlineInfo", "/mp/record/barchart", "/mp/record/statics",
+    "/mp/rank/clubList", "/mp/rank/userBreakRank", "/mp/rank/ratingList",
+    "/mp/rank/breakList", "/mp/rank/winRateList",
+    "/mobile/getUserBoxStatus",
+    "/video/videoClient/getVideoStatistics", "/video/videoClient/myVideos/processingV2",
+    "/video/videoClient/myVideos/readyV2", "/video/videoClient/myVideos/failedV2",
+    "/video/videoinfo/competitionVideos",
+}
+
+
+def _norm_replay_path(path):
+    """重放闸门路径归一: 去 query/尾斜杠、小写、%解码、折叠 . 与 .. —— 防变体绕过 DENY"""
+    import posixpath
+    p = (path or '').split('?')[0]
+    try:
+        p = urllib.parse.unquote(p)
+    except Exception:
+        pass
+    p = posixpath.normpath(p.lower())
+    if p in ('.', '/'):
+        p = '/'
+    return p
+
+
+REPLAY_DENY_PATHS = {_norm_replay_path(p) for p in REPLAY_DENY_PATHS}
+REPLAY_ALLOW_PATHS = {_norm_replay_path(p) for p in REPLAY_ALLOW_PATHS}
+REPLAY_TEST_ONLY_PATHS = {_norm_replay_path(p) for p in REPLAY_TEST_ONLY_PATHS}
+
+
+def replay_policy(path, env, no_replay=False):
+    """二次请求重放闸门: 返回 (allowed, reason)"""
+    if no_replay:
+        return False, '--no-replay 被动模式'
+    p = _norm_replay_path(path)
+    if p in REPLAY_DENY_PATHS:
+        return False, '副作用接口，禁止重放'
+    if p in REPLAY_TEST_ONLY_PATHS:
+        if env == 'test':
+            return True, '埋点上报接口(测试环境放行)'
+        return False, '埋点上报接口(生产环境禁重放)'
+    if p in REPLAY_ALLOW_PATHS:
+        return True, '已知只读接口'
+    if env == 'test':
+        return True, '未知接口(测试环境)'
+    return False, '未知接口(生产环境防误操作)'
+
+
 HEADERS = {
     "Content-Type": "application/json",
     "Accept": "application/json",
@@ -204,163 +305,304 @@ def safe_print(text, color=None, bold=False):
 
 # ============== 接口解析工具 ==============
 
-def _dart_to_json(dart_str):
-    """将 Dart 风格对象转为 JSON"""
-    if not dart_str or not dart_str.strip().startswith("{"):
+def _parse_dart_value(s, i, scalars_as_str):
+    """从 s[i] 起解析一个 Dart 字面量值，返回 (value, 下一个下标)。
+
+    递归解析 Map/List/带引号字符串/裸标量；括号深度不会变负，
+    多余的收尾字符由调用方忽略（修复旧版"负深度塌缩"缺陷）。
+    scalars_as_str=True 时标量保留原文（headers 采集专用，避免 null→'None'）。
+    """
+    while i < len(s) and s[i] in ' \t\r\n':
+        i += 1
+    if i >= len(s):
+        return None, i
+    ch = s[i]
+    if ch == '{':
+        obj = {}
+        i += 1
+        while i < len(s):
+            while i < len(s) and s[i] in ' \t\r\n,':
+                i += 1
+            if i >= len(s):
+                break
+            if s[i] == '}':
+                i += 1
+                break
+            key_start = i
+            while i < len(s) and s[i] != ':':
+                i += 1
+            if i >= len(s):
+                break
+            key = s[key_start:i].strip()
+            i += 1
+            val, i = _parse_dart_value(s, i, scalars_as_str)
+            if key:
+                obj[key] = val
+        return obj, i
+    if ch == '[':
+        arr = []
+        i += 1
+        while i < len(s):
+            while i < len(s) and s[i] in ' \t\r\n,':
+                i += 1
+            if i >= len(s):
+                break
+            if s[i] == ']':
+                i += 1
+                break
+            val, i = _parse_dart_value(s, i, scalars_as_str)
+            arr.append(val)
+        return arr, i
+    if ch in ('"', "'"):
+        quote = ch
+        i += 1
+        buf = []
+        while i < len(s):
+            c = s[i]
+            if c == '\\' and i + 1 < len(s):
+                buf.append(s[i + 1])
+                i += 2
+                continue
+            if c == quote:
+                i += 1
+                break
+            buf.append(c)
+            i += 1
+        return ''.join(buf), i
+    # 裸标量: 读到顶层逗号或收尾括号为止
+    # scalars_as_str(headers 采集)模式下, 逗号后不像"key:"时视为值内逗号(如 Accept: a,b)
+    start = i
+    depth = 0
+    while i < len(s):
+        c = s[i]
+        if c in '{[':
+            depth += 1
+        elif c in '}]':
+            if depth == 0:
+                break
+            depth -= 1
+        elif c == ',' and depth == 0:
+            if scalars_as_str and not re.match(r'\s*[\w\-\.]+\s*:', s[i + 1:]):
+                i += 1
+                continue
+            break
+        i += 1
+    raw = s[start:i].strip()
+    if scalars_as_str:
+        return raw, i
+    if raw == 'null':
+        return None, i
+    if raw == 'true':
+        return True, i
+    if raw == 'false':
+        return False, i
+    try:
+        return int(raw), i
+    except ValueError:
+        pass
+    try:
+        return float(raw), i
+    except ValueError:
+        pass
+    return raw, i
+
+
+def _dart_to_json(dart_str, scalars_as_str=False):
+    """将 Dart 风格字面量（Map/List toString 打印）转为 JSON 兼容结构。
+
+    v3.2 重写: 递归解析、支持嵌套 Map/List 与方括号；深度不为负；
+    输入不以 { 或 [ 开头时返回 None。
+    """
+    if not dart_str:
         return None
     s = dart_str.strip()
-    inner = s[1:-1].strip() if s.endswith("}") else s[1:].strip()
-    if not inner:
-        return {}
-
-    result = {}
-    parts = []
-    depth = 0
-    current = ""
-    for ch in inner:
-        if ch == "{":
-            depth += 1
-            current += ch
-        elif ch == "}":
-            depth -= 1
-            current += ch
-        elif ch == "," and depth == 0:
-            parts.append(current.strip())
-            current = ""
-        else:
-            current += ch
-    if current.strip():
-        parts.append(current.strip())
-
-    for part in parts:
-        # 用正则匹配 key: value 分隔符（key 后跟 `:` + 至少一个空白符）
-        # \s+ 确保 `https://` 不会被误匹配为 key='https'
-        m = re.match(r'^(\w+)\s*:\s+(.*)', part, re.DOTALL)
-        if m:
-            key = m.group(1).strip()
-            value = m.group(2).strip()
-            if value == "null":
-                result[key] = None
-            elif value == "true":
-                result[key] = True
-            elif value == "false":
-                result[key] = False
-            elif value.lstrip("-").isdigit():
-                result[key] = int(value)
-            elif "." in value:
-                try:
-                    result[key] = float(value)
-                except ValueError:
-                    result[key] = value
-            else:
-                result[key] = value
-    return result
+    if not s or s[0] not in '{[':
+        return None
+    value, _ = _parse_dart_value(s, 0, scalars_as_str)
+    return value
 
 
-def _parse_request_data(data_lines):
-    """解析请求数据"""
-    data_str = " ".join(data_lines).strip()
+def _brackets_balanced(text):
+    """括号配平校验: 引号感知 + {} [] 分别配对（引号内括号不计，错配即 False）"""
+    stack = []
+    in_str = None
+    esc = False
+    for ch in text:
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == '\\':
+                esc = True
+            elif ch == in_str:
+                in_str = None
+            continue
+        if ch in '"\'':
+            in_str = ch
+        elif ch in '{[':
+            stack.append(ch)
+        elif ch in '}]':
+            if not stack or stack[-1] != ('{' if ch == '}' else '['):
+                return False
+            stack.pop()
+    return not stack and in_str is None
+
+
+def _dart_parse_complete(text):
+    """Dart 字面量是否可解析且被完全消费（带尾巴的截断/污染串判 False）"""
+    if not text or text[0] not in '{[':
+        return False
+    val, i = _parse_dart_value(text, 0, False)
+    return val is not None and text[i:].strip() == ''
+
+
+def _parse_request_data(data_str):
+    """解析请求数据，返回 (data, raw_str, parse_ok)。
+
+    parse_ok=False 表示原文既非合法 JSON 也非可解析 Dart 字面量，
+    调用方应展示原文并拒绝据此重放（不再伪造 {"raw": ...} 对象）。
+    """
+    data_str = "".join(data_str).strip() if isinstance(data_str, (list, tuple)) else (data_str or '').strip()
     if not data_str:
-        return {}, data_str
+        return {}, data_str, True
     try:
-        return json.loads(data_str), data_str
+        return json.loads(data_str), data_str, True
     except (json.JSONDecodeError, ValueError):
-        parsed = _dart_to_json(data_str)
-        if parsed is not None:
-            return parsed, data_str
-        return {"raw": data_str[:200]}, data_str
+        pass
+    parsed = _dart_to_json(data_str)
+    if isinstance(parsed, (dict, list)):
+        return parsed, data_str, True
+    return {}, data_str, False
+
+
+def _fetch_error(reason):
+    return {
+        'status': 0, 'headers': {}, 'body': None, 'raw_text': None,
+        'size': 0, 'time_ms': 0, 'timing': {}, 'redirects': 0,
+        'body_note': None, 'error': reason,
+    }
 
 
 def _fetch_full_response(uri, method, data_str, req_headers=None):
-    """用 Python requests 获取完整响应（包含 status/headers/size/timing）
+    """重放 App 原始请求，获取完整响应（status/headers/size/timing/raw_text）
 
-    Args:
-        uri: 请求 URL
-        method: HTTP 方法
-        data_str: 请求体 JSON 字符串
-        req_headers: App 原始请求的完整 headers（从 logcat 捕获）
+    v3.2 保真约定（目标: 重放请求 == 抓包请求，响应才有可比性）:
+    - body 按捕获原文重建: 仅当 JSON 合法、或 Dart 字面量可解析且括号配平时才发送，
+      以 ensure_ascii=False 紧凑格式序列化（贴近 Dio jsonEncode 字节）;
+      污染/不配平/不可解析的 body 一律拒绝重放（error=body_*），绝不伪造 {"raw":...} 发出;
+    - headers 以捕获原始头为基准（键名大小写不敏感合并），全局 HEADERS 只补缺失;
+      剔除 Dio 元数据字段与 accept-encoding（避免收到无法解压的 gzip 体）;
+    - 手动跟随 3xx 重定向最多 5 次（对齐 Dio followRedirects 默认行为）;
+    - 按响应头 charset 解码; raw_text 保留完整原文供 Raw 页签与一致性比对。
     """
-    data = None
-    try:
-        data = json.loads(data_str)
-    except (json.JSONDecodeError, ValueError):
-        data = _dart_to_json(data_str)
-    if data is None:
-        data = {"raw": data_str[:200] if data_str else ""}
+    upper_method = (method or 'GET').upper()
 
+    # ---- body 重建: 宁可拒发，不可错发 ----
+    body_bytes = None
+    body_note = None
+    if upper_method not in ("GET", "HEAD") and data_str:
+        if is_polluted_text(data_str):
+            return _fetch_error('body_polluted: 请求体混入 logcat 系统行，拒绝重放')
+        try:
+            data = json.loads(data_str)
+        except (json.JSONDecodeError, ValueError):
+            data = _dart_to_json(data_str)
+            if data is None or not _brackets_balanced(data_str) or not _dart_parse_complete(data_str):
+                return _fetch_error('body_unparseable: 请求体不完整/不可解析/带尾巴，拒绝重放')
+            body_note = 'body 由 Dart 字面量重建'
+        body_bytes = json.dumps(data, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
+
+    # ---- headers: 仅用捕获原始头（大小写不敏感）----
+    # v3.2: 不再注入全局 HEADERS 的 Authorization —— 重放请求必须 == 抓包请求，
+    # 公开接口/未捕获到头的请求若被注入 token，服务端可能返回与抓包不同的数据
+    DIO_META = {"contenttype", "content-length", "followredirects", "responsetype", "accept-encoding"}
+    hdr_map = {}  # lower -> (原始键名, 值)
+    if req_headers:
+        for k, v in req_headers.items():
+            kl = k.lower()
+            if kl in DIO_META:
+                continue
+            hdr_map[kl] = (k, str(v))
+    if upper_method in ("GET", "HEAD"):
+        hdr_map.pop('content-type', None)
+        hdr_map.pop('content-length', None)
+    elif body_bytes is not None:
+        if 'content-type' not in hdr_map:
+            hdr_map['content-type'] = ('Content-Type', 'application/json')
+        hdr_map['content-length'] = ('Content-Length', str(len(body_bytes)))
+    send_headers = {k: v for (k, v) in hdr_map.values()}
+
+    # ---- 发送 + 重定向跟随 ----
     conn = None
+    target = uri
+    redirects = 0
+    m_now, bb_now = upper_method, body_bytes
     try:
-        parsed = urllib.parse.urlparse(uri)
-        host = parsed.hostname
-        port = parsed.port or (443 if parsed.scheme == 'https' else 80)
-        path = parsed.path or '/'
-        if parsed.query:
-            path += '?' + parsed.query
-
-        if parsed.scheme == 'https':
-            conn = http.client.HTTPSConnection(host, port, timeout=10)
-        else:
-            conn = http.client.HTTPConnection(host, port, timeout=10)
-
-        # 构建 headers：以全局 HEADERS 为基础，用 App 原始 headers 覆盖/补充
-        hdrs = dict(HEADERS)
-        if req_headers:
-            for k, v in req_headers.items():
-                # 跳过 Dio 元数据字段，只保留实际 HTTP headers
-                if k.lower() not in ("contenttype",):
-                    hdrs[k] = v
-
-        # GET/HEAD 请求不发送 body（很多服务器拒绝 GET+body）
-        body_bytes = None
-        upper_method = method.upper()
-        if upper_method not in ("GET", "HEAD") and data_str:
-            body_bytes = json.dumps(data).encode('utf-8')
-            hdrs['Content-Type'] = 'application/json'
-            hdrs['Content-Length'] = str(len(body_bytes))
-        elif upper_method in ("GET", "HEAD"):
-            # GET/HEAD 移除 Content-Type/Content-Length（无 body）
-            hdrs.pop('Content-Type', None)
-            hdrs.pop('Content-Length', None)
-
         t_start = time.time()
-        conn.request(upper_method, path, body=body_bytes, headers=hdrs)
-
-        resp = conn.getresponse()
-        t_first_byte = time.time()
-        resp_body_raw = resp.read()
-        t_end = time.time()
+        while True:
+            parsed = urllib.parse.urlparse(target)
+            host = parsed.hostname
+            port = parsed.port or (443 if parsed.scheme == 'https' else 80)
+            path = parsed.path or '/'
+            if parsed.query:
+                path += '?' + parsed.query
+            if parsed.scheme == 'https':
+                conn = http.client.HTTPSConnection(host, port, timeout=15)
+            else:
+                conn = http.client.HTTPConnection(host, port, timeout=15)
+            conn.request(m_now, path, body=bb_now, headers=send_headers)
+            resp = conn.getresponse()
+            t_first_byte = time.time()
+            resp_body_raw = resp.read()
+            t_end = time.time()
+            if resp.status in (301, 302, 303, 307, 308) and redirects < 5:
+                loc = resp.getheader('Location')
+                if loc:
+                    redirects += 1
+                    target = urllib.parse.urljoin(target, loc)
+                    if resp.status == 303:
+                        m_now, bb_now = 'GET', None
+                    conn.close()
+                    conn = None
+                    continue
+            break
 
         ttfb_ms = round((t_first_byte - t_start) * 1000, 1)
         download_ms = round((t_end - t_first_byte) * 1000, 1)
         total_ms = round((t_end - t_start) * 1000, 1)
 
+        if (resp.getheader('Content-Encoding') or '').lower() == 'gzip':
+            try:
+                resp_body_raw = gzip.decompress(resp_body_raw)
+            except Exception:
+                pass
+        ctype = resp.getheader('Content-Type') or ''
+        cm = re.search(r'charset=([\w\-]+)', ctype, re.I)
+        enc = cm.group(1) if cm else 'utf-8'
+        try:
+            raw_text = resp_body_raw.decode(enc, errors='replace')
+        except (LookupError, TypeError):
+            raw_text = resp_body_raw.decode('utf-8', errors='replace')
+
         body = None
         try:
-            body = json.loads(resp_body_raw)
+            body = json.loads(raw_text)
         except (json.JSONDecodeError, ValueError):
-            body = resp_body_raw.decode('utf-8', errors='replace')[:5000]
-
-        size = len(resp_body_raw)
+            body = raw_text
 
         return {
             'status': resp.status,
             'headers': dict(resp.getheaders()),
             'body': body,
-            'size': size,
+            'raw_text': raw_text,
+            'size': len(resp_body_raw),
             'time_ms': total_ms,
             'timing': {'ttfb': ttfb_ms, 'download': download_ms},
+            'redirects': redirects,
+            'body_note': body_note,
             'error': None
         }
     except Exception as e:
-        return {
-            'status': 0,
-            'headers': {},
-            'body': None,
-            'size': 0,
-            'time_ms': 0,
-            'timing': {},
-            'error': str(e)
-        }
+        return _fetch_error(str(e))
     finally:
         if conn is not None:
             try:
@@ -486,9 +728,16 @@ class MemoryManager:
         env_label = get_env_label(env)
         key = f"{method} [{env_label}] {path}"
         should_save = False
+        # v3.2: 污染体（混入 logcat 系统行）永不写库
+        if is_polluted_text(data_str):
+            return False
         with self._lock:
-            if key in self._cache:
-                return False
+            existing = self._cache.get(key)
+            if existing is not None:
+                # 旧条目已被污染时允许用干净抓包覆盖（修复"脏模板永久留存"）
+                old_data = json.dumps(existing.get("data"), ensure_ascii=False)
+                if not is_polluted_text(old_data):
+                    return False
             data = None
             try:
                 data = json.loads(data_str)
@@ -519,6 +768,159 @@ class MemoryManager:
 
 
 _memory_mgr = MemoryManager(MEMORY_FILE)
+
+
+# ============== 接口历史画像（混合分级重放决策） ==============
+
+PROFILE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "api_profile.json")
+
+
+def profile_key(uri, method):
+    """画像键: 与记忆库同风格，path 不含 query（轮询参数不拆散画像）"""
+    path = extract_path(uri).split('?')[0]
+    env_label = get_env_label(detect_env(uri))
+    return f"{method} [{env_label}] {path}"
+
+
+class ProfileManager:
+    """线程安全的接口历史画像: 响应尺寸分布/截断率/重放次数。
+
+    驱动混合分级重放决策（方案 C）:
+      small    = 历史最大响应 < 3500B 且截断率≤20%  → 捕获完整时零重放
+      large    = 历史最大响应 ≥ 3500B               → 捕获完整也主动重放(实测元数据+DIFF)
+      unstable = 截断率 > 20%（即使小也常丢块）      → 同 large 主动重放兜底
+    """
+
+    LARGE_THRESHOLD = 3500   # logcat 单条载荷上限 4076B，留余量
+    UNSTABLE_RATE = 0.2
+    MAX_SIZES = 100          # 保留最近 100 个尺寸样本算 p95
+    MAX_AGE_SECONDS = 30 * 24 * 3600
+
+    def __init__(self, filepath):
+        self._filepath = filepath
+        self._lock = threading.Lock()
+        self._disk_lock = threading.Lock()
+        self._cache = self._load()
+        self._purge_expired()
+        self._dirty = False
+        self._save_timer = threading.Timer(30.0, self._periodic_save)
+        self._save_timer.daemon = True
+        self._save_timer.start()
+
+    def _load(self):
+        if os.path.exists(self._filepath):
+            try:
+                with open(self._filepath, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, OSError):
+                return {}
+        return {}
+
+    def _purge_expired(self):
+        cutoff = datetime.now().timestamp() - self.MAX_AGE_SECONDS
+        for key in [k for k, v in self._cache.items()
+                    if self._ts(v.get("updated_at", "")) < cutoff]:
+            del self._cache[key]
+
+    @staticmethod
+    def _ts(s):
+        try:
+            return datetime.strptime(s, "%Y-%m-%d %H:%M:%S").timestamp()
+        except (ValueError, TypeError):
+            return 0
+
+    def _save_to_disk(self):
+        with self._disk_lock:
+            try:
+                snapshot = dict(self._cache)
+                tmp_path = self._filepath + '.tmp'
+                with open(tmp_path, "w", encoding="utf-8") as f:
+                    json.dump(snapshot, f, ensure_ascii=False, indent=2)
+                if os.path.exists(self._filepath):
+                    os.replace(tmp_path, self._filepath)
+                else:
+                    os.rename(tmp_path, self._filepath)
+                self._dirty = False
+            except OSError:
+                pass
+
+    def _periodic_save(self):
+        try:
+            with self._lock:
+                should_save = self._dirty
+            if should_save:
+                self._save_to_disk()
+        except Exception:
+            pass
+        try:
+            self._save_timer = threading.Timer(30.0, self._periodic_save)
+            self._save_timer.daemon = True
+            self._save_timer.start()
+        except Exception:
+            pass
+
+    def flush(self):
+        with self._lock:
+            should_save = self._dirty
+        if should_save:
+            self._save_to_disk()
+
+    def shutdown(self):
+        try:
+            self._save_timer.cancel()
+        except Exception:
+            pass
+        self.flush()
+
+    @classmethod
+    def _classify(cls, p):
+        if p["samples"] and p["trunc_count"] / p["samples"] > cls.UNSTABLE_RATE:
+            return "unstable"
+        if p["size_max"] >= cls.LARGE_THRESHOLD:
+            return "large"
+        return "small"
+
+    @staticmethod
+    def _p95(sizes):
+        if not sizes:
+            return 0
+        s = sorted(sizes)
+        return s[max(0, int(round(0.95 * (len(s) - 1))))]
+
+    def observe(self, key, size, truncated=False, replayed=False):
+        """每条展示记录回写: 展示体字节数 / 捕获是否截断 / 是否走了重放"""
+        with self._lock:
+            p = self._cache.get(key)
+            if p is None:
+                p = {"sizes": [], "size_max": 0, "samples": 0,
+                     "trunc_count": 0, "replay_count": 0}
+                self._cache[key] = p
+            p["samples"] += 1
+            p["sizes"].append(int(size))
+            if len(p["sizes"]) > self.MAX_SIZES:
+                p["sizes"] = p["sizes"][-self.MAX_SIZES:]
+            if int(size) > p["size_max"]:
+                p["size_max"] = int(size)
+            if truncated:
+                p["trunc_count"] += 1
+            if replayed:
+                p["replay_count"] += 1
+            p["class"] = self._classify(p)
+            p["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self._dirty = True
+
+    def get(self, key):
+        """返回画像副本(含 size_p95/class)，无画像返回 None"""
+        with self._lock:
+            p = self._cache.get(key)
+            if not p:
+                return None
+            out = dict(p)
+            out["size_p95"] = self._p95(p["sizes"])
+            return out
+
+
+_profile_mgr = ProfileManager(PROFILE_FILE)
 
 
 # ============== 日志缓冲区 ==============
@@ -612,10 +1014,13 @@ def next_log_id():
 
 
 def _clean_for_json(o):
-    """递归清理字符串中的孤立 surrogate，确保 json.dumps + utf-8 编码不报错。
+    """递归清理字符串中的孤立 surrogate 与非有限浮点，确保 json.dumps + utf-8 编码不报错。
     在数据入库时调用一次，避免每次轮询重复清洗。"""
     if isinstance(o, str):
         return o.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
+    elif isinstance(o, float):
+        # NaN/Infinity 不是合法 JSON，浏览器 JSON.parse 会整页抛错 → 转字符串保留信息
+        return o if math.isfinite(o) else str(o)
     elif isinstance(o, list):
         return [_clean_for_json(item) for item in o]
     elif isinstance(o, dict):
@@ -624,8 +1029,8 @@ def _clean_for_json(o):
 
 
 def _safe_json_dumps(obj):
-    """JSON 序列化（assume 数据已在入库时清洗过）"""
-    return json.dumps(obj, ensure_ascii=False, separators=(',', ':'))
+    """JSON 序列化（assume 数据已在入库时清洗过；allow_nan=False 双保险）"""
+    return json.dumps(obj, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
 
 
 # ============== DevTools HTTP 服务 ==============
