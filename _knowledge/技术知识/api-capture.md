@@ -85,6 +85,22 @@ logcat 对**大响应（>4000 字符）会截断**（Android logcat 单行限制
 
 **回归测试**: `python devtools/test_state_machine.py`（17 条合成 logcat fixture，无需真机）
 
+## 4.1 接口记录：/mp/app/deleteAlias（预发布环境）
+
+| 项目 | 内容 |
+|------|------|
+| **URL** | `https://pre.supervisionsstore.com/mp/app/deleteAlias` |
+| **环境** | 预发布（pre），对应预发库 `47.112.30.64:3306/supervisions`（见 database.md） |
+| **记录日期** | 2026-10-10 |
+| **业务含义** | 删除别名（具体业务待与开发确认） |
+| **重放配置** | 已内置于 `api_tool_lite.py` 的 `EXTRA_REPLAY_ALLOW`，跑精简版即自动重放该接口 |
+| **临时追加方式** | `python devtools/api_tool_lite.py --replay-allow /mp/app/xxx` |
+
+> ⚠️ **写操作重放提醒**：deleteAlias 是删除类操作。App 自己已完成第一次删除，工具重放拿到的是
+> **"第 2 次执行"的响应**（如"记录不存在/已删除"类错误码），适合看响应结构与错误码，
+> **不能**当作 App 当次收到的响应体来记测试结果。如需 App 当次真实响应，用 Reqable 代理抓包看。
+> 后续同类"点名为看响应而重放"的写接口，都加到 `EXTRA_REPLAY_ALLOW` 即可（永久生效）。
+
 ## 5. 注意事项
 
 - **logcat 够用场景**: 小响应（用户信息、盒子状态、版本检查等 <1000 字符的接口）

@@ -25,8 +25,9 @@ BASE_URL = "https://test.supervisions.cn"
 ENV_DOMAINS = {
     "test.supervisions.cn": "test",
     "app.supervisions.cn": "prod",
+    "pre.supervisionsstore.com": "pre",
 }
-ENV_LABELS = {"test": "测试", "prod": "生产"}
+ENV_LABELS = {"test": "测试", "prod": "生产", "pre": "预发布"}
 
 # API 中文注释表（路径 → 中文名）
 API_DESC = {

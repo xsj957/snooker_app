@@ -1,9 +1,21 @@
 # 斯诺克大师国内App — 数据库完整文档
 
-> **数据库**: supervisions（121.40.243.17:3306）
-> **账号**: linjiakun / 密码: Ljk@123456
-> **生成日期**: 2026-07-28（最后更新: 2026-09-02）
+> **生成日期**: 2026-07-28（最后更新: 2026-10-09）
 > **数据来源**: 直接读取 information_schema 字段注释 + 实际数据分析
+
+## 〇、环境连接信息（按环境区分 🔴）
+
+| 环境 | 主机:端口 | 数据库 | 账号 | 密码 | 对应服务域名 |
+|------|-----------|--------|------|------|--------------|
+| **测试环境 (SIT)** | `121.40.243.17:3306` | supervisions | linjiakun | `Ljk@123456` | test.supervisions.cn |
+| **预发布环境 (PRE)** | `47.112.30.64:3306` | supervisions | xsj | `W7!7789aef@37` | pre.supervisionsstore.com |
+
+> ⚠️ **DBeaver 连接注意事项**：MySQL 8 的 `caching_sha2_password` 认证 + 非 SSL 连接会报
+> `Public Key Retrieval is not allowed`，URL 需加参数：
+> `jdbc:mysql://{host}:3306/supervisions?allowPublicKeyRetrieval=true&useSSL=false`
+> 或在 DBeaver「驱动属性」中将 `allowPublicKeyRetrieval` 设为 `true`。
+>
+> 本文档正文的表结构、数据分布统计基于测试环境整理，两环境表结构应一致，数据各自独立。
 
 ---
 
