@@ -880,6 +880,33 @@ video_price.discount / video_promotion.discount:
 | **user_id** | `aff7eae4-3680-4b89-9f01-819e02c3b6b5` | `57d703dc-659a-4474-898e-b75efa1f2e0a` | `7c37a4a2-d11a-4ac8-83c6-b7c293b6c1f4` | `d3194e52-cb99-43f7-81f9-29b79d477557` |
 | **union_id** | `oIp-Q5pI-MlZ2Lov0zX-cIhs4caw` | `oIp-Q5uHh1HHD4UBBSr51Y2b_0KE` | `oIp-Q5qUwi6ULEGjTchV6FRL3xhc` | `oIp-Q5s8LPR25M_qDwIj7VFjZhso` |
 
+### 8.2 俱乐部与设备表速查（2026-10-16 补充）
+
+| 表名 | 说明 | 关键字段 |
+|------|------|---------|
+| mer_merchant_address | 俱乐部门店 | id, name（俱乐部名称）, merchant_id（法人id→mer_merchant）, address, club_status(1=正常/2=已终止), is_video(1=开通视频) |
+| dev_device_info | 设备主表 | id, device_sn（设备序列号）, merchant_address_id（俱乐部id）, snooker_number（球桌编号）, box_id（工控机id）, android_id（电视id）, client_device_id |
+| ten_competition | 斯诺克场数据 | id（比赛id）, deviceinfo_id（设备id→dev_device_info.id）, merchant_address_id（球房id）, table_number（球桌号）, begin_time/end_time, invalid(0=有效) ⚠️ 无 create_time 列 |
+| ten_competition3 | 追分模式场数据 | 同上结构 |
+
+**关联路径**：比赛ID → `ten_competition.deviceinfo_id` → `dev_device_info.device_sn`（比赛录制设备）；比赛ID → `ten_competition.merchant_address_id` → `mer_merchant_address.name`（所属俱乐部）
+
+```sql
+-- 按比赛ID查设备SN和俱乐部
+SELECT tc.id, tc.deviceinfo_id, ddi.device_sn, ddi.snooker_number,
+       tc.merchant_address_id, mma.name AS club_name, tc.table_number, tc.begin_time
+FROM ten_competition tc
+LEFT JOIN dev_device_info ddi ON tc.deviceinfo_id = ddi.id
+LEFT JOIN mer_merchant_address mma ON tc.merchant_address_id = mma.id
+WHERE tc.id = '{competition_id}';
+
+-- 按俱乐部ID列全部设备SN
+SELECT id, device_sn, name, snooker_number
+FROM dev_device_info WHERE merchant_address_id = '{merchant_address_id}';
+```
+
+> 注意：`video_list.table_number` 存的是设备SN而非桌号（如 `0008600100000000000556`），而 `ten_competition.table_number` 存的是桌号（如 `A002`），两表同名字段含义不同。
+
 ---
 
 ## 九、视频业务SQL查询大全
